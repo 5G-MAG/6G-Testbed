@@ -1,0 +1,106 @@
+# Example Network Profiles for netemu
+# These profiles demonstrate common network condition emulations
+
+profiles:
+  # Ideal conditions - no impairments
+  ideal:
+    description: "Ideal network - no impairments"
+    delay_ms: 0
+    jitter_ms: 0
+    loss_pct: 0
+    rate_mbit: null  # Unlimited
+
+  # Good WiFi connection
+  good_wifi:
+    description: "Good WiFi connection"
+    delay_ms: 30
+    jitter_ms: 10
+    loss_pct: 0.1
+    rate_mbit: 50
+
+  # Poor cellular connection
+  poor_cellular:
+    description: "Poor cellular signal / cell edge"
+    delay_ms: 120
+    jitter_ms: 30
+    loss_pct: 1.0
+    rate_mbit: 5
+
+  # Satellite link (high latency)
+  satellite:
+    description: "Satellite connection - high latency"
+    delay_ms: 600
+    jitter_ms: 50
+    loss_pct: 0.5
+    rate_mbit: 10
+
+  # Congested network
+  congested:
+    description: "Heavy network congestion"
+    delay_ms: 200
+    jitter_ms: 50
+    loss_pct: 3.0
+    rate_mbit: 1
+
+  # Asymmetric DSL-like connection
+  dsl_asymmetric:
+    description: "DSL-like asymmetric connection"
+    delay_ms: 40
+    jitter_ms: 5
+    loss_pct: 0.05
+    rate_mbit: 20
+
+  # Low latency gaming profile
+  low_latency:
+    description: "Low latency optimized"
+    delay_ms: 5
+    jitter_ms: 1
+    loss_pct: 0
+    rate_mbit: 100
+
+  # Packet loss testing
+  lossy:
+    description: "High packet loss for testing"
+    delay_ms: 20
+    jitter_ms: 5
+    loss_pct: 5.0
+    rate_mbit: null
+
+  # Variable delay with jitter
+  jittery:
+    description: "High jitter connection"
+    delay_ms: 50
+    jitter_ms: 40
+    delay_distribution: normal
+    loss_pct: 0.1
+    rate_mbit: null
+
+  # Realistic 4G/LTE
+  lte_typical:
+    description: "Typical 4G LTE conditions"
+    delay_ms: 50
+    jitter_ms: 15
+    loss_pct: 0.2
+    rate_mbit: 30
+
+  # Edge computing profile
+  edge:
+    description: "Edge computing - low latency"
+    delay_ms: 2
+    jitter_ms: 1
+    loss_pct: 0
+    rate_mbit: 200
+
+  # Transatlantic link
+  transatlantic:
+    description: "Transatlantic connection"
+    delay_ms: 80
+    jitter_ms: 10
+    loss_pct: 0.1
+    rate_mbit: 100
+
+# Default interface for network emulation
+default_interface: "eth0"
+
+# Enable bidirectional shaping (ingress + egress)
+bidirectional: true

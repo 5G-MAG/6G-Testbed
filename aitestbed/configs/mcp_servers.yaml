@@ -1,0 +1,112 @@
+# MCP Server Configurations for 6G AI Traffic Testbed
+#
+# This file defines the MCP servers used for real tool execution
+# in agentic AI scenarios.
+#
+# Prerequisites:
+#   - Node.js >= 18 (for npx-based servers)
+#   - API keys for services requiring authentication
+#
+# Environment Variables Required:
+#   - BRAVE_API_KEY: For Brave Search server (get at https://brave.com/search/api/)
+
+mcpServers:
+  # Web Search - Uses Brave Search API
+  # Provides: brave_web_search, brave_local_search
+  brave-search:
+    name: brave-search
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-brave-search"
+    env:
+      BRAVE_API_KEY: "${BRAVE_API_KEY}"
+    description: "Web search using Brave Search API"
+    tools:
+      - brave_web_search
+      - brave_local_search
+
+  # HTTP Fetch - Fetches content from URLs
+  # Provides: fetch
+  fetch:
+    name: fetch
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-fetch"
+    env: {}
+    description: "Fetch content from URLs with robot.txt compliance"
+    tools:
+      - fetch
+
+  # Filesystem - Read/write files (sandboxed)
+  # Provides: read_file, write_file, list_directory, etc.
+  filesystem:
+    name: filesystem
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/tmp/testbed-sandbox"  # Sandboxed directory
+    env: {}
+    description: "Sandboxed filesystem access"
+    tools:
+      - read_file
+      - write_file
+      - list_directory
+      - create_directory
+      - move_file
+      - search_files
+      - get_file_info
+
+  # Memory - Persistent key-value store
+  # Provides: store, retrieve, list_keys
+  memory:
+    name: memory
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-memory"
+    env: {}
+    description: "Persistent memory for agent context"
+    tools:
+      - store
+      - retrieve
+      - list_keys
+
+# Server Groups for Different Scenarios
+serverGroups:
+  # Web Research Agent - search and fetch
+  web_research:
+    - brave-search
+    - fetch
+    - memory
+
+  # Shopping Agent - search for products (uses web search)
+  shopping:
+    - brave-search
+    - fetch
+
+  # General Purpose Agent
+  general:
+    - brave-search
+    - fetch
+    - filesystem
+    - memory
+
+# Tool Aliases for Backward Compatibility
+# Maps old mock tool names to MCP tool names
+toolAliases:
+  web_search: brave_web_search
+  search_products: brave_web_search
+  fetch_url: fetch
+  check_price: brave_web_search  # Will search for product prices
+
+# Rate Limiting Configuration
+rateLimits:
+  brave_web_search:
+    requests_per_minute: 15
+    requests_per_day: 2000
+  fetch:
+    requests_per_minute: 30
+    concurrent_max: 5

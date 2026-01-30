@@ -1,0 +1,204 @@
+# Network Profile Definitions for 6G AI Traffic Testbed
+# These profiles emulate various network conditions using tc/netem
+
+profiles:
+  ideal_6g:
+    description: "Ideal 6G conditions - minimal latency, no loss"
+    delay_ms: 1
+    jitter_ms: 0
+    loss_pct: 0
+    rate_mbit: null  # Unlimited
+
+  5g_urban:
+    description: "Typical 5G urban deployment"
+    delay_ms: 20
+    jitter_ms: 5
+    loss_pct: 0.1
+    rate_mbit: 100
+
+  wifi_good:
+    description: "Good WiFi connection"
+    delay_ms: 30
+    jitter_ms: 10
+    loss_pct: 0.1
+    rate_mbit: 50
+
+  cell_edge:
+    description: "Cell edge / poor signal conditions"
+    delay_ms: 120
+    jitter_ms: 30
+    loss_pct: 1.0
+    rate_mbit: 5
+
+  edge_rural:
+    description: "Rural edge deployment"
+    delay_ms: 80
+    jitter_ms: 20
+    loss_pct: 1.0
+    rate_mbit: 10
+
+  satellite:
+    description: "Satellite / remote access (high latency)"
+    delay_ms: 600
+    jitter_ms: 50
+    loss_pct: 0.5
+    rate_mbit: 10
+
+  congested:
+    description: "Heavy network congestion"
+    delay_ms: 200
+    jitter_ms: 50
+    loss_pct: 3.0
+    rate_mbit: 1
+
+  # 5QI-derived profiles (delay_ms uses Packet Delay Budget; loss_pct = PER * 100)
+  5qi_1:
+    description: "5QI 1 GBR - Conversational Voice (PDB 100ms, PER 1e-2)"
+    delay_ms: 100
+    jitter_ms: 0
+    loss_pct: 1.0
+    rate_mbit: null
+
+  5qi_2:
+    description: "5QI 2 GBR - Conversational Video Live (PDB 150ms, PER 1e-3)"
+    delay_ms: 150
+    jitter_ms: 0
+    loss_pct: 0.1
+    rate_mbit: null
+
+  5qi_3:
+    description: "5QI 3 GBR - Real Time Gaming/V2X (PDB 50ms, PER 1e-3)"
+    delay_ms: 50
+    jitter_ms: 0
+    loss_pct: 0.1
+    rate_mbit: null
+
+  5qi_4:
+    description: "5QI 4 GBR - Non-Conversational Video (PDB 300ms, PER 1e-6)"
+    delay_ms: 300
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_5:
+    description: "5QI 5 Non-GBR - IMS Signalling (PDB 100ms, PER 1e-6)"
+    delay_ms: 100
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_6:
+    description: "5QI 6 Non-GBR - Buffered Video (PDB 300ms, PER 1e-6)"
+    delay_ms: 300
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_7:
+    description: "5QI 7 Non-GBR - Voice/Live Streaming/Interactive Gaming (PDB 100ms, PER 1e-3)"
+    delay_ms: 100
+    jitter_ms: 0
+    loss_pct: 0.1
+    rate_mbit: null
+
+  5qi_8:
+    description: "5QI 8 Non-GBR - Buffered Video (PDB 300ms, PER 1e-6)"
+    delay_ms: 300
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_9:
+    description: "5QI 9 Non-GBR - Buffered Video (PDB 300ms, PER 1e-6)"
+    delay_ms: 300
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_65:
+    description: "5QI 65 GBR - Mission Critical PTT (PDB 75ms, PER 1e-2)"
+    delay_ms: 75
+    jitter_ms: 0
+    loss_pct: 1.0
+    rate_mbit: null
+
+  5qi_66:
+    description: "5QI 66 GBR - Non-Mission-Critical PTT (PDB 100ms, PER 1e-2)"
+    delay_ms: 100
+    jitter_ms: 0
+    loss_pct: 1.0
+    rate_mbit: null
+
+  5qi_67:
+    description: "5QI 67 GBR - Mission Critical Video (PDB 100ms, PER 1e-3)"
+    delay_ms: 100
+    jitter_ms: 0
+    loss_pct: 0.1
+    rate_mbit: null
+
+  5qi_69:
+    description: "5QI 69 Non-GBR - Mission Critical Signalling (PDB 60ms, PER 1e-6)"
+    delay_ms: 60
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_70:
+    description: "5QI 70 Non-GBR - Mission Critical Data (PDB 200ms, PER 1e-6)"
+    delay_ms: 200
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_75:
+    description: "5QI 75 GBR - V2X Messages (PDB 50ms, PER 1e-2)"
+    delay_ms: 50
+    jitter_ms: 0
+    loss_pct: 1.0
+    rate_mbit: null
+
+  5qi_79:
+    description: "5QI 79 Non-GBR - V2X Messages (PDB 50ms, PER 1e-2)"
+    delay_ms: 50
+    jitter_ms: 0
+    loss_pct: 1.0
+    rate_mbit: null
+
+  5qi_80:
+    description: "5QI 80 Non-GBR - Low Latency eMBB/AR (PDB 10ms, PER 1e-6)"
+    delay_ms: 10
+    jitter_ms: 0
+    loss_pct: 0.0001
+    rate_mbit: null
+
+  5qi_82:
+    description: "5QI 82 Delay Critical GBR - Discrete Automation (PDB 10ms, PER 1e-4)"
+    delay_ms: 10
+    jitter_ms: 0
+    loss_pct: 0.01
+    rate_mbit: null
+
+  5qi_83:
+    description: "5QI 83 Delay Critical GBR - Discrete Automation (PDB 10ms, PER 1e-4)"
+    delay_ms: 10
+    jitter_ms: 0
+    loss_pct: 0.01
+    rate_mbit: null
+
+  5qi_84:
+    description: "5QI 84 Delay Critical GBR - Intelligent Transport (PDB 30ms, PER 1e-5)"
+    delay_ms: 30
+    jitter_ms: 0
+    loss_pct: 0.001
+    rate_mbit: null
+
+  5qi_85:
+    description: "5QI 85 Delay Critical GBR - Electricity Distribution HV (PDB 5ms, PER 1e-5)"
+    delay_ms: 5
+    jitter_ms: 0
+    loss_pct: 0.001
+    rate_mbit: null
+
+# Default interface for network emulation
+default_interface: "eth0"
+bidirectional: true

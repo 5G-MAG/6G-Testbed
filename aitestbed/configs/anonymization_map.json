@@ -1,0 +1,53 @@
+{
+  "defaults": {
+    "provider": "Provider X",
+    "model": "Model X",
+    "scenario": "Scenario Unknown"
+  },
+  "providers": {
+    "openai": "Provider A",
+    "gemini": "Provider B",
+    "deepseek": "Provider C"
+  },
+  "models": {
+    "gpt-5-mini": "Model A1",
+    "gpt-5.2": "Model A2",
+    "gpt-4o-mini": "Model A3",
+    "gpt-realtime-mini": "Model A4",
+    "gpt-image-1.5": "Model A5",
+    "tts-1": "Model A6",
+    "gemini-3-flash-preview": "Model B1",
+    "deepseek-chat": "Model C1",
+    "deepseek-coder": "Model C2",
+    "deepseek-reasoner": "Model C3"
+  },
+  "scenarios": {
+    "chat_basic": "Chat Basic",
+    "chat_deepseek": "Chat Basic",
+    "chat_deepseek_coder": "Chat Coding",
+    "chat_deepseek_reasoner": "Chat Reasoning",
+    "chat_deepseek_streaming": "Chat Streaming",
+    "chat_gemini": "Chat Streaming",
+    "chat_streaming": "Chat Streaming",
+    "computer_control_agent": "Computer Control",
+    "direct_web_search": "Direct Web Search",
+    "direct_web_search_burst": "Direct Web Search Burst",
+    "direct_web_search_deepseek": "Direct Web Search",
+    "direct_web_search_google": "Direct Web Search (Custom API)",
+    "general_agent": "General Agent",
+    "image_generation": "Image Generation",
+    "multimodal_analysis": "Multimodal Analysis",
+    "parallel_search_benchmark": "Parallel Search Benchmark",
+    "realtime_audio": "Realtime Audio",
+    "realtime_interactive": "Realtime Interactive",
+    "realtime_multilingual": "Realtime Multilingual",
+    "realtime_technical": "Realtime Technical",
+    "realtime_text": "Realtime Text",
+    "realtime_text_webrtc": "Realtime Text WebRTC",
+    "realtime_audio_webrtc": "Realtime Audio WebRTC",
+    "shopping_agent": "Shopping Agent",
+    "shopping_agent_deepseek": "Shopping Agent",
+    "web_search_agent": "Web Search Agent",
+    "web_search_agent_deepseek": "Web Search Agent"
+  }
+}

@@ -1,0 +1,53 @@
+# =============================================================================
+# 6G AI Traffic Testbed - Prometheus Configuration
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  # Attach labels to metrics
+  external_labels:
+    monitor: 'ai-traffic-testbed'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Rule files (optional)
+# rule_files:
+#   - "first_rules.yml"
+#   - "second_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Testbed metrics (if exposed)
+  # The testbed can expose metrics via a simple HTTP endpoint
+  - job_name: 'testbed'
+    static_configs:
+      - targets: ['testbed:9100']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # PostgreSQL exporter (if running)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:9187']
+
+  # Redis exporter (if running)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:9121']
+
+  # Node exporter for system metrics (if running)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']

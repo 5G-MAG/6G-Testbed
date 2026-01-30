@@ -1,0 +1,48 @@
+# 6G AI Traffic Characterization Testbed
+# Docker Compose Configuration
+#
+# Usage:
+#   docker compose up testbed
+#   docker compose run testbed --help
+
+version: '3.8'
+
+services:
+  testbed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 6g-ai-testbed:latest
+    container_name: ai-traffic-testbed
+
+    # Required for network emulation (tc/netem)
+    cap_add:
+      - NET_ADMIN
+
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - BRAVE_API_KEY=${BRAVE_API_KEY:-}
+      - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY:-}
+      - GOOGLE_SEARCH_CX=${GOOGLE_SEARCH_CX:-}
+      - BING_SEARCH_API_KEY=${BING_SEARCH_API_KEY:-}
+      - ENABLE_NETEM=${ENABLE_NETEM:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PYTHONUNBUFFERED=1
+
+    volumes:
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+      - ./capture/captures:/app/capture/captures
+      - ./capture/l7_captures:/app/capture/l7_captures
+      - testbed-sandbox:/tmp/testbed-sandbox
+
+    ports:
+      - "8080:8080"   # mitmproxy
+      - "8081:8081"   # mitmproxy web UI
+
+    command: ["--help"]
+
+volumes:
+  testbed-sandbox:

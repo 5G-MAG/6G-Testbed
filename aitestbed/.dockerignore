@@ -1,0 +1,88 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.hypothesis/
+
+# Documentation
+docs/_build/
+
+# Logs and data (will be mounted as volumes)
+logs/*.db
+logs/*.log
+reports/*.json
+reports/*.md
+reports/figures/*.png
+capture/captures/*.pcap
+capture/l7_captures/*.jsonl
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+*.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# Keep docker directory for supporting files
+!docker/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Node modules (MCP servers installed globally in container)
+node_modules/
+
+# Jupyter
+.ipynb_checkpoints/
