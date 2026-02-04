@@ -25,6 +25,8 @@
 **/*.pcap
 **/*.sh
 !aitestbed/run_full_test.sh
+!netemu/scripts/apply_profile.sh
+!netemu/scripts/clear_profile.sh
 
 **/.DS_Store
 **/.idea/
