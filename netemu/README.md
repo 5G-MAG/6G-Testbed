@@ -29,8 +29,6 @@ A Python wrapper for Linux tc/netem network emulation.
 # From local directory
 pip install -e /path/to/netemu
 
-# Or from git (when published)
-pip install git+https://github.com/3gpp/netemu.git
 ```
 
 ## Quick Start
@@ -255,6 +253,4 @@ Standalone shell scripts are provided in `scripts/`:
 ./scripts/clear_profile.sh eth0
 ```
 
-## License
 
-Apache License 2.0

@@ -4,49 +4,47 @@ A comprehensive testbed for evaluating and characterizing AI traffic patterns un
 
 ## Overview
 
-This testbed enables researchers and engineers to:
+This testbed enables 3GPP experts to:
 
-- **Measure** traffic characteristics of generative AI services (LLMs, image generation)
+- **Measure** traffic characteristics of generative AI services (LLMs, image generation, etc.)
 - **Analyze** agentic AI patterns (multi-step tool calling, agent-to-agent communication)
 - **Evaluate** QoE metrics under emulated network conditions (latency, loss, bandwidth)
-- **Generate** 3GPP-aligned reports for standardization contributions
+- **Generate** reports for standardization contributions
 
-The testbed supports multiple LLM providers (OpenAI, Google Gemini, DeepSeek) and implements various traffic scenarios that represent real-world AI service usage patterns.
+The testbed supports multiple LLM providers (OpenAI, Google Gemini, DeepSeek, self-hosted LLMs) and implements various traffic scenarios that represent real-world AI service usage patterns.
 
 ## Features
 
 ### Traffic Scenarios
 
-Evaluation status reflects the latest results in `RESULTS.md` and may change as new runs are added.
-
-| Scenario | Description | Evaluation Status | Applicable Metrics |
-|:---------|:------------|:------------------|:-------------------|
-| Chat Basic (`chat_basic`) | Basic single-turn chat interaction | Evaluated | Latency, TTFT/TTLT, tokens, bytes |
-| Chat Streaming (`chat_streaming`) | Multi-turn chat with streaming responses | Evaluated | Latency, TTFT/TTLT, streaming chunks, tokens, bytes |
-| Chat Basic (Gemini) (`chat_gemini`) | Chat interaction using Google Gemini | Evaluated | Latency, TTFT/TTLT, tokens, bytes |
-| Chat Basic (DeepSeek) (`chat_deepseek`) | Basic chat interaction using DeepSeek | Evaluated | Latency, TTFT/TTLT, tokens, bytes |
-| Chat Streaming (DeepSeek) (`chat_deepseek_streaming`) | Streaming chat interaction using DeepSeek | Evaluated | Latency, TTFT/TTLT, streaming chunks, tokens, bytes |
-| Chat Coding (DeepSeek) (`chat_deepseek_coder`) | Code-focused chat using DeepSeek Coder | Evaluated | Latency, TTFT/TTLT, tokens, bytes |
-| Chat Reasoning (DeepSeek) (`chat_deepseek_reasoner`) | Deep reasoning chat using DeepSeek Reasoner | Evaluated | Latency, TTFT/TTLT, tokens, bytes |
-| Shopping Agent (`shopping_agent`) | Shopping assistant with tool calling | Not evaluated | Latency, tokens, tool calls/latency, bytes |
-| Shopping Agent (DeepSeek) (`shopping_agent_deepseek`) | Shopping assistant with tool calling using DeepSeek | Not evaluated | Latency, tokens, tool calls/latency, bytes |
-| Web Search Agent (`web_search_agent`) | Research agent with web search capability | Not evaluated | Latency, tokens, tool calls/latency, bytes |
-| Web Search Agent (DeepSeek) (`web_search_agent_deepseek`) | Research agent with web search using DeepSeek | Not evaluated | Latency, tokens, tool calls/latency, bytes |
-| General Agent (`general_agent`) | General-purpose agent with full MCP access | Not evaluated | Latency, tokens, tool calls/latency, bytes |
-| Computer Control Agent (`computer_control_agent`) | Computer use agent via OpenAI computer tool | Not evaluated | Latency, tool calls/latency, bytes (screenshots) |
-| Image Generation (`image_generation`) | Image generation using DALL-E | Evaluated | Latency, bytes, throughput |
-| Multimodal Analysis (`multimodal_analysis`) | Multimodal input analysis (image + text) | Evaluated | Latency, tokens, bytes |
-| Direct Web Search (`direct_web_search`) | Multi-threaded web search without MCP | Evaluated | Latency, bytes, throughput |
-| Direct Web Search (Google) (`direct_web_search_google`) | Web search using Google Custom Search API | Evaluated | Latency, bytes, throughput |
-| Direct Web Search Burst (`direct_web_search_burst`) | High-parallelism burst search stress test | Not evaluated | Latency, bytes, throughput, concurrency |
-| Parallel Search Benchmark (`parallel_search_benchmark`) | Benchmark parallel search with varying threads | Not evaluated | Latency, throughput, bytes, concurrency |
-| Realtime Text (`realtime_text`) | Real-time conversational AI via WebSocket (text) | Evaluated | Latency, TTFT, streaming chunks, bytes |
-| Realtime Text WebRTC (`realtime_text_webrtc`) | Real-time conversational AI via WebRTC (text) | Evaluated | Latency, TTFT, streaming chunks, bytes, SDP sizes |
-| Realtime Interactive (`realtime_interactive`) | Interactive real-time conversation (text + audio) | Evaluated | Latency, TTFT, streaming chunks, bytes, audio bytes |
-| Realtime Technical (`realtime_technical`) | Technical support real-time conversation | Evaluated | Latency, TTFT, streaming chunks, bytes, audio bytes |
-| Realtime Multilingual (`realtime_multilingual`) | Multilingual real-time conversation | Evaluated | Latency, TTFT, streaming chunks, bytes, audio bytes |
-| Realtime Audio (`realtime_audio`) | Audio-based real-time conversation (voice in/out) | Evaluated | Latency, TTFT, audio bytes, audio duration, streaming chunks |
-| Realtime Audio WebRTC (`realtime_audio_webrtc`) | Audio-based real-time conversation over WebRTC | Not evaluated | Latency, TTFT, audio bytes, audio duration, streaming chunks, SDP sizes |
+| Scenario | Description | Applicable Metrics |
+|:---------|:------------|:-------------------|
+| Chat Basic (`chat_basic`) | Basic single-turn chat interaction | Latency, TTFT/TTLT, tokens, bytes |
+| Chat Streaming (`chat_streaming`) | Multi-turn chat with streaming responses | Latency, TTFT/TTLT, streaming chunks, tokens, bytes |
+| Chat Basic (Gemini) (`chat_gemini`) | Chat interaction using Google Gemini | Latency, TTFT/TTLT, tokens, bytes |
+| Chat Basic (DeepSeek) (`chat_deepseek`) | Basic chat interaction using DeepSeek | Latency, TTFT/TTLT, tokens, bytes |
+| Chat Streaming (DeepSeek) (`chat_deepseek_streaming`) | Streaming chat interaction using DeepSeek | Latency, TTFT/TTLT, streaming chunks, tokens, bytes |
+| Chat Coding (DeepSeek) (`chat_deepseek_coder`) | Code-focused chat using DeepSeek Coder | Latency, TTFT/TTLT, tokens, bytes |
+| Chat Reasoning (DeepSeek) (`chat_deepseek_reasoner`) | Deep reasoning chat using DeepSeek Reasoner | Latency, TTFT/TTLT, tokens, bytes |
+| Shopping Agent (`shopping_agent`) | Shopping assistant with tool calling | Latency, tokens, tool calls/latency, bytes |
+| Shopping Agent (DeepSeek) (`shopping_agent_deepseek`) | Shopping assistant with tool calling using DeepSeek | Latency, tokens, tool calls/latency, bytes |
+| Web Search Agent (`web_search_agent`) | Research agent with web search capability | Latency, tokens, tool calls/latency, bytes |
+| Web Search Agent (DeepSeek) (`web_search_agent_deepseek`) | Research agent with web search using DeepSeek | Latency, tokens, tool calls/latency, bytes |
+| General Agent (`general_agent`) | General-purpose agent with full MCP access | Latency, tokens, tool calls/latency, bytes |
+| Computer Control Agent (`computer_control_agent`) | Computer use agent via OpenAI computer tool | Latency, tool calls/latency, bytes (screenshots) |
+| Image Generation (`image_generation`) | Image generation | Latency, bytes, throughput |
+| Multimodal Analysis (`multimodal_analysis`) | Multimodal input analysis (image + text) | Latency, tokens, bytes |
+| Direct Web Search (`direct_web_search`) | Multi-threaded web search without MCP | Latency, bytes, throughput |
+| Direct Web Search (Google) (`direct_web_search_google`) | Web search using Google Custom Search API | Latency, bytes, throughput |
+| Direct Web Search Burst (`direct_web_search_burst`) | High-parallelism burst search stress test | Latency, bytes, throughput, concurrency |
+| Parallel Search Benchmark (`parallel_search_benchmark`) | Benchmark parallel search with varying threads | Latency, throughput, bytes, concurrency |
+| Realtime Text (`realtime_text`) | Real-time conversational AI via WebSocket (text) | Latency, TTFT, streaming chunks, bytes |
+| Realtime Text WebRTC (`realtime_text_webrtc`) | Real-time conversational AI via WebRTC (text) | Latency, TTFT, streaming chunks, bytes, SDP sizes |
+| Realtime Interactive (`realtime_interactive`) | Interactive real-time conversation (text + audio) | Latency, TTFT, streaming chunks, bytes, audio bytes |
+| Realtime Technical (`realtime_technical`) | Technical support real-time conversation | Latency, TTFT, streaming chunks, bytes, audio bytes |
+| Realtime Multilingual (`realtime_multilingual`) | Multilingual real-time conversation | Latency, TTFT, streaming chunks, bytes, audio bytes |
+| Realtime Audio (`realtime_audio`) | Audio-based real-time conversation (voice in/out) | Latency, TTFT, audio bytes, audio duration, streaming chunks |
+| Realtime Audio WebRTC (`realtime_audio_webrtc`) | Audio-based real-time conversation over WebRTC | Latency, TTFT, audio bytes, audio duration, streaming chunks, SDP sizes |
 
 
 ### Network Profiles
@@ -153,7 +151,7 @@ profiles:
 
 ### Metrics
 
-The testbed captures metrics aligned with TR 26.998 and TR 22.870:
+The testbed captures metrics aligned with TR 22.870:
 
 - **QoE Metrics**
   - Time-to-First-Token (TTFT)
@@ -197,7 +195,7 @@ The testbed captures metrics aligned with TR 26.998 and TR 22.870:
         │    ┌────────────────────────┐    │
         │    │    MCP Tool Servers    │    │
         │    │ ┌────────┬───────────┐ │    │
-        │    │ │ Brave  │   Fetch   │ │    │
+        │    │ │ Cloud  │   Fetch   │ │    │
         │    │ │ Search │  Server   │ │    │
         │    │ └────────┴───────────┘ │    │
         │    │ ┌────────┬───────────┐ │    │
@@ -210,10 +208,10 @@ The testbed captures metrics aligned with TR 26.998 and TR 22.870:
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      LLM Client Layer                            │
-│     ┌────────────────┬────────────────┬────────────────┐         │
-│     │ OpenAIClient   │ GeminiClient   │ DeepSeekClient │         │
-│     └────────────────┴────────────────┴────────────────┘         │
+│                      LLM Client Layer                           │
+│     ┌────────────────┬────────────────┬────────────────┐──────┐ │
+│     │ OpenAIClient   │ GeminiClient   │ DeepSeekClient │ vLLM | │
+│     └────────────────┴────────────────┴────────────────┘──────┘ │
 └─────────────────────────┬───────────────────────────────────────┘
                           │ HTTPS
                           ▼
@@ -259,7 +257,7 @@ The testbed captures metrics aligned with TR 26.998 and TR 22.870:
 
 ```bash
 # Clone or navigate to the testbed directory
-cd testbed
+cd aitestbed
 
 # Create virtual environment (recommended)
 python -m venv venv
@@ -318,7 +316,7 @@ Each scenario uses a specific model. The table below shows the mapping and estim
 | realtime_technical | gpt-realtime-mini | realtime (text) | $0.60 in / $2.40 out |
 | realtime_audio | gpt-realtime-mini | realtime (audio) | $10.00 in / $20.00 out |
 
-**DeepSeek** (Very Affordable)
+**DeepSeek** 
 
 | Scenario | Model | Type | Pricing (per 1M tokens) |
 |:---------|:------|:-----|:------------------------|
@@ -327,7 +325,7 @@ Each scenario uses a specific model. The table below shows the mapping and estim
 | chat_deepseek_coder | deepseek-coder | chat | $0.14 in / $0.28 out |
 | chat_deepseek_reasoner | deepseek-reasoner | chat | $0.55 in / $2.19 out |
 
-**Gemini** (Free Tier Available)
+**Gemini** 
 
 | Scenario | Model | Type | Pricing (per 1M tokens) |
 |:---------|:------|:-----|:------------------------|
@@ -344,18 +342,8 @@ The `run_full_tests.sh` script supports different modes with varying costs:
 | (default) | 5 runs each | 2 runs each | **~$2.50** |
 | `--full` | 10 runs each | 2 runs each | **~$4.00** |
 
-**Cost Breakdown (default mode, 5 runs):**
 
-| Provider/API | Est. Cost | Notes |
-|:-------------|:----------|:------|
-| OpenAI GPT-5-mini | ~$0.80 | Chat, search, agents (~350K tokens) |
-| OpenAI Realtime (text) | ~$0.15 | Text-only realtime (~50K tokens) |
-| OpenAI Realtime (audio) | ~$0.30 | Audio realtime (2 runs only) |
-| OpenAI DALL-E 3 | ~$1.20 | 30 images @ $0.04 |
-| DeepSeek | ~$0.05 | All DeepSeek scenarios |
-| Gemini | ~$0.00 | Usually free tier |
-
-> **Note:** Realtime scenarios use text mode by default. Audio mode (`realtime_audio`) is more expensive ($10-20/1M tokens vs $0.60-2.40/1M for text).
+> **Note:** Realtime scenarios with Audio mode (`realtime_audio`) is more expensive ($10-20/1M tokens vs $0.60-2.40/1M for text).
 
 ### MCP Server Configuration
 
@@ -735,30 +723,6 @@ The testbed generates:
   - Success rate charts
   - Agent loop factor visualization
 
-## 3GPP Alignment
-
-This testbed is designed to support contributions to 3GPP SA4 6G Media Study:
-
-### TR 26.998 Mapping
-
-| Testbed Metric | 3GPP Section | Description |
-|:---------------|:-------------|:------------|
-| TTFT, TTLT | Section a | End-to-end service quality |
-| Success Rate | Section a | QoE under degraded conditions |
-| UL/DL Bytes | Section b | Traffic characterization |
-| Token Rate | Section b | Dynamic traffic patterns |
-| Loop Factor | Section d | AI service behavior |
-| Tool Latency | Section d | Agent traffic characteristics |
-
-### TR 22.870 Use Cases
-
-The scenarios align with use cases from TR 22.870:
-
-- **Interactive AI Assistant**: Chat scenarios
-- **AI-Enhanced Shopping**: Shopping agent
-- **Research & Information Retrieval**: Web search agent
-- **Content Generation**: Image generation
-
 ## Direct Web Search (No MCP)
 
 The testbed includes an alternative web search implementation that uses **direct HTTP requests** instead of MCP servers. This is useful for:
@@ -839,16 +803,6 @@ print(f"Sum latency: {results.total_latency_sec:.2f}s")
 print(f"Parallelism factor: {results.total_latency_sec / results.wall_clock_time_sec:.1f}x")
 ```
 
-### Traffic Patterns
-
-The direct search scenarios generate distinct traffic patterns:
-
-| Scenario | Pattern | UL/DL Ratio | Characteristics |
-|:---------|:--------|:------------|:----------------|
-| `direct_web_search` | Burst + Query-Response | ~0.01 | Parallel HTTP then LLM |
-| `direct_web_search_burst` | Pure Burst | ~0.02 | 20 parallel requests |
-| `parallel_search_benchmark` | Variable Burst | ~0.02 | 1-20 threads measured |
-
 ## Extending the Testbed
 
 ### Adding a New Scenario
@@ -896,150 +850,6 @@ class MyProviderClient(LLMClient):
 
 2. Register in `clients/__init__.py`
 3. Add to orchestrator's client factory
-
-## Troubleshooting
-
-### Network Emulation Not Working
-
-```bash
-# Check if tc is available
-which tc
-
-# Check current qdisc
-tc qdisc show dev eth0
-
-# Clear any existing rules
-sudo tc qdisc del dev eth0 root
-
-# Test manually
-sudo tc qdisc add dev eth0 root netem delay 100ms
-ping google.com  # Should show ~100ms added latency
-sudo tc qdisc del dev eth0 root
-```
-
-### Sudoers Configuration for Network Emulation
-
-The network emulator requires `sudo` access for `tc`, `ip`, and `modprobe` commands. To avoid password prompts during automated runs, configure passwordless sudo for these specific commands.
-
-#### Option 1: Allow Specific Commands (Recommended)
-
-Create a sudoers file for network emulation:
-
-```bash
-sudo visudo -f /etc/sudoers.d/netem
-```
-
-Add the following line (replace `yourusername` with your actual username):
-
-```
-yourusername ALL=(ALL) NOPASSWD: /sbin/tc, /sbin/ip, /sbin/modprobe ifb*
-```
-
-Or for all users in a group (e.g., `netdev`):
-
-```
-%netdev ALL=(ALL) NOPASSWD: /sbin/tc, /sbin/ip, /sbin/modprobe ifb*
-```
-
-#### Option 2: More Permissive (Development/Testing)
-
-```bash
-sudo visudo -f /etc/sudoers.d/netem
-```
-
-```
-yourusername ALL=(ALL) NOPASSWD: /sbin/tc *, /sbin/ip link set dev ifb*, /sbin/modprobe ifb*
-```
-
-#### Verify Command Paths
-
-The paths may vary by distribution. Check yours first:
-
-```bash
-which tc ip modprobe
-```
-
-Common locations:
-- **Debian/Ubuntu**: `/sbin/tc`, `/sbin/ip`, `/sbin/modprobe`
-- **Some distros**: `/usr/sbin/tc`, `/usr/bin/ip`
-
-#### Test Configuration
-
-```bash
-# Should run without prompting for password
-sudo -n tc qdisc show
-sudo -n ip link show
-```
-
-#### For Docker
-
-If running in Docker, use `--cap-add=NET_ADMIN` instead of sudoers:
-
-```bash
-docker run --cap-add=NET_ADMIN ...
-```
-
-Or in docker-compose.yaml:
-
-```yaml
-services:
-  testbed:
-    cap_add:
-      - NET_ADMIN
-```
-
-### API Key Issues
-
-```bash
-# Verify environment variables
-echo $OPENAI_API_KEY
-echo $GOOGLE_API_KEY
-
-# Test API access
-python -c "from openai import OpenAI; print(OpenAI().models.list())"
-```
-
-### Database Issues
-
-```bash
-# Check database
-sqlite3 logs/traffic_logs.db ".tables"
-sqlite3 logs/traffic_logs.db "SELECT COUNT(*) FROM traffic_logs"
-
-# Clear database
-rm logs/traffic_logs.db
-```
-
-### L7 Capture Issues
-
-```bash
-# Check if mitmproxy is installed
-mitmdump --version
-
-# Check if CA certificate exists
-ls -la ~/.mitmproxy/
-
-# Generate CA certificate if missing
-mitmdump  # Then Ctrl+C
-
-# Test mitmproxy manually
-mitmdump -p 8080
-# In another terminal:
-curl -x http://localhost:8080 http://httpbin.org/get
-
-# For HTTPS, trust the CA or use:
-curl -x http://localhost:8080 --cacert ~/.mitmproxy/mitmproxy-ca-cert.pem https://api.openai.com/v1/models
-
-# Check if proxy port is in use
-lsof -i :8080
-
-# SSL Certificate errors in Python
-export SSL_CERT_FILE=~/.mitmproxy/mitmproxy-ca-cert.pem
-export REQUESTS_CA_BUNDLE=~/.mitmproxy/mitmproxy-ca-cert.pem
-
-# View captured data
-cat capture/l7_captures/*.jsonl | jq .
-```
 
 ## Docker Deployment
 
@@ -1139,10 +949,6 @@ Mount these volumes to preserve data between runs:
 -v $(pwd)/capture/captures:/app/capture/captures    # PCAP files
 -v $(pwd)/capture/l7_captures:/app/capture/l7_captures  # L7 logs
 ```
-
-## License
-
-Licensed under the Apache License, Version 2.0. See `LICENSE`.
 
 ## References
 

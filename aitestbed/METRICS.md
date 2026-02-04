@@ -1,6 +1,6 @@
 # METRICS.md
 
-Detailed documentation of all metrics calculated by the 6G AI Traffic Characterization Testbed (ATCT).
+Detailed documentation of all metrics calculated by the 6G AI Traffic Characterization Testbed.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ The testbed calculates metrics at multiple levels:
 
 1. **Per-Request Level** - Raw measurements captured during each API call (`LogRecord`)
 2. **Aggregated Level** - Statistical summaries per scenario/profile combination (`ScenarioMetrics`)
-3. **3GPP Report Level** - Formatted output aligned with 3GPP SA4 6G Media Study requirements
+3. **3GPP Report Level** - Formatted output for inclusion in 3GPP SA4 6G Media Study report
 
 ### Data Flow
 
@@ -139,7 +139,7 @@ for each record:
 
 ### 4. Traffic Volume Metrics
 
-Measures payload sizes for network capacity planning (3GPP Section b).
+Measures payload sizes.
 
 | Metric | Formula | Unit | Description |
 |--------|---------|------|-------------|
@@ -182,7 +182,7 @@ When the provider doesn't return token counts:
 
 ---
 
-### 6. Reliability Metrics (QoE - 3GPP Section a)
+### 6. Reliability Metrics
 
 Measures service reliability and error rates.
 
@@ -204,7 +204,7 @@ Categorizes failures by type:
 
 ---
 
-### 7. Agent/Tool Metrics (3GPP Section d)
+### 7. Agent/Tool Metrics
 
 Measures AI agent behavior with external tool usage.
 
@@ -228,7 +228,7 @@ loop_factor = mean(session_sizes)
 
 ### 8. Computer Use Metrics
 
-Metrics specific to computer-use scenarios (GUI automation).
+Metrics specific to computer-use scenarios.
 
 | Metric | Formula | Unit | Description |
 |--------|---------|------|-------------|
@@ -367,7 +367,7 @@ computer_action_records = [r for r in records
 
 ---
 
-## 3GPP Output Format
+## Report Output Format
 
 The `MetricsCalculator.to_3gpp_format()` method converts metrics to 3GPP-aligned JSON format with millisecond precision.
 
@@ -447,16 +447,6 @@ The `MetricsCalculator.to_3gpp_format()` method converts metrics to 3GPP-aligned
 }
 ```
 
-### Unit Conversions
-
-| Internal Unit | Output Unit | Conversion |
-|--------------|-------------|------------|
-| seconds | milliseconds | `value * 1000` |
-| ratio | ratio | unchanged |
-| bytes | bytes | unchanged |
-| count | count | unchanged |
-| percent | percent | unchanged |
-
 ---
 
 ## Configuration Parameters
@@ -482,21 +472,6 @@ defaults:
 Gaps between requests:
 - `<= threshold`: "on" period (burst activity)
 - `> threshold`: "off" period (idle)
-
----
-
-## Source Code References
-
-| Component | File | Key Lines |
-|-----------|------|-----------|
-| LogRecord | `analysis/logger.py` | 16-94 |
-| TrafficLogger | `analysis/logger.py` | 96-200 |
-| MetricsCalculator | `analysis/metrics.py` | 113-436 |
-| Percentile function | `analysis/metrics.py` | 439-450 |
-| 3GPP format | `analysis/metrics.py` | 495-559 |
-| ChatResponse | `clients/base.py` | 129-146 |
-| StreamingResponse | `clients/base.py` | 57-127 |
-| BaseScenario._create_log_record | `scenarios/base.py` | 111-183 |
 
 ---
 

@@ -11,12 +11,12 @@ A framework for measuring and analyzing AI/LLM service traffic patterns under va
 
 ## aitestbed
 
-The core testing framework (~15K lines Python) that orchestrates experiments across multiple AI providers and scenarios.
+The core testing framework that orchestrates experiments across multiple AI providers and scenarios.
 
 **Features:**
 - **11 scenario types**: Chat, agentic AI with MCP tools, image generation, multimodal, video understanding, realtime WebSocket/WebRTC
 - **8 LLM providers**: OpenAI, Gemini, DeepSeek, vLLM, and realtime variants
-- **60+ 3GPP-aligned metrics**: TTFT/TTLT, latency percentiles, UL/DL ratios, token rates, agent loop factors
+- **60+ metrics**: TTFT/TTLT, latency percentiles, UL/DL ratios, token rates, agent loop factors
 - **Multi-layer traffic capture**: L3/L4 via tcpdump, L7 via mitmproxy
 - **SQLite logging** with structured metrics schema
 
@@ -28,7 +28,7 @@ python orchestrator.py --scenario chat_basic --profile 5g_urban --runs 10
 
 ## netemu
 
-A lightweight network emulation library (~500 lines Python) providing a clean interface to Linux traffic control.
+A lightweight network emulation library providing a clean interface to Linux traffic control.
 
 **Features:**
 - Wraps `tc` and `netem` for delay, jitter, packet loss, and rate limiting
@@ -85,6 +85,3 @@ docker run --cap-add=NET_ADMIN -e OPENAI_API_KEY="..." \
 - Linux with `iproute2` (for network emulation)
 - Sudo access or Docker with `NET_ADMIN` capability
 
-## License
-
-Internal use for 3GPP SA4 contributions.
