@@ -368,7 +368,7 @@ class TestbedOrchestrator:
         scenario_name: str,
         profile_name: str,
         runs: int = 10,
-        inter_run_delay: float = 5.0, 
+        inter_run_delay: float = 20.0,
         ingress_profile: Optional[str] = None,
         run_timeout: Optional[float] = None,
         stop_on_error: bool = False,
@@ -761,15 +761,18 @@ class TestbedOrchestrator:
                             model_name = scenario_config.get("model", "liquid")
                             po_thd = task_config.get("po_thd", 3)
                             results_dir = task_config.get("results_dir", "logs")
-
+                            task_class = task_config.get("task_class", "real")
                             data = MetricsCalculator.load_task_results(results_dir, profile_name)
                             if data:
-                                task_stats = MetricsCalculator.calculate_task_accuracy(data, model_name, po_thd)
+                                task_stats = MetricsCalculator.calculate_task_accuracy(data, model_name, po_thd, task_class)
                                 MetricsCalculator.update_task_metrics(metrics, task_stats)
                                 logger.info(
-                                    f"task total = {metrics.task_total}"
-                                    f"time_accuracy = {metrics.task_time_accuracy}"
-                                    f"answer_accuracy = {metrics.task_answer_accuracy}"
+                                    f"task total = {metrics.task_total}, "
+                                    f"time_accuracy = {metrics.task_time_accuracy}, "
+                                    f"answer_accuracy = {metrics.task_answer_accuracy}, "
+                                    f"real_total = {metrics.real_total}, "
+                                    f"real_correct = {metrics.real_correct}, "
+                                    f"real_accuracy = {metrics.real_accuracy}, "
                                 )
                         except Exception as e:
                             logger.warning(f"Failed to calculate task accuracy: {e}")
@@ -1148,15 +1151,19 @@ def main():
                     model_name = scenario_config.get("model", "liquid")
                     po_thd = task_config.get("po_thd", 3)
                     results_dir = task_config.get("results_dir", "logs")
+                    task_class = task_config.get("task_class", "real")
 
                     data = MetricsCalculator.load_task_results(results_dir, args.profile)
                     if data:
-                        task_stats = MetricsCalculator.calculate_task_accuracy(data, model_name, po_thd)
+                        task_stats = MetricsCalculator.calculate_task_accuracy(data, model_name, po_thd, task_class)
                         MetricsCalculator.update_task_metrics(metrics, task_stats)
                         logger.info(
                             f"task total = {metrics.task_total}, "
                             f"time_accuracy = {metrics.task_time_accuracy}, "
                             f"answer_accuracy = {metrics.task_answer_accuracy}, "
+                            f"real_total = {metrics.real_total}, "
+                            f"real_correct = {metrics.real_correct}, "
+                            f"real_accuracy = {metrics.real_accuracy}, "
                         )
                 except Exception as e:
                     logger.warning(f"Failed to calculate task accuracy: {e}")
@@ -1197,6 +1204,12 @@ def main():
                 print(f"  Time accuracy:  {metrics.task_time_accuracy}")
             if metrics.task_answer_accuracy is not None:
                 print(f"  Answer accuracy:{metrics.task_answer_accuracy}")
+            if metrics.real_total is not None:
+                print(f"  Real total:     {metrics.real_total}")
+            if metrics.real_correct is not None:
+                print(f"  Real correct:  {metrics.real_correct}")
+            if metrics.real_accuracy is not None:
+                print(f"  Real accuracy:{metrics.real_accuracy}")
         else:
             parser.print_help()
     finally:

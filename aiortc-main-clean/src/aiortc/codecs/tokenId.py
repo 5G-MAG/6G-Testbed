@@ -296,6 +296,24 @@ class TokenIdDecoder(Decoder):
         return [frame]  
 
 
+PROMPT_TEMPLATE = '''You are an expert video question-answering assistant. Analyze the video frame and select the correct option based STRICTLY on visual evidence.
+Rules:
+1. Verify each option against the image details (objects, actions, text, colors).
+2. Output ONLY the single letter (A, B, C or D). No markdown, no extra text.
+3. Output the only best option A or B or C or D at the end anyway. Do not output other options except the best option.
+
+Question: {}
+Options:
+{}
+{}
+{}
+{}
+Output Format:
+{{
+    "reasoning": "Brief visual evidence supporting the choice.",
+    "answer": "A"
+}}'''
+
 PROMPT_TEMPLATE_PROACTIVE = '''You are an advanced image question-answering AI assistant. You have been provided with images and a question related to the images. Your task is to carefully analyze the images and provide the answer to the question. You need to carefully confirm whether the images content meet the conditions of the question, and then output the correct content. Answer directly.
 Question: {}
 The answer is:
@@ -310,6 +328,7 @@ class AsyncTokenIdDecoder(Decoder):
     _dec_tasks = set()
     #==============
     # for streaming bench evaluation
+    task_class = "real"
     bench_config = []
     model_name = "liquid"
     question_states = {}
@@ -332,16 +351,18 @@ class AsyncTokenIdDecoder(Decoder):
             questions = subset.get("questions", [])
             for q in questions:
                 time_stamp = q.get("time_stamp", "00:00:00")
-                ground_truth_time_stamp = q.get("ground_truth_time_stamp", "00:00:00")
+                ground_truth_time_stamp = q.get("ground_truth_time_stamp")
                 try:
                     q_parts = time_stamp.split(":")
                     q_time_sec = int(q_parts[0]) * 3600 + int(q_parts[1]) * 60 + int(q_parts[2])
-                    g_parts = ground_truth_time_stamp.split(":")
-                    g_time_sec = int(g_parts[0]) * 3600 + int(g_parts[1]) * 60 + int(g_parts[2])
-                    if pts_sec - q_time_sec >= 0 and pts_sec - g_time_sec <= 4:
-                        # print(f"pts: {pts_sec}, q_time: {q_time_sec}, g_time: {g_time_sec}", end = '', flush=True)
-                        # print("=", end = '', flush=True)
-                        return q
+                    if ground_truth_time_stamp is None:
+                        if 0 <= (pts_sec - q_time_sec) <= 4:
+                            return q
+                    else:
+                        g_parts = ground_truth_time_stamp.split(":")
+                        g_time_sec = int(g_parts[0]) * 3600 + int(g_parts[1]) * 60 + int(g_parts[2])
+                        if pts_sec - q_time_sec >= 0 and pts_sec - g_time_sec <= 4:
+                            return q
                 except:
                     continue
         return None
@@ -444,163 +465,176 @@ class AsyncTokenIdDecoder(Decoder):
                 pts_ms = pts
                 pts_sec = pts / 1000.0 / 90.0
                 question = AsyncTokenIdDecoder.match_question_by_timestamp(pts_sec)
-                if question is None:
-                    print(f">", end='', flush=True)
-
-                if question is not None:
-                    qid = question.get("question_id", str(pts_ms))
-                    ground_truth = question.get("ground_truth_output", "")
-                    time_stamp = question.get("time_stamp", "")
-                    question_text = question.get("question", "")
-                    ground_truth_timestamp = question.get("ground_truth_time_stamp", time_stamp)
-                    try:
-                        parts = time_stamp.split(":")
-                        start_time_sec = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
-                        parts_gt = ground_truth_timestamp.split(":")
-                        ground_truth_time_sec = int(parts_gt[0]) * 3600 + int(parts_gt[1]) * 60 + int(parts_gt[2])
-                    except:
-                        start_time_sec = pts_sec
-                        ground_truth_time_sec = pts_sec
-                    max_time = ground_truth_time_sec + 4
-                    if qid not in AsyncTokenIdDecoder.question_states:
-                        AsyncTokenIdDecoder.question_states[qid] = {
-                            'phase': 'yes_no',
-                            'history': [],
-                            'answered': None
-                        }
-                    
-                    state = AsyncTokenIdDecoder.question_states[qid]                    
-                    if state['phase'] == 'done':
-                        print("=", end = '', flush=True)
-                        # 3. inference now
-                        # header = pack('!I', pts)
-                        # prompt = "What is in the video? Answer directly!"
-                        # streamer = bridge.generate(token_tuple, user_prompt = prompt)
-                        # def process_stream_done():
-                        #     for new_text in streamer:
-                        #         if new_text:
-                        #             token_number = bridge.estimate_token_number(new_text)
-                        #             # result_payload = header + new_text.encode('utf-8')
-                        #             result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
-                        #             loop.call_soon_threadsafe(self.send_to_channel, result_payload)
-                        # await loop.run_in_executor(None, process_stream_done)
-                        # loop.call_soon_threadsafe(self.send_to_channel, "[DONE]")
-                        continue
-                    if state['phase'] == 'yes_no' and pts_sec > max_time:
-                        state['phase'] = 'done'
-                        print("DONE due MAX TIME", flush=True)
-                        # 3. inference now
-                        # header = pack('!I', pts)
-                        # prompt = "What is in the video? Answer directly!"
-                        # streamer = bridge.generate(token_tuple, user_prompt = prompt)
-                        # def process_stream_timeout():
-                        #     for new_text in streamer:
-                        #         if new_text:
-                        #             token_number = bridge.estimate_token_number(new_text)
-                        #             # result_payload = header + new_text.encode('utf-8')
-                        #             result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
-                        #             loop.call_soon_threadsafe(self.send_to_channel, result_payload)
-                        # await loop.run_in_executor(None, process_stream_timeout)
-                        # loop.call_soon_threadsafe(self.send_to_channel, "[DONE]")
-                        continue
-
-                    if state['phase'] == 'yes_no':
-                        query = f"{question_text} Is it the right time to output \"{ground_truth}\"? You can only answer yes or no."
-                        prompt = PROMPT_TEMPLATE_PROACTIVE.format(query)
-                        phase_type = 'yes_no'
-                        print(f"YES_NO: {prompt}", flush=True)
-                    elif state['phase'] == 'actual':
-                        prompt = PROMPT_TEMPLATE_PROACTIVE.format(question_text)
-                        phase_type = 'actual'
-                        print(f"ACTUAL: {prompt}", flush=True)
-                    else:
-                        print(f"phase ERROR", flush=True)
-                        continue                        
-                    #=============
-                    # 3. inference now
-                    header = pack('!I', pts)
-                    streamer = bridge.generate(token_tuple, user_prompt = prompt)
-                    def process_stream_sb():
-                        collected_text = ""
-                        start_time = time.time()
-                        for new_text in streamer:
-                            if new_text:
-                                token_number = bridge.estimate_token_number(new_text)
-                                # result_payload = header + new_text.encode('utf-8')
-                                result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
-                                loop.call_soon_threadsafe(self.send_to_channel, result_payload)
-                                collected_text += new_text
-                        end_time = time.time()
-                        timecost = end_time - start_time
-                        #=====================
-                        history_entry = {
-                                'role': 'user', 
-                                'content': prompt, 
-                                'time': pts_sec, 
-                                'cost': timecost
+                if AsyncTokenIdDecoder.task_class == "proactive_output":
+                    if question is None:
+                        print(f">", end='', flush=True)
+                    if question is not None:
+                        qid = question.get("question_id", str(pts_ms))
+                        ground_truth = question.get("ground_truth_output", "")
+                        time_stamp = question.get("time_stamp", "")
+                        question_text = question.get("question", "")
+                        ground_truth_timestamp = question.get("ground_truth_time_stamp", time_stamp)
+                        try:
+                            parts = time_stamp.split(":")
+                            start_time_sec = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+                            parts_gt = ground_truth_timestamp.split(":")
+                            ground_truth_time_sec = int(parts_gt[0]) * 3600 + int(parts_gt[1]) * 60 + int(parts_gt[2])
+                        except:
+                            start_time_sec = pts_sec
+                            ground_truth_time_sec = pts_sec
+                        max_time = ground_truth_time_sec + 4
+                        if qid not in AsyncTokenIdDecoder.question_states:
+                            AsyncTokenIdDecoder.question_states[qid] = {
+                                'phase': 'yes_no',
+                                'history': [],
+                                'answered': None
                             }
-                        state['history'].append(history_entry)                        
-                        history_entry_ans = {
-                                'role': 'assistant', 
-                                'content': collected_text, 
-                                'time': pts_sec, 
-                                'cost': timecost
-                            }
-                        state['history'].append(history_entry_ans)
-                        if phase_type == 'yes_no':
-                            if 'yes' in collected_text.strip().lower():
-                                state['phase'] = 'actual'
-                                print(f"[Server] YES triggered at {pts_sec}s for {qid}, running actual question...", flush=True)    
-                                actual_prompt = PROMPT_TEMPLATE_PROACTIVE.format(question_text)
-                                streamer_actual = bridge.generate(token_tuple, user_prompt=actual_prompt)
-                                collected_text_actual = ""
-                                start_time_actual = time.time()
-                                for new_text in streamer_actual:
-                                    if new_text:
-                                        token_number = bridge.estimate_token_number(new_text)
-                                        # result_payload = header + new_text.encode('utf-8')
-                                        result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
-                                        loop.call_soon_threadsafe(self.send_to_channel, result_payload)
-                                        collected_text_actual += new_text
-                                end_time_actual = time.time()
-                                timecost_actual = end_time_actual - start_time_actual
-                                state['history'].append({'role': 'user', 'content': actual_prompt, 'time': pts_sec, 'cost': timecost_actual})
-                                state['history'].append({'role': 'assistant', 'content': collected_text_actual, 'time': pts_sec, 'cost': timecost_actual})                                
+
+                        state = AsyncTokenIdDecoder.question_states[qid]
+                        if state['phase'] == 'done':
+                            print("=", end = '', flush=True)
+                            continue
+                        if state['phase'] == 'yes_no' and pts_sec > max_time:
+                            state['phase'] = 'done'
+                            print("DONE due MAX TIME", flush=True)
+                            continue
+
+                        if state['phase'] == 'yes_no':
+                            query = f"{question_text} Is it the right time to output \"{ground_truth}\"? You can only answer yes or no."
+                            prompt = PROMPT_TEMPLATE_PROACTIVE.format(query)
+                            phase_type = 'yes_no'
+                            print(f"YES_NO: {prompt}", flush=True)
+                        elif state['phase'] == 'actual':
+                            prompt = PROMPT_TEMPLATE_PROACTIVE.format(question_text)
+                            phase_type = 'actual'
+                            print(f"ACTUAL: {prompt}", flush=True)
+                        else:
+                            print(f"phase ERROR", flush=True)
+                            continue
+                        #=============
+                        # 3. inference now
+                        header = pack('!I', pts)
+                        streamer = bridge.generate(token_tuple, user_prompt = prompt)
+                        def process_stream_sb():
+                            collected_text = ""
+                            start_time = time.time()
+                            for new_text in streamer:
+                                if new_text:
+                                    token_number = bridge.estimate_token_number(new_text)
+                                    # result_payload = header + new_text.encode('utf-8')
+                                    result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
+                                    loop.call_soon_threadsafe(self.send_to_channel, result_payload)
+                                    collected_text += new_text
+                            end_time = time.time()
+                            timecost = end_time - start_time
+                            #=====================
+                            history_entry = {
+                                    'role': 'user',
+                                    'content': prompt,
+                                    'time': pts_sec,
+                                    'cost': timecost
+                                }
+                            state['history'].append(history_entry)
+                            history_entry_ans = {
+                                    'role': 'assistant',
+                                    'content': collected_text,
+                                    'time': pts_sec,
+                                    'cost': timecost
+                                }
+                            state['history'].append(history_entry_ans)
+                            if phase_type == 'yes_no':
+                                if 'yes' in collected_text.strip().lower():
+                                    state['phase'] = 'actual'
+                                    print(f"[Server] YES triggered at {pts_sec}s for {qid}, running actual question...", flush=True)
+                                    actual_prompt = PROMPT_TEMPLATE_PROACTIVE.format(question_text)
+                                    streamer_actual = bridge.generate(token_tuple, user_prompt=actual_prompt)
+                                    collected_text_actual = ""
+                                    start_time_actual = time.time()
+                                    for new_text in streamer_actual:
+                                        if new_text:
+                                            token_number = bridge.estimate_token_number(new_text)
+                                            # result_payload = header + new_text.encode('utf-8')
+                                            result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
+                                            loop.call_soon_threadsafe(self.send_to_channel, result_payload)
+                                            collected_text_actual += new_text
+                                    end_time_actual = time.time()
+                                    timecost_actual = end_time_actual - start_time_actual
+                                    state['history'].append({'role': 'user', 'content': actual_prompt, 'time': pts_sec, 'cost': timecost_actual})
+                                    state['history'].append({'role': 'assistant', 'content': collected_text_actual, 'time': pts_sec, 'cost': timecost_actual})
+                                    state['phase'] = 'done'
+                                    state['answered'] = pts_sec
+                                    question[AsyncTokenIdDecoder.model_name] = {
+                                        "answered": state['answered'],
+                                        "dialog_history": state['history']
+                                    }
+                                    print(f"[Server] Question {qid} completed.", flush=True)
+                                else:
+                                    print(f"[Server] No triggered at {pts_sec}s for {qid}, waiting...", flush=True)
+                            elif phase_type == 'actual':
                                 state['phase'] = 'done'
                                 state['answered'] = pts_sec
                                 question[AsyncTokenIdDecoder.model_name] = {
                                     "answered": state['answered'],
                                     "dialog_history": state['history']
                                 }
-                                print(f"[Server] Question {qid} completed.", flush=True)
-                            else:
-                                print(f"[Server] No triggered at {pts_sec}s for {qid}, waiting...", flush=True)
-                        elif phase_type == 'actual':
-                            state['phase'] = 'done'
-                            state['answered'] = pts_sec
-                            question[AsyncTokenIdDecoder.model_name] = {
-                                "answered": state['answered'],
-                                "dialog_history": state['history']
+                                print(f"[Server] Question {qid} completed (actual phase).", flush=True)
+                        #=====================
+                        await loop.run_in_executor(None, process_stream_sb)
+                        loop.call_soon_threadsafe(self.send_to_channel, "[DONE]")
+                    else:
+                        # 3. inference now
+                        header = pack('!I', pts)
+                        prompt = "What is in the video? Answer directly!"
+                        streamer = bridge.generate(token_tuple, user_prompt = prompt)
+                        def process_stream():
+                            for new_text in streamer:
+                                if new_text:
+                                    token_number = bridge.estimate_token_number(new_text)
+                                    # result_payload = header + new_text.encode('utf-8')
+                                    result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
+                                    loop.call_soon_threadsafe(self.send_to_channel, result_payload)
+                        await loop.run_in_executor(None, process_stream)
+                        loop.call_soon_threadsafe(self.send_to_channel, "[DONE]")
+                        #####
+                if AsyncTokenIdDecoder.task_class == "real":
+                    if question is not None:
+                        time_stamp = question.get("time_stamp", "")
+                        qid = question.get("question_id", str(time_stamp))
+                        if qid not in AsyncTokenIdDecoder.question_states:
+                            AsyncTokenIdDecoder.question_states[qid] = {
+                                'phase': 'undone'
                             }
-                            print(f"[Server] Question {qid} completed (actual phase).", flush=True)
-                    #=====================
-                    await loop.run_in_executor(None, process_stream_sb)
-                    loop.call_soon_threadsafe(self.send_to_channel, "[DONE]")
-                else:
-                    # 3. inference now
-                    header = pack('!I', pts)
-                    prompt = "What is in the video? Answer directly!"
-                    streamer = bridge.generate(token_tuple, user_prompt = prompt)
-                    def process_stream():
-                        for new_text in streamer:
-                            if new_text:
-                                token_number = bridge.estimate_token_number(new_text)
-                                # result_payload = header + new_text.encode('utf-8')
-                                result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
-                                loop.call_soon_threadsafe(self.send_to_channel, result_payload)
-                    await loop.run_in_executor(None, process_stream)
-                    loop.call_soon_threadsafe(self.send_to_channel, "[DONE]")
-                    #####
+                        state = AsyncTokenIdDecoder.question_states[qid]
+                        if state['phase'] == 'done':
+                            print("=", end='', flush=True)
+                            continue
+                        ques = question["question"]
+                        if "options" in question.keys():
+                            options = question["options"]
+                            if not options[0].startswith("A."):
+                                options = [f"A. {options[0]}", f"B. {options[1]}", f"C. {options[2]}", f"D. {options[3]}"]
+                            prompt = PROMPT_TEMPLATE.format(ques, *options)
+                            prompt += "\n\nWhat is the best option?"
+                            # 3. Inference now
+                            header = pack('!I', pts)
+                            streamer = bridge.generate(token_tuple, user_prompt=prompt)
+                            def process_stream_real():
+                                collected_text = ""
+                                for new_text in streamer:
+                                    if new_text:
+                                        token_number = bridge.estimate_token_number(new_text)
+                                        result_payload = header + pack('!H', token_number) + new_text.encode('utf-8')
+                                        loop.call_soon_threadsafe(self.send_to_channel, result_payload)
+                                        collected_text += new_text
+                                question[AsyncTokenIdDecoder.model_name] = collected_text
+                            await loop.run_in_executor(None, process_stream_real)
+                            loop.call_soon_threadsafe(self.send_to_channel, "[DONE]")
+                            state['phase'] = 'done'
+                            print(">", end='', flush=True)
+                    else:
+                        print("+", end='',flush=True)
+                        continue
+
             except Exception as e:
                 pass
             finally:

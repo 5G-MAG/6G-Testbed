@@ -8,7 +8,7 @@ import json
 import statistics
 from typing import Optional
 from dataclasses import dataclass, field
-import os, glob
+import os, glob, re
 
 @dataclass
 class ScenarioMetrics:
@@ -107,6 +107,9 @@ class ScenarioMetrics:
     task_answer_correct: int = 0
     task_time_accuracy: float = 0.0
     task_answer_accuracy: float = 0.0
+    real_total: int = 0
+    real_correct: int = 0
+    real_accuracy: float = 0.0
 
 
 class MetricsCalculator:
@@ -476,10 +479,29 @@ class MetricsCalculator:
         return data
 
     @staticmethod
+    def extract_answer(text):
+        if not text:
+            return None
+        try:
+            data = json.loads(text)
+            if isinstance(data, dict) and 'answer' in data:
+                return str(data['answer']).strip().upper()
+        except (json.JSONDecodeError, TypeError):
+            pass
+        match = re.search(r'"answer"\s*:\s*"?([A-D])"?', text, re.IGNORECASE)
+        if match:
+            return match.group(1).upper()
+        match = re.search(r'answer is:\s*([A-D])', text, re.IGNORECASE)
+        if match:
+            return match.group(1).upper()
+        return None
+
+    @staticmethod
     def calculate_task_accuracy(
         data: list[dict],
         model: str,
         po_thd: int,
+        task_class: str
     ) -> dict[str, dict[str, int | float]]:
         """
         Calculate task metrics from VLM video understanding results.      
@@ -513,45 +535,63 @@ class MetricsCalculator:
                         if k.lower() == model.lower():
                             model_key = k
                             break
-                
-                if not model_key:
-                    continue
 
-                if "ground_truth_time_stamp" not in question:
-                    continue
+                if task_class == "proactive_output":
+                    if "ground_truth_time_stamp" not in question:
+                        continue
 
-                ground_truth_timestamp = question["ground_truth_time_stamp"]
+                    ground_truth_timestamp = question["ground_truth_time_stamp"]
 
-                try:
-                    ground_truth_time = sum(int(x) * 60 ** i for i, x in enumerate(reversed(ground_truth_timestamp.split(":"))))
-                except:
-                    continue
+                    try:
+                        ground_truth_time = sum(int(x) * 60 ** i for i, x in enumerate(reversed(ground_truth_timestamp.split(":"))))
+                    except:
+                        continue
 
-                task_type = "Proactive Output"
-                model_answer = question.get(model_key, None)
-                
-                if not model_answer or "dialog_history" not in model_answer:
-                    continue
+                    task_type = "proactive_output"
+                    model_answer = question.get(model_key, None)
 
-                history = model_answer["dialog_history"]
-                if not history:
-                    continue
-                    
-                last_time = history[-1]["time"]
-                last_answer = history[-1]["content"]  
+                    if not model_answer or "dialog_history" not in model_answer:
+                        continue
 
-                total += 1
-                stats[f'{task_type}']["total"] += 1
-                
-                if -po_thd <= last_time - ground_truth_time <= po_thd:
-                    stats[f'{task_type}']["time_correct"] += 1
-                    if "ground_truth_output" in question and question["ground_truth_output"] in last_answer:
-                        stats[f'{task_type}']["answer_correct"] += 1
-        
+                    history = model_answer["dialog_history"]
+                    if not history:
+                        continue
+
+                    last_time = history[-1]["time"]
+                    last_answer = history[-1]["content"]
+
+                    total += 1
+                    stats[f'{task_type}']["total"] += 1
+
+                    if -po_thd <= last_time - ground_truth_time <= po_thd:
+                        stats[f'{task_type}']["time_correct"] += 1
+                        if "ground_truth_output" in question and question["ground_truth_output"] in last_answer:
+                            stats[f'{task_type}']["answer_correct"] += 1
+
+                elif task_class == "real":
+                    print(f"question: {question}")
+                    model_answer = MetricsCalculator.extract_answer(question.get(model,""))
+                    correct_answer = question["answer"]
+                    print(f"correct_answer: {correct_answer}, model answer: {model_answer}")
+                    task_type = question["task_type"]
+                    if model_answer:
+                        total += 1
+                        stats[task_type]["total"] += 1
+                        stats["total"]["total"] += 1
+                        if model_answer == correct_answer:
+                            stats[task_type]["correct"] += 1
+                            stats["total"]["correct"] += 1
+
+
         # Calculate accuracy ratios
-        for task_type, counts in stats.items():
-            counts["time_accuracy"] = counts["time_correct"] / counts["total"] if counts["total"] > 0 else 0
-            counts["answer_accuracy"] = counts["answer_correct"] / counts["total"] if counts["total"] > 0 else 0
+        if task_class == "proactive_output":
+            for task_type, counts in stats.items():
+                counts["time_accuracy"] = counts["time_correct"] / counts["total"] if counts["total"] > 0 else 0
+                counts["answer_accuracy"] = counts["answer_correct"] / counts["total"] if counts["total"] > 0 else 0
+        elif task_class == "real":
+            for task_type, counts in stats.items():
+                counts["accuracy"] = counts["correct"] / counts["total"] if counts["total"] > 0 else 0
+                print(f"task_type: {task_type}, counts: {counts}")
         
         return dict(stats)
 
@@ -563,13 +603,18 @@ class MetricsCalculator:
         if not task_state:
             return
         
-        task_type = "Proactive Output"
+        task_type = "proactive_output"
         stats = task_state.get(task_type, {})
         metrics.task_total = stats.get("total", 0)
         metrics.task_time_correct = stats.get("time_correct", 0)
         metrics.task_answer_correct = stats.get("answer_correct", 0)
         metrics.task_time_accuracy = stats.get("time_accuracy", 0.0)
         metrics.task_answer_accuracy = stats.get("answer_accuracy", 0.0)
+        task_type = "real"
+        stats = task_state.get('total', {})
+        metrics.real_total = stats.get("total", 0)
+        metrics.real_correct = stats.get("correct", 0)
+        metrics.real_accuracy = stats.get("accuracy", 0.0)
        
 
     @staticmethod
@@ -699,5 +744,8 @@ class MetricsCalculator:
                 "answer_correct": metrics.task_answer_correct,
                 "time_accuracy": metrics.task_time_accuracy,
                 "answer_accuracy": metrics.task_answer_accuracy,
+                "real_total": metrics.real_total,
+                "real_correct": metrics.real_correct,
+                "real_accuracy": metrics.real_accuracy,
             }
         }

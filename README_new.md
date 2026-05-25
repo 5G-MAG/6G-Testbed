@@ -30,8 +30,41 @@ https://huggingface.co/spaces/Junfeng5/Liquid_demo/resolve/main/chameleon/vqgan.
 https://huggingface.co/spaces/Junfeng5/Liquid_demo/resolve/main/chameleon/vqgan.yaml  
 - VLM model: download all model files, put them in aiortc-main-clean/src/aiortc/liquid/checkpoints/model  
 https://huggingface.co/Junfeng5/Liquid_V1_7B/tree/main  
-- dataset: download dataset, unzip to aitestbed/examples/assets/dataset  
-https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Output_1-25.zip  
+- dataset (proactive output): download dataset, unzip to aitestbed/examples/assets/dataset  
+https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Output_1-25.zip
+*** scenario config ***
+  realtime_video_understanding:
+    type: "realtime_video_understanding"
+    description: "Real-time visual understanding via VLM model"
+    provider: "vlm-local"
+    model: "liquid"
+    target_fps: 2
+    stream: true
+    task_config:
+      task_class: "proactive_output"
+      po_thd: 3 
+      results_dir: "examples/assets/dataset/"
+      video_paths: "examples/assets/dataset/"
+    prompts:
+      - "What is in the video? Answer directly!"
+
+- another dataset (real): download dataset, unzip to aitestbed/examples/assets/dataset_real
+https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip
+*** scenario config ***
+  realtime_video_understanding:
+    type: "realtime_video_understanding"
+    description: "Real-time visual understanding via VLM model"
+    provider: "vlm-local"
+    model: "liquid"
+    target_fps: 2
+    stream: true
+    task_config:
+      task_class: "real"
+      po_thd: 3 # not used
+      results_dir: "examples/assets/dataset_real/"
+      video_paths: "examples/assets/dataset_real/"
+    prompts:
+      - "What is in the video? Answer directly!"
 
 **Preparation for Chat with token ID scenario:**
 - Set up OpenAI-compatible server with open-source LLM
@@ -135,7 +168,7 @@ python orchestrator.py \
 - Python 3.10+
 - Linux with `iproute2` (for network emulation)
 - Sudo access or Docker with `NET_ADMIN` capability
-- NVIDIA GPU with ~30GB VRAM
+- NVIDIA GPU with ~30GB VRAM (~2.5GB for VLM client, ~27GB for VLM server)
 - CUDA Toolkit >= 12.1
 
 ## Sudoers (for Network Emulation)

@@ -374,7 +374,7 @@ All MCP servers support HTTP transport for traffic measurement via loopback (sub
 - Linux with `iproute2` (for network emulation)
 - `tcpdump` (for PCAP capture)
 - Sudo access or Docker with `NET_ADMIN`
-- NVIDIA GPU with ~ 30GB VRAM (for VLM models)
+- NVIDIA GPU with ~30GB VRAM (~2.5GB for VLM client, ~27GB for VLM server)
 - CUDA Toolkit >= 12.1
 
 ### Setup

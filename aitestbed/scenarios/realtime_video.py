@@ -62,21 +62,22 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
         signaling_host = self.config.get("signaling_host", "127.0.0.1")
         signaling_port = self.config.get("signaling_port", 1234)
         model = self.config.get("model", "vlm-local")
-        # video_paths = self.config.get("video_paths", [])
-        # print(f"video paths: {video_paths}")
-        # video_path = [video_paths[run_index % len(video_paths)]]
-        # print(f"run index: {run_index}, video path: {video_path}")
         target_fps = self.config.get("target_fps", 10)
         max_frames = self.config.get("max_frames_per_video")
-        dataset_dir = self.config.get("video_paths", "data/videos")
+        task_config = self.config.get("task_config", {})
+        dataset_dir = task_config.get("video_paths", "data/videos")
         video_paths = []
         if dataset_dir and Path(dataset_dir).exists():
             dataset_path = Path(dataset_dir)
-            for subdir in sorted(dataset_path.iterdir()):
-                if subdir.is_dir():
-                    for video_file in subdir.glob("*.mp4"):
-                        video_paths.append(str(video_file))
-                        break
+            subdirs = [d for d in dataset_path.iterdir() if d.is_dir()]
+            valid_subdirs = [
+                d for d in subdirs
+                if d.name.startswith('sample_') and d.name.split('_')[-1].isdigit()
+            ]
+            for subdir in sorted(valid_subdirs, key=lambda x: int(x.name.split('_')[-1])):
+                for video_file in subdir.glob("*.mp4"):
+                    video_paths.append(str(video_file))
+                    break
         else:
             video_paths = self.config.get("video_paths", [])
         # print(f"video paths: {video_paths}")

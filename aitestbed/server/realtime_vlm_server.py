@@ -13,6 +13,10 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, Me
 from aiortc.contrib.signaling import BYE
 from aiortc.codecs.tokenId import AsyncTokenIdDecoder
 import aiortc.shared as shared
+import yaml
+
+from aitestbed.export_to_excel import scenario_alias
+
 
 # ======================
 # Logging Setup
@@ -199,6 +203,21 @@ class VlmServer:
         self.signaling: Optional[TcpSignalingServer] = None
         self.is_shutting_down = False
         self.session_count = 0
+        self.scenario_name = "realtime_video_understanding"
+
+    def load_task_config(self):
+        config_path = "configs/scenarios.yaml"
+        self.config_path = Path(config_path)
+        with open(self.config_path) as f:
+            self.scenarios_config = yaml.safe_load(f)
+        scenario_config = self.scenarios_config["scenarios"].get(self.scenario_name)
+        if not scenario_config:
+            raise ValueError(f"Unknown scenario: {self.scenario_name}")
+        task_config = scenario_config.get("task_config", {})
+        task_class = task_config.get("task_class", "real")
+        return task_class
+
+
 
     def save_results(self):
         logger.info(f"[Server] Attempting to save benchmark results.")
@@ -258,7 +277,8 @@ class VlmServer:
         if self.preload_bridge:
             AsyncTokenIdDecoder.preload_bridge()
             logger.info("vlm model preloaded")
-
+        task_class = self.load_task_config()
+        AsyncTokenIdDecoder.task_class = task_class
         AsyncTokenIdDecoder.reset_decoder_state(model_name="liquid")
 
         self.signaling = TcpSignalingServer(self.host, self.port, persistent=self.persistent_mode)

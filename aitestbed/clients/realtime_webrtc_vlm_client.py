@@ -255,7 +255,7 @@ class TcpSignalingClient:
             self._writer.write(message.encode('utf8'))
             await asyncio.wait_for(self._writer.drain(), timeout=5.0)
             return len(message.encode('utf8'))
-        except asynocio.TimeoutError:
+        except asyncio.TimeoutError:
             raise ConnectionError("Signaling send timeout")
 
     async def close(self):

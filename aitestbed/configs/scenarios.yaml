@@ -427,11 +427,27 @@ scenarios:
     target_fps: 2
     stream: true
     task_config:
+      task_class: "real"
       po_thd: 3
-      results_dir: "examples/assets/dataset/"
-    video_paths: "examples/assets/dataset/"
+      results_dir: "examples/assets/dataset_real/"
+      video_paths: "examples/assets/dataset_real/"
     prompts:
       - "What is in the video? Answer directly!"
+
+#  realtime_video_understanding:
+#    type: "realtime_video_understanding"
+#    description: "Real-time visual understanding via VLM model"
+#    provider: "vlm-local"
+#    model: "liquid"
+#    target_fps: 2
+#    stream: true
+#    task_config:
+#      task_class: "proactive_output"
+#      po_thd: 3
+#      results_dir: "examples/assets/dataset/"
+#      video_paths: "examples/assets/dataset/"
+#    prompts:
+#      - "What is in the video? Answer directly!"
 
 
   # =============================================================================
