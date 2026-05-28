@@ -1,0 +1,85 @@
+name: Build and Test
+
+on:
+  pull_request:
+    branches: [development]
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # netemu — install + unit tests
+  # ---------------------------------------------------------------------------
+  netemu:
+    name: netemu (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: netemu/pyproject.toml
+
+      - name: Install netemu with dev dependencies
+        run: pip install -e ".[dev]"
+        working-directory: netemu
+
+      - name: Run tests
+        run: pytest -v
+        working-directory: netemu
+
+  # ---------------------------------------------------------------------------
+  # aitestbed — install + lint + format check + typecheck
+  # ---------------------------------------------------------------------------
+  aitestbed:
+    name: aitestbed (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: aitestbed/requirements.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            iproute2 \
+            libpcap-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libavdevice-dev \
+            libavutil-dev \
+            libavfilter-dev \
+            libswscale-dev \
+            libswresample-dev
+
+      - name: Install netemu
+        run: pip install -e netemu
+
+      - name: Install aitestbed dependencies
+        run: pip install -r aitestbed/requirements.txt
