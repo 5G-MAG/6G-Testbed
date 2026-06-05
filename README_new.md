@@ -25,14 +25,16 @@ The core testing framework that orchestrates experiments across multiple AI prov
 Realtime video analysis and chat with token ID scenarios are supported.
 
 **Preparation for realtime video analysis scenario:**
-- VLM_tokenizer: download vqgan.ckpt and vqgan.yaml, put them in aiortc-main-clean/src/aiortc/liquid/checkpoints/chameleon  
-https://huggingface.co/spaces/Junfeng5/Liquid_demo/resolve/main/chameleon/vqgan.ckpt  
-https://huggingface.co/spaces/Junfeng5/Liquid_demo/resolve/main/chameleon/vqgan.yaml  
-- VLM model: download all model files, put them in aiortc-main-clean/src/aiortc/liquid/checkpoints/model  
-https://huggingface.co/Junfeng5/Liquid_V1_7B/tree/main  
-- dataset (proactive output): download dataset, unzip to aitestbed/examples/assets/dataset  
-https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Output_1-25.zip
-*** scenario config ***
+- VLM_tokenizer:
+  - Download  [vqgan.ckpt](https://huggingface.co/spaces/Junfeng5/Liquid_demo/resolve/main/chameleon/vqgan.ckpt) and [vqgan.yaml](https://huggingface.co/spaces/Junfeng5/Liquid_demo/resolve/main/chameleon/vqgan.yaml) and store them in aiortc-main-clean/src/aiortc/liquid/checkpoints/chameleon`
+- VLM model:
+  - Download all these [model files](https://huggingface.co/Junfeng5/Liquid_V1_7B/tree/main) and store them in `aiortc-main-clean/src/aiortc/liquid/checkpoints/model`  
+
+- Dataset (proactive output):
+  - Download [this dataset](https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Output_1-25.zip) and unzip to `aitestbed/examples/assets/dataset`  
+
+  ***Scenario Configuration***
+  ```
   realtime_video_understanding:
     type: "realtime_video_understanding"
     description: "Real-time visual understanding via VLM model"
@@ -47,10 +49,12 @@ https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Out
       video_paths: "examples/assets/dataset/"
     prompts:
       - "What is in the video? Answer directly!"
+  ```
+- Dataset (real):
+  - Download this [dataset](https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip) and unzip to `aitestbed/examples/assets/dataset_real`
 
-- another dataset (real): download dataset, unzip to aitestbed/examples/assets/dataset_real
-https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip
-*** scenario config ***
+  ***Scenario Configuration***
+  ```
   realtime_video_understanding:
     type: "realtime_video_understanding"
     description: "Real-time visual understanding via VLM model"
@@ -65,7 +69,7 @@ https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20
       video_paths: "examples/assets/dataset_real/"
     prompts:
       - "What is in the video? Answer directly!"
-
+  ```
 **Preparation for Chat with token ID scenario:**
 - Set up OpenAI-compatible server with open-source LLM
 - Copy tokenizer related files to TOK_PATH
@@ -74,7 +78,6 @@ https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20
   - OPENAI_API_KEY
   - MODEL_NAME
   - TOK_PATH
-
 
 ## netemu
 
