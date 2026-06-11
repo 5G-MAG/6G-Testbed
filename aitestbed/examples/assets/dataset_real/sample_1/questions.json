@@ -1,0 +1,91 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00]: The video opens with a visually striking animation featuring red and blue shapes on the screen, forming abstract patterns. The shapes are bold, with sharp angles and curved elements, moving in a synchronized manner. The background smoothly transitions between colors; [0:00:01 - 0:00:02]: As the animation continues, a \"SUBSCRIBE\" button appears in the center of the screen. The button has a white border with bold white text on a red background. For added emphasis, the button is highlighted by a bright yellow glow; [0:00:03 - 0:00:04]: The scene shifts dramatically to a crowded football stadium, filled with spectators. The field is green, and players and officials, wearing red shirts and holding a ball, walk towards the camera. The atmosphere is lively, filled with anticipation. The Aeromexico and La Liga logos are visible in the background; [0:00:05]: As the procession continues, the camera focuses on a man extending his arm, engaged in an animated conversation. He is wearing a dark polo shirt, and the crowd’s energy is palpable behind him; [0:00:06]: This man, still dressed in a dark polo shirt, embraces another individual, indicating a greeting or sign of respect. The red backdrop behind them accentuates the intense colors of the football stadium environment; [0:00:07]: Both men smile as they continue to greet and embrace others, tightening their hug. The surrounding crowd, some in security vests, and another person in sports attire are visible, adding to the sense of community and excitement; [0:00:08 - 0:00:09]: The camera cuts to an on-field interaction between players, identifiable by their uniforms. One player in green and another in white with the name \"Sergio Ramos\" and the number 4 on his jersey are seen. Several officials stand nearby, closely observing the interaction; [0:00:10]: An aerial view of the football field reveals players from both teams taking positions around the midfield circle, preparing for the game to start. The geometric patterns of the field's lines and the players' formations are clearly visible; [0:00:11]: With the stadium now fully visible, a large crowd fills the stands, suggesting a significant event. The game appears to be starting as players spread out on the field, ready to commence; [0:00:12]: The camera zooms out further, showing a broader view of the field and the arrangements of the players. The white team appears to be on one side and the blue team on the other, with the referee centrally positioned; [0:00:13 - 0:00:14]: The scoreboard overlays the lower part of the screen, showing \"0 - 0\" with team logos, underlining the match's commencement and the score at the starting point; [0:00:15 - 0:00:17]: The game advances, with both teams now actively engaging and moving the ball around the field. Players from both sides are strategically positioned, making attempts to move forward or defend; [0:00:18 - 0:00:20]: The game progresses with fluid movements across the pitch. Players in blue and white jerseys are actively passing the ball, looking for openings in each other's defenses. The scoreboard and La Liga branding remain on screen throughout this period.\n[0:00:40 - 0:01:00] [0:00:40 - 0:00:49]: On a crowded football field during a match, a player wearing a white jersey with the number 2 on the back is running towards a fallen player from the opposing team, who is wearing a purple and blue jersey. The white jerseyed player is in mid-step with one leg off the ground and arms slightly spread out for balance. The background is filled with cheering spectators, a banner with red and white sections, and a scoreboard displaying \"LALIGA.\" Moving to the next frame, the ball is in mid-air, and several players from both teams are positioning themselves underneath it. The white jersey player is closer to the camera, leaning slightly forward, while an oncoming player from the same team is attempting to connect with the ball. [0:00:50 - 0:00:56]: The ball is still airborne, with players from both teams intensely watching its descent. One player in a purple and blue jersey is making a high jump on the right side of the field, trying to head the ball. The goalkeeper, dressed in bright yellow, is seen nearer to the goal post, prepared to make a move. The players continue to converge around the goal area, with the yellow-clad goalkeeper making a fully outstretched dive to save the ball, resulting in a collision near the goal line. The ball is then struck past the goalkeeper who cannot make the save, resulting in a goal. [0:00:57]: Following the goal, the scene transitions to a joyful celebration. A player wearing a purple and blue jersey, numbered 9 on the back, is seen celebrating. He engages in a unique arm gesture with a teammate, who mimics the motion. Another teammate, with a partially visible name on his jersey, joins in the celebration. A crowd of spectators can be seen in the background, bringing life to the moment. [0:00:54 - 0:00:59]: Cutting back to an active play in another stage of the match, an attacking player in white is dribbling the ball up the field, facing defensive pressure from three players in purple and blue jerseys. The dribbling player manages to cut inside, evading one defender. Positioned near the top of the penalty area, he takes a stride to set up a shot as other defenders close in. With a quick step, a player in white manages to shoot, sending the ball past the defenders and goalkeeper. [0:01:00]: As the ball speeds towards the goal, the opposing goalie, dressed in green, dives futilely to stop it. The attacking player throws his arms in the air in celebration as the ball hits the back of the net. The crowd in the background is a blur of excitement, showing various flags and colors, with a large section dressed in black twirling scarves in jubilation.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What logos are visible in the background as players and officials walk towards the camera?",
+                "time_stamp": "00:00:04",
+                "answer": "D",
+                "options": [
+                    "A. FIFA and Premier League.",
+                    "B. UEFA and Champions League.",
+                    "C. Bundesliga and MLS.",
+                    "D. Aeromexico and La Liga."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Causal Reasoning",
+                "question": "Why does the player wearing the number nine red and blue jersey celebrate?",
+                "time_stamp": "00:00:53",
+                "answer": "C",
+                "options": [
+                    "A. He saved a goal.",
+                    "B. He received a pass.",
+                    "C. He scored a goal.",
+                    "D. He won a free kick."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_1_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:01:40]",
+        "captions": "[0:01:20 - 0:01:40] [0:01:21]: The camera shows a soccer match in progress, with a goal being guarded by a goalie in a yellow uniform. In the foreground, multiple players from two different teams stand inside the box, preparing for an offensive play;  [0:01:22]: A close-up of a player in a blue and red jersey with \"Spotify\" as the sponsor logo is seen, covering his mouth in apparent disbelief or surprise. Another player with \"No. 2\" on his back is partially visible to the side;  [0:01:23]: The perspective shifts to a broader view of the field where a player in a blue and red jersey is advancing toward the goal with the ball at his feet. He is closely followed by a cluster of white-clad defenders;  [0:01:24]: As the player in the blue and red jersey approaches the penalty area, several defenders continue chasing while another offensive player on the right makes a run towards the goal to support the attack;  [0:01:25]: Inside the penalty box, the offense intensifies. The player holding the ball is preparing for a potential pass or shot on goal, with several defending players closely guarding the area;  [0:01:26]: The ball is nearing the goalkeeper in the yellow uniform, positioned to block any incoming shots;  [0:01:27]: The offensive player in the blue and red jersey attempts to maneuver past two defenders, edging closer to the goal while evaluating his options;  [0:01:28]: A defender makes a crucial tackle attempt, but the offensive movement persists as the ball continues to float near the penalty area, heightening the intensity of the play;  [0:01:29]: Inside the penalty area, the offensive player tries to outmaneuver multiple defenders while the goalie adjusts his position, creating a highly stressful engagement near the goal;  [0:01:30]: As the chaotic scramble for the ball ensues, players from both teams converge around the ball, leading to a high-pressure situation at the goalmouth;  [0:01:31]: The ball is passed around near the edge of the penalty area. Offensive players in blue and red jerseys are searching for an opening to potentially strike at the goal, while defenders hold their positions;  [0:01:32]: The attacking team maintains possession near the penalty box. Multiple players from both sides are concentrated in this area, ready to intercept or shoot the ball;  [0:01:33]: The ball is skillfully moved around just outside the penalty box as the offensive team probes for a weak spot in the defender's line;  [0:01:34]: A sequence of quick passes between offensive players tests the defenders' resolve, as the ball remains dangerously close to the goal area;  [0:01:35]: The offensive pressure is relentless, with a focused attempt to breach the goal, while the defense organizes themselves to block any potential shots;  [0:01:36]: A player in the blue and red jersey winds up for a shot from outside the penalty box, while defenders rush to intercept it;  [0:01:37]: The ball remains in a threatening position as defenders and offensive players collide, escalating the high stakes of this exchange near the goal;  [0:01:38]: The game continues with intense energy as the ball nears the 6-yard box. Players from both teams are entirely engrossed in this contest, fighting for control of the ball;  [0:01:39]: Another offensive play develops near the corner of the penalty box, as a player in a blue and red jersey maneuvers to keep the ball in play and sustain the attacking momentum.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What logo is seen on the jersey of the player covering his mouth?",
+                "time_stamp": "00:01:22",
+                "answer": "D",
+                "options": [
+                    "A. Apple.",
+                    "B. Google.",
+                    "C. Adidas.",
+                    "D. Spotify."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the goalie's uniform?",
+                "time_stamp": "00:01:20",
+                "answer": "D",
+                "options": [
+                    "A. Blue.",
+                    "B. Red.",
+                    "C. White.",
+                    "D. Yellow."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_1_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:02:20]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:01 - 0:02:05]: A football match is underway with players predominantly in white and red kits occupying the field. The camera, capturing the action from the stands, focuses on the penalty area where the play is intensifying. In the left part of the image, a group of players is converging near the top corner of the penalty box, including a player in a blue and red kit intensely focused on controlling the ball while being marked by opposing players. The goalkeeper, in bright yellow attire, is poised and ready near the goalmouth, which is currently protected by a few defenders. The crowd in the background is densely packed and highly engaged, showcasing a variety of banners and team colors. [0:02:06 - 0:02:08]: The scene shifts to the sidelines, where two team officials are seen interacting near the team bench. One official dressed in dark casual attire seems to be giving instructions or communicating, standing nearby a red cooler labeled \"PRIME.\" Customary bright red seats behind them imply it’s their designated technical area. [0:02:09 - 0:02:12]: The camera cuts back to the playing field, showing close-up interactions between players. One player in blue and red kit stands near the sidelines looking towards the crowd, seemingly celebrating or catching a breath. Shortly after, another player from the same team approaches, and they share a brief, heartfelt celebration near the edge of the pitch, expressing camaraderie. [0:02:13 - 0:02:13]: A zoomed-in shot focuses on the feet of the player in the white kit and number 22 on his jersey as he aggressively marks an opponent. The ball, prominently visible, is just a few inches away from the player's feet, indicating a close contest for possession. [0:02:14]: The scene transitions quickly to the middle of the field, capturing a solitary player in a white kit in open play. The field is expansive, with green grass and clear white markings visible, aiding field structure visualization. [0:02:15 - 0:02:16]: The action returns to the attack, where a powerful shot is taken toward the goal by an attacker from the edge of the penalty area. The goalkeeper, dressed in bright yellow, dives full stretch to the right in an effort to save the ball, showcasing a fully committed defensive maneuver. [0:02:17 - 0:02:19]: The camera captures a close-up sequence of another player in the blue and red kit breaking past two defenders inside the penalty box, driving forward with the ball at his feet. The final frames capture a tense moment where the player attempts a shot on goal, while defenders and the goalkeeper put in desperate efforts to block the attempt.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is the color of the cooler labeled \"PRIME\" near the team bench?",
+                "time_stamp": "00:02:08",
+                "answer": "D",
+                "options": [
+                    "A. Blue.",
+                    "B. Yellow.",
+                    "C. Green.",
+                    "D. Red."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_1_real.mp4"
+    }
+]

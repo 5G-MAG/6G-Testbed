@@ -15,8 +15,6 @@ from aiortc.codecs.tokenId import AsyncTokenIdDecoder
 import aiortc.shared as shared
 import yaml
 
-from aitestbed.export_to_excel import scenario_alias
-
 
 # ======================
 # Logging Setup

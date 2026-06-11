@@ -1,0 +1,83 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:01]: The video begins with a person in a blue t-shirt, holding a small red object in his left hand. The kitchen background has white brick walls, blue cabinets, various utensils, and a mid-sized window with a view of outdoor foliage. There’s an assortment of colorful vegetables and spices on the counter in the foreground. [0:02:01 - 0:02:02]: The person holds the red object closer to view, presumably inspecting it. The expression on their face seems focused as they glance towards the counter. Behind them, the word \"COOK\" is displayed on a shelf with various jars and bottles. [0:02:02 - 0:02:03]: The person turns slightly to the side, looking at several pots on the stove in front of them. The pots are of varying sizes and appear to contain different ingredients. The layout of the kitchen is designed for efficient cooking with all necessary utensils and ingredients within arm’s reach. [0:02:03 - 0:02:04]: The person starts moving the red object towards the pots on the stove. There are three pots, one with boiling liquid and the other two with ingredients being cooked.  [0:02:04 - 0:02:05]: The frame shifts to an aerial view of the cooking surface. There are four burners, two of which have pots on them. One pot contains eggs in water while another pot has a darker liquid with some solid food items. On the left side of the counter, there are various chopped vegetables and other cooking ingredients. [0:02:05 - 0:02:06]: The person begins moving some ingredients from the cutting board to one of the pots. Their movements are precise, suggesting they are experienced in cooking. The overall setup of the kitchen remains consistent, with clean counters and organized utensils. [0:02:06 - 0:02:07]: The person adds more ingredients to the pots on the stove, constantly observing and adjusting the contents as they cook. The aerial view continues to show the detailed arrangement of everything on the counter. [0:02:07 - 0:02:08]: The person uses a spoon to stir the contents of one of the pots. The close-up perspective highlights the careful attention they pay to the cooking process. Simultaneously, they seem to be making sure all ingredients are cooking evenly. [0:02:08 - 0:02:09]: The view shifts again to a front perspective, where the person is adjusting the heat on the stove. The blue cabinets and white-brick wall in the background continue to add an aesthetic touch to the modern kitchen setup. [0:02:09 - 0:02:10]: The person appears to be explaining something, possibly giving instructions or tips on cooking. Their focus alternates between the stove and the camera. [0:02:10 - 0:02:11]: The focus shifts back to the stove, where the person holds two pieces of cauliflower, examining them before placing them into a pot. The arrangement of kitchen utensils remains meticulous and practical. [0:02:11 - 0:02:12]: They add the pieces of cauliflower to the pot and stir the contents again, ensuring all ingredients blend well. The attention to detail continues to be evident as they manage multiple pots simultaneously. [0:02:12 - 0:02:13]: The individual continues to cook and stir, focusing on every detail. The kitchen's overall arrangement, with plates, jars, and knives neatly organized, enhances the cooking efficiency. [0:02:13 - 0:02:14]: The person checks the contents of the other pots, making sure everything is cooking properly. The kitchen's aesthetic, with the mix of modern and rustic elements, provides a visually pleasing background. [0:02:14 - 0:02:15]: The person tastes the food, adjusting the seasoning if necessary. The focus on perfection is evident as they ensure the dish meets certain standards. [0:02:15 - 0:02:16]: The frame returns to an aerial view, highlighting the stirring action in one of the pots. The dark liquid and noodles are visible, being carefully blended with a spoon. [0:02:16 - 0:02:17]: The person continues stirring the pot, making sure the noodles are cooked evenly. The aerial perspective provides a clear view of the cooking process, showing the consistency and texture of the food. [0:02:17 - 0:02:18]: The person stirs more vigorously, perhaps to achieve a specific consistency. The organized layout of the cooking tools and ingredients remains evident in this frame. [0:02:18 - 0:02:19]: The person continues to monitor the cooking process",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding in their right hand at the beginning of the video?",
+                "time_stamp": "0:02:01",
+                "answer": "B",
+                "options": [
+                    "A. A green vegetable.",
+                    "B. A red bottle cap.",
+                    "C. A blue utensil.",
+                    "D. A white jar."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What are the colors of the cabinets and the walls in the kitchen?",
+                "time_stamp": "0:02:40",
+                "answer": "B",
+                "options": [
+                    "A. Red cabinets and white walls.",
+                    "B. Blue cabinets and white brick walls.",
+                    "C. White cabinets and blue walls.",
+                    "D. Green cabinets and white brick walls."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_42_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:01]: In a bright kitchen with a prominent green plant by the window, a person in a blue shirt is standing at a wooden countertop. On the countertop, there are various kitchen utensils and cooking appliances, including a frying pan on the stove, two pots, a bowl with a spatula, and a set of knives in a holder. The person appears to be engaged in cooking. [0:06:01 - 0:06:02]: The person picks up a bowl filled with shredded ingredients, perhaps cheese or vegetables, from the countertop and holds it over the stove. [0:06:02 - 0:06:05]: The scene shifts to a wider view of the kitchen. A white brick wall with shelves holding plates, jars, and utensils is in the background. Decorative letters spelling \"COOK\" are prominently displayed on the top shelf. The person continues to stand in front of the stove, holding the bowl and preparing to pour its contents into a pan. On the counter in the foreground, there are more cooking utensils and ingredients. [0:06:05 - 0:06:06]: The person now has their focus on the pan while carefully adding the contents from the bowl. The scene remains in the same kitchen setup with the background unchanged. [0:06:06 - 0:06:07]: The person looks down intently at the pan while adding the ingredients from the bowl, making sure to distribute everything evenly. [0:06:07 - 0:06:10]: The view returns to the previous angle in the kitchen. The person is adjusting the pans and pots on the stove. The countertop remains cluttered with various kitchen essentials, and the green plant in the background adds a touch of nature to the setting. [0:06:10 - 0:06:11]: The person leans towards a pan on the stove and begins adding more ingredients from the bowl. The view remains focused on the cooking area with the same background elements. [0:06:11 - 0:06:13]: Close-up of the person’s hand holding the bowl and actively adding the shredded ingredients into a frying pan on the stove. The surrounding countertop shows multiple kitchen tools and ingredients, indicating a busy cooking session. [0:06:13 - 0:06:15]: The hand continues to add shredded ingredients from the bowl into the frying pan. Adjacent to the pan are spatulas, ladles, and other cooking essentials within arm's reach. [0:06:15 - 0:06:17]: The person's hand dips back into the bowl to grab another handful of ingredients, then proceeds to sprinkle them into the frying pan. The stovetop shows two additional pots, one covered and one boiling. [0:06:17 - 0:06:18]: A top-down view of the stove reveals three active burners. One pot has a lid and contains boiling food items, and the frying pan is filled with the shredded ingredients that are being cooked. The person's hand blurs slightly as it moves about, indicating continuous activity. The countertop holds various additional kitchen supplies and ingredients for the meal being prepared. [0:06:18 - 0:06:19]: The perspective shifts back to a wider shot of the person in front of the stove in the kitchen. The brick wall with shelves is still visible, along with the decorative \"COOK\" letters and multiple kitchen items on the countertop. The person seems to be finishing up their task and turning away from the stove, possibly to get more ingredients or tools.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What does the person hold over after touching the handle of the pan?",
+                "time_stamp": "0:06:03",
+                "answer": "B",
+                "options": [
+                    "A. A frying pan.",
+                    "B. A bowl filled with shredded ingredients.",
+                    "C. A pot.",
+                    "D. A set of knives."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Counting",
+                "question": "How many active burners are revealed in the top-down view of the stove?",
+                "time_stamp": "0:06:25",
+                "answer": "C",
+                "options": [
+                    "A. One.",
+                    "B. Two.",
+                    "C. Five.",
+                    "D. Four."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What do the decorative letters on the top shelf spell?",
+                "time_stamp": "0:06:05",
+                "answer": "C",
+                "options": [
+                    "A. EAT.",
+                    "B. CHEF.",
+                    "C. COOK.",
+                    "D. FOOD."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_42_real.mp4"
+    }
+]

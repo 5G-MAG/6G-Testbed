@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:04]: The video begins with a close-up of a graphic featuring a large white number \"10\" with a fork and knife positioned to look like clock hands on a white plate. The background is a gradient blue, and the number is bordered by a thin white line. Next to it is another rectangular white shape. [0:00:01 - 0:00:02]: The camera zooms out to reveal a person standing against the same blue background. The individual is presumably introducing the show \"Ramsay in 10,\" as the title appears behind them. The person is smiling and wearing a dark blue shirt. Light beams can be seen radiating from above the individual, adding dynamic lighting to the background. The fork and knife from the previous scene remain. [0:00:03 - 0:00:04]: The close-up shot continues, with the person still smiling and standing slightly to the right. The large blue text in the background says \"RAMSAY in 10,\" and the fork and knife clock mechanism remains at the center. [0:00:05 - 0:00:09]: The scene transitions to a kitchen setting. The same individual is now seen standing in the middle of a kitchen with a white brick backsplash and wooden shelves holding various kitchen items, including plates, bottles, and jars. The word \"COOK\" appears in red, large letters on the top shelf. The person starts talking, gesturing with their hands.  [0:00:10 - 0:00:12]: The individual continues talking, making a thumbs-up gesture. Behind them are several knives mounted on the wall and more kitchen utensils. The word \"HOT\" is also visible in small white letters on the countertop. The lighting in the room is bright, giving a clear view of the kitchen setup. [0:00:13 - 0:00:15]: The individual appears to be explaining something, looking directly at the camera. The background remains the same with kitchen utensils and the word \"COOK\" still prominent. The person then clasps their hands together, seeming focused on what they are talking about. [0:00:16 - 0:00:19]: The focus shifts to the individual's left profile as they continue to speak, looking slightly to the side. The camera seems to pan slightly, showing a clearer view of the kitchen appliances, including an oven and more storage jars. The individual maintains an engaged and animated expression while talking.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What graphic is featured in the video at the beginning?",
+                "time_stamp": "0:00:20",
+                "answer": "D",
+                "options": [
+                    "A. A large white number \"10\" with a spoon and fork positioned like clock hands on a white plate.",
+                    "B. A large white number \"10\" with a spoon and knife positioned like clock hands on a white plate.",
+                    "C. A large white number \"10\" with a fork and knife positioned like clock hands on a blue plate.",
+                    "D. A large white number \"10\" with a fork and knife positioned like clock hands on a white plate."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_47_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:06]: The scene portrays a man in a black shirt in a kitchen setting. He is preparing food on a countertop, facing the camera. The countertop is packed with various items including a wooden cutting board with raw meat, a glass bottle filled with olive oil, and bowls of colorful vegetables. The backdrop is a white brick wall adorned with arranged plates and kitchen utensils. He is seasoning two pieces of raw meat on a white plate placed on the cutting board. [0:02:07 - 0:02:09]: The camera zooms in to provide a close-up of the meat being seasoned with salt and other spices. The meat pieces, glistening with olive oil, are positioned on a wooden cutting board. [0:02:10 - 0:02:12]: The man turns away from the countertop and approaches a stove area with a pan already placed on the burner. On the countertop in front of the stove are bowls of various ingredients, such as spices and herbs. The plate with seasoned meat is still on the wooden cutting board. [0:02:13 - 0:02:15]: He carefully lifts a piece of bread from the pan on the stove with tongs and places it on a grill. He uses his fingers to split the bread and check the texture. [0:02:16 - 0:02:19]: The man adjusts the position of the bread slices on the grill with his hands, ensuring both pieces are evenly aligned. The close-up captures his hands working swiftly as he places the bread flat side down on the grill, pressing them gently to toast.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man seasoning on the white plate?",
+                "time_stamp": "0:02:06",
+                "answer": "D",
+                "options": [
+                    "A. Vegetables.",
+                    "B. Bread.",
+                    "C. Fish.",
+                    "D. Raw meat."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_47_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:01]: The scene opens with a grill placed on a stove, where several items are being cooked. Two steak pieces are on the left side of the grill, while two large mushrooms and four slices of onion are on the right. A pair of red tongs is being used to manage the food on the grill;  [0:04:01 - 0:04:02]: The tongs are adjusting one of the mushrooms to ensure even cooking. The two steak pieces and onion slices remain in their original positions on the grill;  [0:04:02]: The tongs are now used to turn over one of the mushrooms. A small cavity in the upturned mushroom cap shows some butter melting inside;  [0:04:03 - 0:04:04]: The person using the tongs is visible from a first-person perspective. They are seen clutching one mushroom cap while the other hand holds the tongs;  [0:04:04 - 0:04:05]: The tongs re-position the mushroom cap on the grill, and its placement is adjusted for even cooking;  [0:04:05 - 0:04:07]: The camera view transitions to a close-up of the grill, focusing on the cooking items. The scene highlights the middle of the grill, where the bulbous parts of the mushroom caps are arranged;  [0:04:08 - 0:04:11]: A hand extends towards the food on the grill, possibly with seasoning or additional ingredients to add. At this point, the mushrooms, steak, and onion slices are in focus;  [0:04:12 - 0:04:13]: The view zooms out to include more of the kitchen environment. The workspace contains a countertop with various cooking items and utensils. At this juncture, a person wearing a black shirt is seen adding seasonings to the food on the grill;  [0:04:14]: The person steps back momentarily, suggesting they are finishing seasoning or adjusting the food on the grill;  [0:04:15 - 0:04:16]: The camera captures a broader view of the kitchen while the person prepares additional ingredients. The setting includes a backsplash of white tiles and shelves lined with plates, jars, and other kitchenware;  [0:04:17 - 0:04:18]: The person moves towards a wooden cutting board placed on the kitchen island. They appear to be preparing a mixture in a bowl;  [0:04:18 - 0:04:19]: A closer view of the hands shows them pouring a liquid seasoning or sauce into the bowl. The wooden cutting board hosts a small red onion segment and nearby greenery in a white bowl, rounding out the scene.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is being used to manage the food on the grill?",
+                "time_stamp": "0:04:01",
+                "answer": "D",
+                "options": [
+                    "A. A spatula.",
+                    "B. A wooden spoon.",
+                    "C. A fork.",
+                    "D. A pair of red tongs."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_47_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:05]: A man is standing in a kitchen in front of a counter with various ingredients and utensils laid out. He is wearing a black t-shirt and holding a striped cloth in his left hand. In front of him, there are two pieces of bread on a wooden cutting board, a bottle of olive oil, a bowl, and some vegetables. On the left of the counter, a stovetop grill is visible with food cooking on it. A backsplash of white tiles with visible grout lines forms the background, along with shelves containing plates and utensils. The man turns his head to the right, then shifts slightly to place the cloth next to the cutting board; [0:06:06 - 0:06:07]: He picks up a spoon from the counter with his right hand and scoops some sauce from the small bowl in his left hand. All around, the counter is filled with plates and bowls containing various ingredients like lettuce, beetroot, sliced bread, and a large cheese block. The shelves in the background show more kitchen utensils and glassware; [0:06:08 - 0:06:10]: The man carefully spreads the sauce on the bread using the spoon, making sure to cover the surface evenly. His attention remains on his task as he applies the sauce with precision; [0:06:11 - 0:06:12]: He adds more of the sauce to the bread, scooping a generous amount from the bowl and continuing to spread it; [0:06:13 - 0:06:15]: Once the bread is evenly coated with the sauce, he sets the bowl aside and places the bread back on the counter; [0:06:16 - 0:06:17]: The camera shifts to an overhead view, showing the cutting board with several food items such as leaves of lettuce, mushrooms, a block of blue cheese, a few lemons, a bottle of olive oil, containers of salt, pepper, and chili flakes. The man begins to tear the lettuce leaves over a wooden cutting board; [0:06:18 - 0:06:20]: He places the torn lettuce pieces on the bread he's prepared earlier, carefully arranging them to ensure they are evenly distributed. The camera remains focused on the man's hands and the ingredients as he continues to work.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the man do with the striped cloth?",
+                "time_stamp": "0:06:05",
+                "answer": "C",
+                "options": [
+                    "A. He wipes the counter.",
+                    "B. He holds it in his right hand.",
+                    "C. He places it next to the cutting board.",
+                    "D. He uses it to cover the bread."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What does the man do immediately after picking up a spoon?",
+                "time_stamp": "0:06:12",
+                "answer": "B",
+                "options": [
+                    "A. He stirs a pot on the stovetop.",
+                    "B. He scoops some sauce from a bowl.",
+                    "C. He chops vegetables.",
+                    "D. He flips food on the grill."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_47_real.mp4"
+    }
+]

@@ -1,0 +1,83 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:03]: A person wearing a teal shirt stands in front of a kitchen counter beginning to cook. Two frying pans rest on the stove, with the one on the left emitting a small amount of steam. A wooden shelf filled with glass containers and dishes decorates the white-tiled backsplash behind them. The person grasps a cauliflower head with both hands, positioning it in front of them;  [0:02:04 - 0:02:10]: The person lowers the cauliflower towards one of the frying pans on the stove, tilting it to a vertical position. Various kitchen utensils, bottles, and a cutting board are visible on the left side of the counter. They place the cauliflower into the pan with both hands;  [0:02:11 - 0:02:13]: An overhead view focuses on two frying pans—the left one containing the cauliflower. The person's right hand picks up a pinch of seasoning or salt from a nearby container and sprinkles it over the cauliflower;  [0:02:14 - 0:02:16]: The person's left hand retrieves another pinch of seasoning or salt from the container and again sprinkles it over the cooking cauliflower;  [0:02:17 - 0:02:19]: After seasoning, the person steps aside to grab a small plate from the left side of the counter. The kitchen is equipped with an array of utensils, jars, and bottles neatly arranged near the stove.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What does the person in the teal shirt grasp with both hands?",
+                "time_stamp": "0:02:04",
+                "answer": "A",
+                "options": [
+                    "A. A cauliflower head.",
+                    "B. A frying pan.",
+                    "C. A cutting board.",
+                    "D. A glass container."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the person do after picking up a pinch of seasoning or salt?",
+                "time_stamp": "0:02:18",
+                "answer": "D",
+                "options": [
+                    "A. Places it on the cutting board.",
+                    "B. Puts it back in the container.",
+                    "C. Hands it to someone else.",
+                    "D. Sprinkles it over the cauliflower."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_38_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:05]: A person is seen from a first-person perspective, holding a small bottle of golden liquid above a glass mixing bowl placed on a wooden cutting board. The person is pouring the liquid into the bowl containing chopped green ingredients while stirring with a spoon. The setting is a kitchen with a stove and a saucepan on the left side. Cabinets in blue and wooden tones are visible in the background.  [0:06:06 - 0:06:12]: The scene zooms out, showing more of the kitchen and the person. There are various kitchen items on the countertop, such as plates, and small glass containers holding spices. The person is continuing to pour the golden liquid into the mixing bowl and stirring. The background reveals a brick wall with shelves holding kitchen utensils and ingredients.  [0:06:13 - 0:06:15]: The view shifts to an overhead perspective, showing the person stirring the mixture in the glass bowl placed on the wooden cutting board with other ingredients like butter and pepper in small bowls positioned around it.  [0:06:16 - 0:06:18]: The person adds another ingredient from a small container into the mixing bowl and continues mixing. The overhead perspective provides a clear view of the various ingredients and utensils arranged around the workspace.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding above the glass mixing bowl?",
+                "time_stamp": "0:06:06",
+                "answer": "A",
+                "options": [
+                    "A. A small bottle of golden liquid.",
+                    "B. A jar of honey.",
+                    "C. A bottle of olive oil.",
+                    "D. A cup of vinegar."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "Which utensil is the person using to stir the mixture?",
+                "time_stamp": "0:06:15",
+                "answer": "A",
+                "options": [
+                    "A. Spoon.",
+                    "B. Fork.",
+                    "C. Whisk.",
+                    "D. Spatula."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Clips Summarize",
+                "question": "What is the overall activity taking place in the kitchen?",
+                "time_stamp": "0:06:18",
+                "answer": "A",
+                "options": [
+                    "A. Making a delicate cauliflower dish.",
+                    "B. Baking a cake.",
+                    "C. Making a sandwich.",
+                    "D. Cooking pasta."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_38_real.mp4"
+    }
+]

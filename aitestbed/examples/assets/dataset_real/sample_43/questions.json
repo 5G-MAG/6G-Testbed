@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:01]: A person is holding a white plate with a colorful, vibrant dish that includes green vegetables and pasta. The dish is garnished with grated cheese. The background is blurry, showing a hint of a blue color. [0:00:02]: The wider scene reveals a kitchen with modern appliances and wooden cabinets. The person holding the plate is seen in a medium shot. On the countertop, there are several items including bowls, a potted herb, a bottle of olive oil, and some utensils. [0:00:03 - 0:00:05]: The scene transitions with a vibrant graphic display featuring the text \"NXT LVL KITCH N\" in bold, colorful letters. The background is a visually engaging mix of red, yellow, and green hues. [0:00:06]: The previous kitchen scene reappears with an effect making it look as if light is emitting from the countertop, creating a glowing effect. [0:00:07 - 0:00:19]: The person, in front of the kitchen setup, speaks directly to the camera while gesturing with their hands. Various cooking items can be seen clearly on the countertop, including a bottle of olive oil, a lemon, and other kitchen utensils. The lighting is bright, highlighting the well-organized and clean kitchen environment. During this segment, the person continues to engage the viewer with expressive hand movements and speech, occasionally looking down at the countertop, possibly referencing the ingredients and equipment laid out in front of them. The kitchen's modern aesthetic is emphasized with its stainless steel and wooden finishes.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is being held by a person at the beginning?",
+                "time_stamp": "00:00:20",
+                "answer": "A",
+                "options": [
+                    "A. A white plate with pasta.",
+                    "B. A blue bowl with salad.",
+                    "C. A black pan with meat.",
+                    "D. A green cup with tea."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_43_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:20 - 0:03:40] [0:03:20 - 0:03:21]: A man is standing in a kitchen, working on a wooden cutting board placed on a counter. He's facing forward, focused on chopping or preparing ingredients. The kitchen has a modern design with wooden and black accents, and various kitchen equipment and utensils are visible in the background. [0:03:22 - 0:03:23]: The camera shows a close-up of a frying pan on a stove. Inside the pan, there are small pieces of chopped meat and slices of garlic being sautéed. The ingredients are starting to cook and brown. [0:03:24 - 0:03:26]: The man lifts the frying pan slightly and shakes it to toss the ingredients. There is visible steam or smoke rising from the pan, indicating that the food is being cooked over a high flame. [0:03:27 - 0:03:28]: The man uses a wooden spoon to stir the contents of the frying pan, ensuring even cooking. The close-up shows the pieces of meat and garlic being mixed together. [0:03:29 - 0:03:39]: The cooking process continues with the man frequently stirring and tossing the ingredients in the pan using the wooden spoon. The contents are visibly browning and cooking evenly, with the pieces of meat becoming more golden and the garlic slices getting a caramelized color. The flame under the pan is consistently blue, indicating a controlled cooking environment. The kitchen's modern decor and layout remain visible in the background.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color are the slices of garlic as they are being cooked in the frying pan?",
+                "time_stamp": "00:03:39",
+                "answer": "A",
+                "options": [
+                    "A. White.",
+                    "B. Green.",
+                    "C. Caramelized.",
+                    "D. Red."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_43_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:40 - 0:07:00] [0:06:40 - 0:06:46]: A person is stirring a pan containing green peas and diced vegetables on a stove. They use a metal utensil to mix the contents with the flame visible underneath.  [0:06:47 - 0:06:49]: The person places the pan back on the stove and moves around the kitchen, reaching for various ingredients and utensils. The kitchen has wooden cabinets, a countertop with plates and bowls, and a stove with pots on top. [0:06:50 - 0:06:53]: The person turns their attention to a large pot of boiling water where they use tongs to stir the contents, appearing to be pasta. The steam is clearly visible above the pot. [0:06:54 - 0:06:56]: They return to the stovetop and lift the pasta out of the boiling water using tongs, checking its consistency. [0:06:57 - 0:06:59]: They shift focus from the boiling pot back to the countertop, where various ingredients and cooking utensils are arranged. Picking up a piece of lettuce, they begin to inspect it closely. [0:07:00]: The person continues to examine the lettuce, possibly preparing it for the next step in their cooking process. The kitchen environment remains consistent with neatly arranged shelves, cooking equipment, and ingredients in the background.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person using to stir the pot containing noodles?",
+                "time_stamp": "00:06:46",
+                "answer": "C",
+                "options": [
+                    "A. Wooden spoon.",
+                    "B. Plastic spatula.",
+                    "C. Metal tongs.",
+                    "D. Silicone whisk."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_43_real.mp4"
+    },
+    {
+        "time": "[0:10:00 - 0:11:00]",
+        "captions": "[0:10:00 - 0:10:20] [0:10:00]: The video starts with a close-up of a frying pan on a stove. Inside the pan, a mixture of vegetables, including green peas, diced tomatoes, and possibly some herbs, is being cooked. The pan is positioned centrally in the frame, with the visible blue flames of the stove burner beneath it. [0:10:01 - 0:10:03]: The scene shifts to feature a chef, who is standing in a modern kitchen interior with wooden walls and dark-colored shelves holding various kitchen utensils and appliances. The chef, who is wearing a dark T-shirt, lowers a lid onto a pot beside the frying pan, then focuses his attention on the frying pan. [0:10:04 - 0:10:07]: The chef uses a pair of tongs to lift some long pasta, possibly fettuccine, out of a pot of boiling water. The chef then holds the pasta above the pot, letting some water drip off. In the background, the sleek design of the kitchen with various equipment is visible. [0:10:08 - 0:10:11]: The chef transfers the pasta from the pot to the frying pan containing the vegetables. The pasta is placed over the vegetables, and it begins to mix with the contents of the pan. Steam rises from the frying pan, indicating that the ingredients are being cooked or reheated.  [0:10:12 - 0:10:14]: Now holding the frying pan by the handle, the chef uses tongs to stir and toss the pasta and vegetables together, ensuring they are well mixed. The chef appears to be explaining something while cooking, as his mouth is open and he is gesturing slightly. [0:10:15 - 0:10:18]: The camera angle changes to an overhead view, showing the chef's hands as he continues to mix the ingredients in the pan. The pasta is being combined with the vegetables, ensuring an even coating of sauce and ingredients. [0:10:19]: The view returns to focus on the chef. He holds the pan in one hand and gestures towards the camera, likely emphasizing a key point or instruction, as he continues to speak. The kitchen setup remains consistent in the background.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is inside the frying pan right now?",
+                "time_stamp": "00:10:00",
+                "answer": "A",
+                "options": [
+                    "A. A mixture of vegetables, including green peas and diced tomatoes.",
+                    "B. Boiling water with pasta.",
+                    "C. Chicken and herbs.",
+                    "D. A steak and mushrooms."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What happens after the chef uses tongs to lift pasta out of the pot?",
+                "time_stamp": "00:10:11",
+                "answer": "B",
+                "options": [
+                    "A. The chef drains the pasta and sets it aside.",
+                    "B. The chef transfers the pasta to the frying pan containing vegetables.",
+                    "C. The chef adds seasoning to the boiling water.",
+                    "D. The chef puts the pasta back into the boiling water."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_43_real.mp4"
+    }
+]

@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00]: The video opens with a graphic featuring the number \"10\" in large, bold white text on the left. To the right of the \"10\" is an image of a white plate with cutlery (a knife and fork) arranged to resemble clock hands;  [0:00:01 - 0:00:04]: The view changes, revealing a person with light-colored hair and a blue shirt standing in front of a backdrop with the text \"RAMSAY in 10.\" The person appears to be smiling and talking; [0:00:05]: The video then shifts to a kitchen scene. The same person is now in a kitchen with white brick walls and shelves. Various kitchen utensils and ingredients are displayed on the shelves. There is a large red \"COOK\" sign on the top shelf; [0:00:06 - 0:00:08]: The person interacts with the camera by gesturing and talking. There is a mix of modern and rustic kitchen elements in the background, including jars, bottles, and a mix of utensils; [0:00:09 - 0:00:14]: The person glances down and then looks up, continuing to speak. The camera angle occasionally changes, showing different perspectives of the kitchen and the person; [0:00:15 - 0:00:17]: The person raises both hands while speaking and then brings them together, emphasizing a point. The kitchen background remains consistent, with the shelves and utensils creating a homey atmosphere; [0:00:18 - 0:00:19]: The video ends with the person making a hand gesture, possibly wrapping up their point. The shelves behind them feature an array of cooking items, neatly organized and visually appealing.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is located on the top shelf in the kitchen?",
+                "time_stamp": "00:00:08",
+                "answer": "B",
+                "options": [
+                    "A. Jars and bottles.",
+                    "B. A large red \"COOK\" sign.",
+                    "C. A clock.",
+                    "D. A set of knives."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_45_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:40 - 0:02:00] [0:01:40 - 0:01:44]: A man wearing a black t-shirt is seen from a close-up perspective in what appears to be a kitchen setting. He is standing in front of a white brick wall with a wooden shelf, filled with various kitchen items like jars, bowls, and utensils. On the wall is a large red sign with the letters \"C-O-O-K.\" The man is handling a piece of food, likely kneading or mixing something with his hands. His facial expression is focused and concentrated. [0:01:45 - 0:01:49]: The scene transitions to an overhead view of the man’s hands shaping a ball of mixture, possibly meat, over a chopping board. There are several kitchen items around, including a grater, a spoon, and ingredients in small bowls. A lemon and knife are visible on the left side. The surroundings feature a countertop with a stove and sink nearby. The man appears to be forming a round shape with the mixture. [0:01:50 - 0:01:54]: The man continues to roll and shape the mixture with his hands, ensuring it maintains a round and compact form. His movements are methodical as he focuses on achieving a consistent shape. The bowl of mixture sits in front of him, partially filled. [0:01:55 - 0:01:57]: The man places the newly formed mixture ball onto a wooden chopping board. He then reaches into the bowl to grab more of the mixture, preparing to form another ball. His hands work swiftly and skillfully. [0:01:58 - 0:01:59]: The scene provides a closer view of his hands as he continues to roll the mixture into a round shape. His focus remains on ensuring that the consistency and shape are uniform throughout. The kitchen background, with the stovetop and counter, is slightly blurred, emphasizing the action in his hands.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the man doing with his hands right now?",
+                "time_stamp": "0:01:44",
+                "answer": "B",
+                "options": [
+                    "A. Washing dishes.",
+                    "B. Kneading and mixing food.",
+                    "C. Cutting vegetables.",
+                    "D. Stirring a pot."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What action is the man performing with the mixture on the bowl?",
+                "time_stamp": "0:01:58",
+                "answer": "A",
+                "options": [
+                    "A. Rolling it into a ball.",
+                    "B. Flattening it.",
+                    "C. Cutting it into pieces.",
+                    "D. Mixing it in a bowl."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_45_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:20 - 0:03:40] [0:03:20 - 0:03:21]: In a modern kitchen with white brick walls and wooden shelves in the background, a person reaches for a red pepper on a countertop which features several items, including various cooking ingredients and utensils. The individual is wearing a black T-shirt; [0:03:21 - 0:03:31]: The person starts to slice the red pepper on a wooden cutting board positioned on a textured countertop. The cutting board is surrounded by several jars and small bowls containing spices and other small cooking items. A frying pan with food is sizzling on the stove adjacent to the cutting board. The camera angle shifts to show a top-down view of the cutting board as the person continues to slice the pepper [0:03:31 - 0:03:34]: The individual gathers the sliced red pepper and starts to move it towards the pans on the stove. The brick wall and shelves filled with dishes remain in the background; [0:03:34 - 0:03:36]: They add the sliced red pepper to a stainless steel pan filled with white rice which is being heated on the stove. Another pan next to it contains meatballs being fried. The stove is modern with a gas burner; [0:03:36 - 0:03:37]: Close-up of the hot pan, focusing on the white rice mixed with the freshly added red pepper slices; [0:03:38 - 0:03:39]: The camera shifts to an overhead view of a kitchen countertop where the person’s hands adjust a bunch of fresh vegetables including lettuce, cucumbers, radishes, and chives on a white plate.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the person do with the sliced red pepper after cutting it?",
+                "time_stamp": "0:03:36",
+                "answer": "B",
+                "options": [
+                    "A. Stores it in a container.",
+                    "B. Adds it to a pan with white rice.",
+                    "C. Throws it away.",
+                    "D. Eats it."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_45_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:40 - 0:07:00] [0:06:40 - 0:06:41]: A person wearing a black shirt is in a kitchen with a white brick backsplash, wooden shelves stocked with dishes, and various kitchen utensils. Green onions are being picked up with one hand while standing behind a counter. [0:06:41 - 0:06:42]: The person places the green onions on a wooden cutting board, with lettuce and a small black bowl on a white platter to the left. The counter has a cutting board, various bottles, and ingredients. [0:06:42 - 0:06:45]: The person begins chopping the green onions with a large knife. Several green onion stalks are being precisely sliced, with a bottle of oil and a blue measuring spoon nearby. [0:06:45 - 0:06:47]: The chopping continues, showing the sharp knife cutting through the green onions rapidly and precisely. The sliced green onions pile up on the wooden board next to the remaining whole green onions. [0:06:47 - 0:06:50]: The camera provides a top-down view of the cutting board and platter. The person continues to chop green onions, with sliced cucumbers and lettuce leaves arranged neatly on the platter. [0:06:50 - 0:06:52]: The person arranges the sliced green onions on the platter with lettuce and cucumbers. The kitchen counter displays various ingredients, tools, and bowls utilized in the cooking process. [0:06:52 - 0:06:53]: The person shifts focus, now holding a small red pepper above the plate, appearing to add it to the dish. The kitchen appears well-organized, with colorful bottles, spice jars, and a pepper mill within easy reach. [0:06:53 - 0:06:56]: Switching to fine chopping, the camera captures the person’s methodical knife skills. The preparation showcases the organized arrangement of fresh ingredients ready to be included in the dish. [0:06:56 - 0:06:57]: The person picks up a halved lime, positioning it to squeeze over the dish. The kitchen environment remains consistent, with white tiled walls and well-arranged kitchen tools and ingredients. [0:06:57 - 0:06:59]: The person continues carefully adding finishing touches to the plate, demonstrating attention to detail. The surrounding area includes various herbs and seasonings on the countertop, ready for use.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What wa being picked up by the person just now?",
+                "time_stamp": "0:06:46",
+                "answer": "B",
+                "options": [
+                    "A. Red pepper.",
+                    "B. Green onions.",
+                    "C. Sliced cucumbers.",
+                    "D. Lettuce."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_45_real.mp4"
+    }
+]

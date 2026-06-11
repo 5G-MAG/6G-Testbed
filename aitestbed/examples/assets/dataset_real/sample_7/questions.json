@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:04]: The video starts with an overhead view of a football stadium packed with spectators. The camera is positioned high above the pitch, capturing the entire field and a significant section of the crowd. The field is green with well-maintained grass, and the goals are white. The stand opposite the camera is filled with thousands of fans, and the arena's roof structure is visible, giving a circular frame to the scene. The video is captured during a significant football match, as indicated by the large crowd and the FIFA logo in the top right corner. [0:00:05 - 0:00:11]: The perspective shifts to a close-up of a football player on the field. The player's uniform is dark blue. The player is standing still, looking focused and solemn. There is some movement and change in the player's facial expression as they turn their head slightly. The background is blurry, filled with indistinct colors suggesting other players, spectators, and the stadium environment. [0:00:12 - 0:00:16]: The view changes to a different perspective focused on the penalty area of the football field. One player is positioned near the penalty mark, preparing to take what appears to be a penalty kick. The goalkeeper, wearing a bright green jersey, stands on the goal line. A referee, dressed in an orange shirt, is standing next to the penalty taker. The background is filled with an audience, creating an intense atmosphere. [0:00:17 - 0:00:19]: The focus shifts to the goalkeeper in the bright green jersey. The goalkeeper is preparing for the penalty, appearing concentrated, and moving along the goal line. The backdrop continues to show blurred figures, indicating movement and anticipation among the crowd and other players in the vicinity.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What is happening in the penalty area of the football field?",
+                "time_stamp": "0:00:16",
+                "answer": "A",
+                "options": [
+                    "A. A player is preparing to take a penalty kick.",
+                    "B. A player is scoring a goal.",
+                    "C. A fight is breaking out.",
+                    "D. The referee is ending the game."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_7_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:03]: A goalkeeper in a neon green jersey stands in front of a goal, wearing red gloves with white accents. He appears to be focused, looking intently ahead. The background is a stadium filled with spectators, which is slightly blurred. [0:02:04 - 0:02:05]: A player in a navy blue jersey is shown up close, standing with his hand covering his face, possibly wiping his nose or mouth. The player's jersey features a white patch on the sleeve and the team's logo on the chest. [0:02:06 - 0:02:11]: The point of view changes to behind the goal as a penalty kick is being taken. The goalkeeper in green dives to the left, attempting to block the shot. The ball moves towards the bottom left of the net, but the goalkeeper misses. The scene takes place in a large, illuminated stadium with a packed crowd. [0:02:12 - 0:02:14]: The goalkeeper, having missed the save, is seen lying on the ground near the goalpost, recovering from the dive. Close-up shows the goalkeeper clutching the net in frustration as the ball crosses the line. [0:02:15]: A player in a white and light blue jersey celebrates with arms raised and an open mouth, shouting in triumph. His teammates and a crowd of spectators can be seen in the background. [0:02:16 - 0:02:19]: The view shifts to another player in a white and light blue jersey walking away from the penalty spot towards the center of the field. In the background, additional team members and spectators are visible, with a large portion of the stands filled with fans, some holding banners and wearing team colors.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What happens after the penalty kick is taken?",
+                "time_stamp": "0:02:15",
+                "answer": "A",
+                "options": [
+                    "A. The penalty kick was saved by the goalkeeper.",
+                    "B. The goalkeeper catches the ball.",
+                    "C. The ball goes into the bottom left of the net.",
+                    "D. The ball is deflected by a defender."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_7_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:04]: A group of players wearing dark blue jerseys are gathered, standing on the green grass of a football field. The players are huddled closely, with one player's arm around another, appearing to engage in a moment of focus and support. The background reveals a packed stadium with numerous spectators wearing white shirts, showcasing the large audience. [0:04:05]: A close-up view shows something in orange, but it is unclear due to its proximity to the camera. [0:04:06 - 0:04:08]: A different player, this time from a different team, is shown in close-up. He is wearing a white jersey with black stripes, focused and intense, with a blurred background of the stadium. [0:04:09 - 0:04:14]: The scene shifts to a wide-angle view of the football field. A player in a white and light blue striped jersey stands poised, ready to take a penalty kick. He is positioned just outside the penalty area, with the goalkeeper in yellow ready in front of the net. The stadium, packed with spectators, forms the backdrop to this tense moment. [0:04:15 - 0:04:16]: The player in the white and light blue striped jersey runs forward and kicks the ball towards the goal. The goalkeeper dives to his right in an attempt to save the shot. [0:04:17]: The ball goes past the diving goalkeeper towards the goal. The player follows through on his kick, continuing his movement as the crowd appears enthusiastic. [0:04:18 - 0:04:19]: The player, now turning, runs to celebrate his action. The back of his jersey reveals his name and number \"5\". He displays triumphant body language, running on the green field.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the player in the white and light blue striped jersey do after running forward?",
+                "time_stamp": "00:04:20",
+                "answer": "D",
+                "options": [
+                    "A. Passes the ball.",
+                    "B. Stops running.",
+                    "C. Celebrates.",
+                    "D. Kicks the ball towards the goal."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What happens after the goalkeeper dives to his right?",
+                "time_stamp": "00:04:18",
+                "answer": "A",
+                "options": [
+                    "A. The ball goes past the goalkeeper.",
+                    "B. The goalkeeper catches the ball.",
+                    "C. The player misses the goal.",
+                    "D. The ball hits the post."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_7_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:02]: A shirtless individual is seen in the foreground, holding a blue and white striped shirt and embracing another person who is wearing a white jersey. The background shows a blurry crowd in a stadium; [0:06:03 - 0:06:06]: The embrace continues, and additional people join in the celebration. The shirtless individual appears emotional, partially covering his face with the shirt. The background crowd is mostly out of focus; [0:06:07 - 0:06:09]: The camera shifts to a high-angle, wide view of the stadium, showing a soccer field and large, crowded stands. Players and other individuals are scattered across the field, some near the goals and others toward the center; [0:06:10 - 0:06:12]: The camera returns to the first-person perspective. Two individuals, both in yellow vests, celebrate and embrace on the field surrounded by a cheering crowd; [0:06:13 - 0:06:14]: The individuals in yellow vests begin to run across the field. The stands are filled with spectators, many holding banners and flags; [0:06:15 - 0:06:19]: The camera angle changes again to a high, wide view of the stadium. Different groups of players and individuals are seen scattered across the field, with a central group celebrating around the center circle. Other individuals spread out towards the goals and the sidelines.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What event is taking place right now?",
+                "time_stamp": "0:06:36",
+                "answer": "A",
+                "options": [
+                    "A. A soccer match celebration.",
+                    "B. A concert.",
+                    "C. A protest.",
+                    "D. A graduation ceremony."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_7_real.mp4"
+    }
+]

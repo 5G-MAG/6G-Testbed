@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:01]: A hand points towards a grey baking dish filled with white flour. Other ingredients like cooking oil, sauces, and various bowls are scattered around the countertop. A larger glass mixing bowl with a whisk inside sits to the left. [0:03:02]: The scene shifts slightly, showing more of the prepared ingredients on the counter. The person is seen from the waist down, with a hand resting on the table and the other off-frame. Several more bottles and jars are visible. [0:03:03]: A man in a white t-shirt stands in a modern kitchen with grey cabinets. He gestures with his right hand while explaining something. In the background, there are cupboards with glass doors and a counter with various kitchen items. [0:03:04]: The man continues to talk, emphasizing his points with animated hand movements. A wooden cutting board and various ingredients are laid out on the counter in front of him, including what appears to be raw fish on a plate. [0:03:05]: The man rearranges some of the items on the countertop while continuing to speak. His gestures are lively and expressive. [0:03:06]: He holds a small mixing bowl with one hand and points toward it with the other. The kitchen setting remains the same, with various utensils and ingredients visible. [0:03:07]: The man is now showing another ingredient, holding it up for emphasis. His facial expression is intense as he explains the next step of the preparation. The stove and kitchen counter are visible in the foreground. [0:03:08]: He continues to explain, using his hands to illustrate his points more clearly. The plate with the fish remains in the forefront on the countertop. [0:03:09]: The man leans forward slightly, focusing on illustrating his point, possibly explaining the next action with his hand movements. [0:03:10]: He picks up a container of seasoning and a bottle of another ingredient, showing both to the camera. The backdrop remains the same, with a clean, modern kitchen setup. [0:03:11]: The man pours a particular ingredient from a tall white container into the mixing bowl. He has a focused look on his face, concentrating on getting the measurements right. [0:03:12]: Showing the close-up view, he explains the importance of the condiments he is using, holding them up to the camera. The mixing bowl lies on the counter below. [0:03:13]: He begins to add the spices directly into the mixing bowl, methodically pouring them while looking down, focusing on his task. [0:03:14]: He gestures again towards the camera, emphasizing the importance of the steps he's explaining. His right hand holds the container while the left hand makes a clear gesture. [0:03:15]: He picks up a small pinch of one of the ingredients, holding it up close to the camera while explaining its significance, ensuring the viewer can see the detail. [0:03:16]: The man resumes mixing the ingredients in the bowl, explaining further steps while looking down and concentrating on his actions. [0:03:17]: He pours what appears to be milk from a mug into the mixing bowl, demonstrating the next crucial step in the process. [0:03:18]: His hand places the now-empty mug on the counter, ensuring the camera focuses on the mixing bowl and its contents. Various other ingredients lie around, showing the preparation involved. [0:03:19]: The man’s face displays concentration as he continues to explain and perform the mixing process, ensuring each detail is carefully shown to the viewer.\n[0:03:20 - 0:03:40] \n[0:03:40 - 0:04:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is the color of the baking dish filled with flour?",
+                "time_stamp": "0:03:01",
+                "answer": "B",
+                "options": [
+                    "A. Blue.",
+                    "B. Grey.",
+                    "C. White.",
+                    "D. Black."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_19_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:01]: A person wearing a white t-shirt is standing in the kitchen, holding a glass bowl with a mixture and a whisk. The background shows a modern kitchen setup with white tiles, dark cabinets, and various utensils and ingredients on the counter. [0:06:01 - 0:06:03]: The person continues to mix the contents of the bowl vigorously. A green bottle and other kitchen items are placed on the counter in front of them. [0:06:03 - 0:06:04]: The person briefly pauses and uses the whisk to scrape down the sides of the bowl, ensuring all the mixture is combined. [0:06:04 - 0:06:05]: The person resumes whisking, tilting the bowl to ensure thorough mixing. The kitchen counter now shows a mix of different ingredients, including bottles and bowls. [0:06:05 - 0:06:06]: The person continues the mixing process with focus, scraping the sides of the bowl with the whisk. The kitchen background remains consistent, with various utensils and items on the counter. [0:06:06 - 0:06:08]: The person continues whisking the mixture in the bowl. The kitchen environment shows clear glass cabinets, and a neatly organized space, including some stacked bowls and plates. [0:06:08 - 0:06:10]: The person's movements stay steady as they whisk. The camera focus remains on the whisking action, while the kitchen setup in the background shows more clearly stocked utensils and ingredients neatly arranged. [0:06:10 - 0:06:12]: The mixture in the bowl appears to be thickening slightly as whisking continues, with the person tilting the bowl for better mixing. The surrounding kitchen remains unchanged, maintaining a tidy appearance. [0:06:12 - 0:06:18]: The person then pours the mixture from the bowl into a pot on the stove. The camera angle shifts slightly to show a close-up of the mixture being transferred, with steam beginning to rise from the heated pot. A cup of coffee can be seen on the counter nearby, while the person adjusts the heat on the stove. [0:06:18 - 0:06:19]: The person places the bowl down and reaches for another utensil on the counter. The stove now has the pot with the mixture heating up, and the surrounding counter is filled with various kitchen items used in the preparation process.\n[0:06:20 - 0:06:40] \n[0:06:40 - 0:07:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item does the person use to mix the contents of the bowl?",
+                "time_stamp": "00:06:03",
+                "answer": "C",
+                "options": [
+                    "A. A spoon.",
+                    "B. A fork.",
+                    "C. A whisk.",
+                    "D. A spatula."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person wearing while standing in the kitchen?",
+                "time_stamp": "00:06:01",
+                "answer": "B",
+                "options": [
+                    "A. A blue apron.",
+                    "B. A white t-shirt.",
+                    "C. A black jacket.",
+                    "D. A red sweater."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_19_real.mp4"
+    },
+    {
+        "time": "[0:09:00 - 0:10:00]",
+        "captions": "[0:09:00 - 0:09:20] [0:09:00 - 0:09:03]: The video starts with a first-person perspective view of a kitchen. A man in a white t-shirt is standing at the counter. In front of him, on the countertop, there is a cutting board with sliced potatoes and a bottle of beer next to it. He picks up a paper towel from the counter and uses it to dry the potato slices. [0:09:04 - 0:09:05]: The man moves briskly to his right, reaching for something off-frame. Behind him, the kitchen counter has various items including a microwave, a mug rack, and some jars. He appears to grab a towel and turns back towards the stove.  [0:09:06 - 0:09:07]: The man focuses on the stove where there are two frying pans on the burners. One frying pan appears to have something frying in it. He uses a spatula to manipulate the food in the frying pan. [0:09:08 - 0:09:09]: He moves closer to the frying pan and begins to flip the golden-brown piece of food cooking in hot oil. The bubbling oil and sizzling sound suggest the food is being deep-fried. [0:09:10 - 0:09:12]: The man carefully continues to cook the food, using a spatula to ensure it's cooking evenly. The surface area of the stovetop includes a griddle and an unused burner. Utensils and a kitchen towel are visible to the side. [0:09:13 - 0:09:15]: He then flips the piece of food to reveal a crispy, evenly-browned side. He moves the spatula and checks the doneness of the food by lifting and peeking underneath. [0:09:16 - 0:09:19]: The video concludes with the man continuing to cook the food, occasionally flipping it and inspecting its color. The kitchen background remains unchanged with various cooking items and appliances neatly arranged.\n[0:09:20 - 0:09:40] \n[0:09:40 - 0:10:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is on the countertop in front of the man right now?",
+                "time_stamp": "0:09:02",
+                "answer": "C",
+                "options": [
+                    "A. A loaf of bread and a bottle of wine.",
+                    "B. A bowl of fruit and a bottle of juice.",
+                    "C. A cutting board with sliced potatoes.",
+                    "D. A plate of vegetables and a bottle of water."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_19_real.mp4"
+    },
+    {
+        "time": "[0:12:00 - 0:13:00]",
+        "captions": "[0:12:00 - 0:12:20] [0:12:00 - 0:12:06]: The video begins with a person wearing a white t-shirt standing in a kitchen. The countertop in front of them is made of marble. They are stirring something in a small bowl with a spoon, other cooking items such as a lemon and a cup are visible nearby. The background shows a clean and organized kitchen with cabinets and a stove. [0:12:07 - 0:12:09]: The person, while holding a towel in one hand, moves toward the stove where a frying pan is positioned over a burner. The pan has something sizzling inside, likely cooking. [0:12:10 - 0:12:13]: The content in the frying pan continues to cook as the person uses a spoon to stir it, ensuring even cooking. The pan contents are turning golden brown.  [0:12:14 - 0:12:15]: A close-up shot of the frying pan reveals slices of food being cooked and stirred. The person uses a spoon to mix and move the slices around in the bubbling oil. [0:12:16 - 0:12:17]: The person continues stirring the food in the frying pan, appearing focused on ensuring they do not stick together. [0:12:18 - 0:12:19]: The food in the frying pan is becoming crispy as the person uses the spoon to gently stir and flip them for even cooking.\n[0:12:20 - 0:12:40] \n[0:12:40 - 0:13:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the countertop made of in the kitchen scene?",
+                "time_stamp": "0:12:06",
+                "answer": "C",
+                "options": [
+                    "A. Granite.",
+                    "B. Wood.",
+                    "C. Marble.",
+                    "D. Stainless steel."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_19_real.mp4"
+    }
+]

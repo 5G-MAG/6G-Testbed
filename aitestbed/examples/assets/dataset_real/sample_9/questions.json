@@ -1,0 +1,76 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] The 20-second video begins with a close-up shot from a first-person perspective of a person holding a fan of playing cards in their hands, which includes an ace, king, queen, five, and eight of various suits. The setting is indoors, with both players seated at a rectangular table covered with a smooth, light-colored surface. Directly across the table, an individual sits facing the camera. They wear a patterned, short-sleeved shirt and are holding their own set of playing cards. This person is positioned slightly to the left of the frame. Behind them, part of the wall, a window, and a section of a chair with a dark piece of clothing draped over it are visible. On the table between the two players, there is a neat stack of face-down cards to the right, alongside two face-up cards: a three of hearts and a four of clubs. The face-up cards are more centered on the table. Throughout the video, the player holding the camera shuffles the cards in their hand multiple times and occasionally adjusts their grip. The other player remains largely stationary, occasionally lifting their cards slightly as if contemplating their next move. In the initial stages, the camera holder is seen spreading their cards into a fan and shuffling them, revealing small movements of their fingers and quick shifts in the arrangement of the cards. As the video progresses, the perspective slightly changes, indicating the camera holder is moving their hands up and down. The other player continues to maintain their focus on their own hand, occasionally looking at the center pile or adjusting their card arrangement. At one point, they gesture slightly towards the middle of the table, possibly indicating their intention to play a card or signaling something related to the game. During these interactions, the camera holder's cards change position frequently, showing combinations of numbered cards and face cards, all with different suits. The background remains consistent, maintaining a focus on the table, the two players, and the playing cards. The video concludes with the same relative arrangement of the players and cards. The camera holder still has a fan of cards in hand, and the game appears to be ongoing, with both players engaged in their next moves.\n[0:00:20 - 0:00:40] The video captures a scene of two individuals engaged in a card game, filmed from a first-person perspective. The location appears to be an indoor setting, with the players seated across from each other at a rectangular table.  In the background, a large window on the left side allows natural light to enter the room, casting bright illumination on the left side of the table. The window has some blinds partially covering it. There is also a large white pillar to the left and an office chair with a jacket draped over it on the right. Near the center of the room beyond the table, another desk or area appears to be visible. In the foreground, the first-person perspective gives a clear view of the cards held by the individual wearing the recording device, revealing a hand consisting of various cards: prominently featuring hearts, diamonds, and clubs. The hands are steadily dealing and organizing cards.  In the middle of the table, a pile of face-up cards is evident, including several face cards like kings and queens from different suits. A separate deck of face-down cards is positioned to the right of this pile. The other player is directly across the table, wearing a patterned short-sleeve shirt. This player is partially leaning forward with their forearms resting on the table and appears to be actively playing their turn, holding a fan of cards close to their chest. Throughout the video, various actions of dealing, picking up, and rearranging cards can be observed. The player across occasionally changes their posture, either leaning forward to take a card or pulling back to sort through their hand. The table itself is grey and uncluttered aside from the cards and a black object resembling a mousepad or a computing device to the right. Overall, this video captures the meticulous and concentrated atmosphere of a card game as the two players thoughtfully engage in their turns with detailed actions involving the cards they handle. The natural light, combined with the indoor office setting, provides a clear and unobstructed view of the game in progress.\n[0:00:40 - 0:01:00] The video depicts a card game being played between two individuals from a first-person perspective. The scene takes place in a well-lit room with neutral-colored walls and a large window on the left side, allowing natural light to filter in. A modern office chair and desk setup is evident.  At the start of the video, the player using the recording device holds a hand of cards, which includes the 5, K, A, 8, and 2 of hearts. Across the rectangular table sits the opponent, a figure wearing a short-sleeved, patterned shirt. The opponent is also holding a hand of cards and appears to be concentrating on their hand, with their arms resting on the table. As the game progresses, the cards on the table in the middle appear to be part of a discard pile, with various face-up cards, including a King and multiple suits of cards spread out. The player wearing the recording device moves their hand several times. First, they seem to draw a card from the deck positioned at the center-right of the table adjacent to the discard pile. With each movement, the viewer sees the player's hand changing slightly, indicating cards being drawn or played. The opponent frequently reaches forward to either place a card on the discard pile or to draw a card themselves. There is a constant, deliberate exchange of cards as both players contemplate their next moves. Notably, the opponent maintains a consistent body posture, only moving their hands while occasionally adjusting their seated position to lean slightly forward or back. Throughout the video, the recording player's hand reveals a changing set of hearts ranging from low numbers to face cards and aces. The pace of the movements is steady, maintaining a casual yet focused atmosphere indicative of a strategic card game. In summary, the video thoroughly captures a strategic exchange in a card game between two players, with clear indications of card movements and game mechanics taking place in a brightly lit, modern office environment.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What card is this person playing now?",
+                "time_stamp": "00:00:11",
+                "answer": "A",
+                "options": [
+                    "A. Nine of Spades.",
+                    "B. Six of Spades.",
+                    "C. Nine of Hearts.",
+                    "D. Seven of Diamonds."
+                ]
+            },
+            {
+                "task_type": "Clips Summarize",
+                "question": "What does the video primarily capture?",
+                "time_stamp": "00:00:19",
+                "answer": "A",
+                "options": [
+                    "A. A card game in progress between two individuals.",
+                    "B. A cooking tutorial.",
+                    "C. A conversation between two people.",
+                    "D. A travel vlog."
+                ]
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "What else is on the table besides the playing cards and a black object?",
+                "time_stamp": "00:00:54",
+                "answer": "A",
+                "options": [
+                    "A. A pair of glasses.",
+                    "B. A computer.",
+                    "C. A pile of books.",
+                    "D. A stack of notebooks."
+                ]
+            }
+        ],
+        "video_path": "./videos/sample_9_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:01:31]",
+        "captions": "[0:01:00 - 0:01:20] The video begins by showing a view from the first-person perspective of someone playing a card game. The setting is a well-lit room with light gray walls and a large window to the left, allowing natural light to illuminate the area. The video captures a tabletop with a smooth gray surface.  Opposite the camera is another player, wearing a short-sleeved, multi-colored patterned shirt. The opponent sits with their arms resting on the table and is holding a set of cards in their hands. A deck of cards lies in the middle of the table, with a visible mix of both face-up and face-down cards spread out chaotically. To the right of the deck is a neatly stacked pile of cards placed face-down, and further to the right is a dark-colored mouse, suggesting that this might be a multi-purpose desk. Directly in front of the camera, one can see the hands of the individual recording, holding a fan of cards that include a combination of hearts, clubs, and spades. The cards visible in the fan show numbers and faces such as 5, 6, 8, and K of hearts, and 2 and 4 of clubs, indicating that the person is in the middle of a card game. As the video progresses, the camera holder shifts the cards slightly between their hands, seemingly organizing or deciding on a move. The opponent periodically places cards on the table, adding to the pile in the middle, while the person holding the camera responds by continuing to adjust their own cards. The camera captures the quick, fluent motions of drawing and discarding cards, typical of a fast-paced card game. The opponent's movements are deliberate; they extend their arm forward to place cards onto the central pile, showing a mix of both face cards and numbered cards. The hands of the person filming often come into focus, shifting and manipulating their cards, which demonstrate a range of suits and numbers predominantly focused on the game strategy. Throughout the entire video, the scene remains focused on the competitive yet cordial environment of the card game. The predictable interval of play actions between the two players creates an engaging rhythm, with rapid card handling motions indicating a blend of seriousness and enjoyment in the gameplay. The setting remains static, ensuring the concentration stays cohesively on the card game. The engaging dynamics of the game and the detailed view from the player's perspective create an immersive experience for the viewer.\n[0:01:20 - 0:01:31] The video opens with a clear view of a person sitting across a table in a well-lit room. The person wears a patterned shirt with a predominantly grey and black design. On the table between the person and the camera is a pile of playing cards, some face up and some face down. The cards feature a mix of suits, with both red and black readily visible in the heap. To the right of the pile, a neatly stacked deck of cards sits, its face down. The person across the table is holding several cards in their hands, fanning them out and seeming to contemplate their next move in the card game. As the video progresses, it’s evident that the camera captures the hands of the person from a first-person perspective, revealing that they hold a spread of cards, predominantly hearts, with values including 5, 6, and Ace. The camera holder’s hands frequently move, interacting with the cards on the table, shuffling through their hand of cards, or reaching down to pick up new ones or place cards into play. The person across the table occasionally picks cards from the pile and adds them to their hand, their focus shifting between the cards they hold and the pile on the table. The opposing player’s facial expression changes subtly, sometimes with a slight smile, indicating their engagement in the game. Throughout the video, the room’s background remains consistent, featuring light-colored walls and large windows on the left side, allowing natural light to fill the space. Additionally, there's a visible part of a whiteboard or similar writing surface behind the person across the table, as well as a black jacket slung over the back of a chair beside them. This video captures the dynamic of a card game in progress from a first-person viewpoint, emphasizing the interaction between the players and the use of strategic thinking, indicated by the careful examination and play of the cards.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What type of shirt is the opponent wearing?",
+                "time_stamp": "00:01:11",
+                "answer": "A",
+                "options": [
+                    "A. A blue and white patterned shirt.",
+                    "B. A plain white shir.",
+                    "C. A yellow patterned shirt.",
+                    "D. A red checkered shirt."
+                ]
+            },
+            {
+                "task_type": "Prospective Reasoning",
+                "question": "What will the camera holder most likely do next?",
+                "time_stamp": "00:01:15",
+                "answer": "A",
+                "options": [
+                    "A. Place Four of hearts onto the central pile.",
+                    "B. Place the Ace of Spades onto the discard pile.",
+                    "C. Put the Seven of Diamonds onto the foundation stack.",
+                    "D. Move the King of Clubs to the empty tableau column."
+                ]
+            }
+        ],
+        "video_path": "./videos/sample_9_real.mp4"
+    }
+]

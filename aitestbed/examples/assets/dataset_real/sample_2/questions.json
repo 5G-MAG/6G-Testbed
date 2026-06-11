@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:01]: A person in a white jersey with red checkered patterns stands on a green field. The number \"13\" and the name \"Sosa\" is visible on the back of the jersey. The person has short cropped hair, and their gaze is focused ahead.;  [0:00:01 - 0:00:04]: The person takes a step, maintaining their focused expression as they move forward. The field remains consistently green.;  [0:00:02 - 0:00:03]: Three people in white jerseys with red checkered patterns are seen from behind with their arms around each other’s shoulders. The names \"KRAMARIC,\" \"MODRIC,\" and \"MAJER\" are visible on their jerseys with the numbers \"16,\" \"10,\" and \"7\" respectively. The crowd in the background, dressed in yellow, fills the stadium.;  [0:00:03 - 0:00:04]: The three people maintain their group stance with their arms around each other, facing the field. The stadium crowd remains lively in the background.;  [0:00:04 - 0:00:05]: A close-up shot shows the face of the person in the white and red checkered jersey. They appear focused and concentrated, looking straight ahead with a slight frown.;  [0:00:05 - 0:00:09]: The person's face shows determination as their eyes remain fixed forward. The background is blurred, highlighting their concentration.;  [0:00:09 - 0:00:13]: The person turns their head slightly to the right without changing their serious expression. Their facial hair is clearly visible, and the green field remains in the background.;  [0:00:13 - 0:00:14]: The person shifts their gaze back to the front as they remain focused. Their facial expression suggests deep concentration.;  [0:00:14 - 0:00:15]: An overhead view of an ongoing soccer match shows the person in the white and red checkered jersey running towards a ball placed in the penalty area. The goalpost is visible in the distance with a goalkeeper ready to defend.;  [0:00:15 - 0:00:16]: The person prepares to kick the ball as the goalkeeper dives to intercept the shot. The field is well-marked, and the audience in the stands watches attentively.;  [0:00:16 - 0:00:17]: After the kick, the person stands with their back to the camera as the goalkeeper stretches out on the ground. The ball is on its trajectory towards the goal.;  [0:00:17 - 0:00:18]: The person in the white jersey, now considerably closer in the frame, appears with clenched fists and an expression of triumph. The field background remains unchanged.;  [0:00:18 - 0:00:19]: As the video concludes, the person continues to show a composed yet energized demeanor, still on the green field with the black-clad referee slightly blurred in the background.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the number on the back of MAJER's jersey?",
+                "time_stamp": "0:00:10",
+                "answer": "A",
+                "options": [
+                    "A. 7.",
+                    "B. 10.",
+                    "C. 13.",
+                    "D. 16."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What event occurred just now?",
+                "time_stamp": "0:00:19",
+                "answer": "A",
+                "options": [
+                    "A. A penalty kick.",
+                    "B. A free kick.",
+                    "C. A goal celebration.",
+                    "D. A corner kick."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_2_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:40 - 0:02:00] [0:01:40 - 0:01:41]: Two football players with the Croatian national team jerseys, numbers 10 and 27, stand with their arms over each other’s shoulders. They appear to be in a formation, possibly lining up for a penalty shootout or a team huddle. The players’ focus is directed downward. The player's brow furrows in concentration as he looks toward the ground. [0:01:41 - 0:01:43]: An additional player, number 16, and yet another, number 21, on either side of the original pair, also show arms interlocked, forming a close-knit unit. Their faces remain serious and focused. The goalposts, along with the goalkeeper and another player from the opposing team, are visible in the background, indicating the setting is near the penalty area. The crowd behind the goalposts is dressed primarily in yellow, cheering with raised hands and signs. [0:01:44 - 0:01:45]: A close-up shot depicts a fan in the stands wearing a Croatian national team jersey. He raises his hands in anticipation or celebration. His eyes show intensity, and his demeanor is deeply engrossed in the unfolding event. [0:01:45 - 0:01:47]: The same fan now has his hands on his head, encapsulating a moment of suspense. The crowd around him displays various expressions, some capturing the moment with their phones.  [0:01:46 - 0:01:49]: One of the players with slightly long brown hair secured by a headband is shown in a close-up view. His gaze is intensely focused in the direction ahead, suggesting he is preparing for or contemplating an important move. [0:01:50 - 0:01:51]: The player's face is determined. He appears resolute as he approaches the ball. The scene shifts to show him running up towards the ball placed at the penalty spot. [0:01:51 - 0:01:52]: The player is captured mid-stride as he takes the penalty shot. The goalkeeper dives to his left in an attempt to save the ball. The setting includes a clear view of the goalposts and the crowd backdrop. [0:01:53 - 0:01:54]: After the shot, the player’s expression is visible. His head is slightly bowed, indicating he is either reflecting on the outcome or in relief. [0:01:54 - 0:01:55]: In the background, another player in yellow appears to be clearing from the area near the goalpost. The scorer maintains a composed expression, blending into the setting of the active play atmosphere. [0:01:55 - 0:01:56]: The scene transitions to a middle-aged man in a suit who seems to be part of the coaching or managerial staff. His expression is neutral-yet-focused as he oversees the actions on the field. [0:01:56 - 0:01:57]: The man's expression remains unchanged. The determined gaze suggests he is watching the subsequent events of the game closely. [0:01:57 - 0:01:59]: A close-up shot shows a wildly cheering fan, his mouth wide open, fists raised in jubilation, capturing the raw emotions encapsulating the dramatic moment. The intensity in the air is palpable, marked by collective energy and spirited reactions from the crowd surrounding him.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the goalkeeper doing as the player takes the penalty shot?",
+                "time_stamp": "0:01:52",
+                "answer": "B",
+                "options": [
+                    "A. Standing still.",
+                    "B. Diving to his left.",
+                    "C. Running towards the ball.",
+                    "D. Waving his hands."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_2_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:20 - 0:03:40] [0:03:20 - 0:03:21]: A soccer player in a white and red checkered uniform is seen running on a green field away from the goalpost. Behind the player, a goalkeeper clad in black is positioned near the goal, which features 'QatarEnergy' advertisements lining the bottom of the net. The stands are filled with spectators dressed predominantly in yellow;  [0:03:21 - 0:03:22]: A closer shot of the same player reveals him in action, identifiable by his number 10 jersey and captain's armband. His long brown hair is slightly disheveled as he moves forward;  [0:03:22 - 0:03:23]: The player looks ahead with focus and determination visible on his face while continuing his stride;  [0:03:23]: Excited spectators, adorned in team colors of white and red, fervently cheer. A young woman with curly hair is visible, her face painted with a bold red and white design, reflecting her enthusiasm;  [0:03:24]: More of the crowd is shown, their expressions filled with anticipation and excitement. The young woman now has her arms raised, and another fan sporting a blue and red checkered hat is seen next to her;  [0:03:25]: A side profile of the cheering crowd highlights their energetic reactions. The camera focuses on the fan adorned in the checkered hat and another individual, whose arm is extended in an animated cheer;  [0:03:26]: The video cuts back to the player. He clasps his hands over his mouth, overwhelmed with emotion, with yellow-clad spectators in the background adding context to the event's significance;  [0:03:27]: The player remains in a state of emotional reverence, eyes closed and hands still covering his mouth as the expressions of joy and disbelief play across his face;  [0:03:28]: The player appears to be speaking or exclaiming something, hands close to his face as he processes the moment amidst the unfolding match;  [0:03:29]: With a resolute expression, he clenches his fists in front of him, celebrating with teammates and fans. His head bends slightly forward, emphasizing his focused determination;  [0:03:30 - 0:03:31]: He turns to his left, his face filled with joy and satisfaction, continuing to celebrate;  [0:03:32]: The player's celebration continues as he looks towards the sidelines or possibly to teammates, sharing his joy and anticipation;  [0:03:33 - 0:03:34]: The camera shifts to a wide-angle view from behind the goal. The goalie's back is framed, and the opposing player is seen preparing for a decisive kick;  [0:03:34 - 0:03:35]: The goalkeeper, clad in a black jersey, extends both arms horizontally to prepare for the incoming shot. The kicker draws closer to the ball, poised for a strike;  [0:03:35 - 0:03:36]: The moment of strike, the player connects with the ball, sending it towards the goal. The goalie reacts swiftly, diving to his right in an attempt to block;  [0:03:36 - 0:03:37]: The ball is seen on the edge of the net as the goalie misses the save. The player's successful shot sends the ball into the goal, and the net bulges in response to the contact;  [0:03:37 - 0:03:38]: Back view of the net capturing the intensity of the moment with the ball securely in the goal. The goalie lies on the ground, extending his arms in an expression of disappointment or dismay;  [0:03:38 - 0:03:39]: Emotion continues as the successful player bends forward, overwhelmed. The spectators dressed in yellow in the background add to the festive atmosphere with their cheers and reactions;  [0:03:39]: Finishing the sequence, the player is seen shouting in elation, throwing his head back in a victorious gesture with arms slightly raised. The intensity of the moment is amplified by the enthusiastic background and the overall celebration of success.",
+        "questions": [
+            {
+                "task_type": "Causal Reasoning",
+                "question": "Why did the player celebrate by clenching his fists and bending his head forward?",
+                "time_stamp": "00:03:31",
+                "answer": "A",
+                "options": [
+                    "A. He just scored a penalty kick.",
+                    "B. He blocked a shot.",
+                    "C. He made a successful pass.",
+                    "D. He received a yellow card."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_2_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:00 - 0:05:20] [0:05:00 - 0:05:01]: A person wearing a checkered red and white uniform is seen running in motion. The individual appears to be on a grassy field with a large digital advertisement board in the background displaying white geometric patterns. Behind the board, there are several people holding cameras and wearing different shades of blue, green, and brown clothing. There are also flags and banners with varied designs hung in the background. [0:05:01 - 0:05:02]: The same player from the previous frame is in the action of kicking a ball towards the goal. The ball is captured mid-air nearing the goalpost. The background remains largely unchanged with several individuals and equipment visible. [0:05:02 - 0:05:03]: The frame shows a diving goalkeeper wearing black gloves and uniform. The goalkeeper attempts to stop the incoming ball. The ball is seen very close to the goal line, just beyond the goalkeeper's reach. The net and more audience members can be seen in the background. [0:05:03 - 0:05:04]: The goalkeeper is now on the ground, having missed the ball. The ball appears to be inside the goalpost. The audience and equipment still present in the background. [0:05:04 - 0:05:05]: The player from earlier is now shown celebrating passionately with clenched fists. The player's facial expression matches that of jubilation. In the background, audience members draped in green, yellow, and other colors are visible amongst blurred crowds. [0:05:05 - 0:05:06]: The celebrating player continues to display excitement, and his clenched fists and strong posture remain prominent. The audience, many clapping and cheering, is captured behind the player. [0:05:06 - 0:05:07]: The same celebrating player is still emotionally engaged with the scene, his facial expression showing strong emotion. The surrounding audience remains active and engaged as well. [0:05:07 - 0:05:08]: The player continues celebration. The foreground focus remains on the player, with the audience still visible in the background, some holding up phones or cameras. [0:05:08 - 0:05:09]: The next frame shifts to another individual with bleached hair and tattoos on their arms, wearing a yellow shirt. This individual's expression appears intense and focused, as they stand closely with another person wearing matching attire. [0:05:09 - 0:05:10]: The same person from the previous frame is now seen with their eyes closed and mouth open, appearing to shout or express strong emotion. The individual’s furrowed brow adds to the intensity of the moment. [0:05:10 - 0:05:11]: The individual's head is slightly bowed down, and they have a shiny substance, possibly celebratory confetti or something else reflective, on their head. The background still shows people with vivid colors of yellow and bright lights. [0:05:11 - 0:05:12]: A new individual is introduced, wearing the same yellow uniform, and they are holding a football. The person's expression is focused, with a serious demeanor indicating preparation. [0:05:12 - 0:05:13]: The same individual is seen looking down at the ball in their hands, remaining focused. The background shows audience members and security personnel as well. [0:05:13 - 0:05:14]: The individual continues holding and looking at the ball with great focus. The setting remains the same with audiences filling the stands and some visible details such as stairs in the arena. [0:05:14 - 0:05:15]: The frame captures the same individual intently preparing for what appears to be a crucial moment, possibly taking a penalty shot. The scoring board shows \"Croatia 4 - 2 Brazil\" with other visual elements indicating it’s a penalty shootout. [0:05:15 - 0:05:16]: The player brings the ball closer to their face and kisses it with great intentionality. The display board and the scores remain in the view behind them. [0:05:16 - 0:05:17]: The person slightly bends down, still with the ball in hand, preparing for an imminent engagement with the ball. [0:05:17 - 0:05:18]: The same individual is now seen fully bent and concentrating, nearing the moment of possible contact with the ball. The surroundings include diverse arena details and audience expressions. [0:05:18 - 0:05:19]: The frame shows the individual still in concentration, just before they likely engage with the ball. The bright colors of the audience and the arena’s elements add to the anticipation.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What is the current score shown on the scoreboard?",
+                "time_stamp": "00:05:15",
+                "answer": "B",
+                "options": [
+                    "A. Croatia 3 - 2 Brazil.",
+                    "B. Croatia 4 - 2 Brazil.",
+                    "C. Croatia 4 - 3 Brazil.",
+                    "D. Croatia 5 - 2 Brazil."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_2_real.mp4"
+    }
+]

@@ -1,0 +1,107 @@
+[
+    {
+        "time": "0:00:00 - 0:00:20",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:09]: A hand holds a set of keychains, displayed prominently against a beige background. The keychains are made of clear acrylic discs with different colored backdrops—pink, purple, blue, and mint green. Each keychain has a name written on it: Holly on the pink disc, Katie on the purple, Millie on the blue, and Eloy on the mint green. Each name is accompanied by a small white heart underneath. The keychains are attached to rings and have tassels in various colors: pink, blue, and green, which complement the discs. The clear discs show a glossy finish, reflecting some light. The hand holding them is slightly rotated to showcase different angles of the keychains. [0:00:09 - 0:00:10]: The screen transitions to black. [0:00:10 - 0:00:13]: White text on a black background appears, reading \"Personalized Acrylic Key Chain.\" [0:00:13 - 0:00:14]: The screen remains black. [0:00:14 - 0:00:18]: More white text appears, reading \"If you would like to see how I designed these keychains, watch until the end.\" [0:00:18]: The screen fades to black again. [0:00:19]: The scene changes to a workspace. A compact, teal-colored Cricut cutting machine is positioned at the top of the frame. Below it, there's a green cutting mat, gridded with white lines, placed on a black-checkered work surface. Two hands are visible, preparing the materials for crafting.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the person doing right now?",
+                "time_stamp": "00:00:20",
+                "answer": "D",
+                "options": [
+                    "A. Holding a set of keychains.",
+                    "B. Displaying a text message.",
+                    "C. Operating a Cricut cutting machine.",
+                    "D. Preparing materials for crafting."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_49_real.mp4"
+    },
+    {
+        "time": "0:02:00 - 0:02:20",
+        "captions": "[0:02:00 - 0:02:20] [0:02:01 - 0:02:02]: Both hands, wearing a magenta sweater, are handling several pieces of translucent, circular plastic sheets and square white papers placed on a gray grid-patterned surface. A small round piece with a light blue color is being lifted by the right hand. [0:02:03]: The left hand holds a piece of paper with a pastel pink color, while the right hand is peeling off a sticker with blue paint. [0:02:04]: The right hand now holds a purple sticker, previously peeled off from the white backing paper, while the left hand holds the same pastel pink paper. [0:02:05]: The purple sticker is now being attached to one of the circular, translucent plastic sheets with the hands carefully positioning it. [0:02:06]: The hands continue positioning and pressing down the purple sticker onto the translucent sheet, ensuring it is aligned. [0:02:07]: The hands are still pressing and adjusting the sticker to ensure it adheres correctly to the circular sheet. [0:02:08 - 0:02:09]: The hands remain focused on fixing the purple sticker onto the circular plastic sheet, smoothing out any bubbles or creases. [0:02:10]: The right hand reaches out for another piece of paper, while the left continues to handle the circle with the purple sticker. [0:02:11 - 0:02:12]: The left hand places the circular sheet with the purple sticker back onto the surface. A new piece of white backing paper with what appears to be a pink sticker is being lifted with both hands. [0:02:13 - 0:02:14]: The right hand begins peeling off a pink sticker from the backing paper while the left hand supports the paper. [0:02:15]: Both hands work together to peel off the entire pink sticker from the white backing paper. [0:02:16]: The pink sticker is now fully removed, and the right hand holds it mid-air while the left hand sets the backing paper aside. [0:02:17 - 0:02:18]: Both hands begin positioning the pink sticker onto another translucent circular sheet, ensuring it is correctly aligned. [0:02:19 - 0:02:20]: The hands continue adjusting and fixing the pink sticker onto the circular sheet, smoothing out its surface to ensure proper adhesion.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What are the hands doing right now?",
+                "time_stamp": "0:02:14",
+                "answer": "C",
+                "options": [
+                    "A. Peeling off a blue sticker.",
+                    "B. Attaching a purple sticker to a circular sheet.",
+                    "C. Adjusting and smoothing out a pink sticker.",
+                    "D. Lifting a piece of pastel pink paper."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_49_real.mp4"
+    },
+    {
+        "time": "0:04:00 - 0:04:20",
+        "captions": "[0:04:00 - 0:04:20] [0:00:01 - 0:00:05]: From the first-person perspective, a pair of hands is visible manipulating keyrings with the use of a blue-handled tool. The backdrop features a gray grid-patterned mat. There are four round keychains near the top of the frame, each with names and pastel colors. The keychains have different colored tassels: blue, pink, green, and purple. [0:00:06 - 0:00:12]: The hands continue working on the keyring. The tool is held in the right hand, used to manipulate a silver component attached to a pink-colored keychain that bears the name \"Holly” along with a small heart symbol underneath it. The activity focuses on attaching or modifying the keychain attachments. [0:00:13 - 0:00:15]: The person’s left hand moves the pink keychain with \"Holly\" positioned centrally, suggesting completion of the adjustment. Meanwhile, the other hand prepares to adjust or attach another part of the keychain. [0:00:16 - 0:00:20]: The right hand with the tool moves closer to the camera, forming a more detailed view of the attachment process. Moments later, the hands present all the keychains in one hand, showing the names \"Millie\", \"Holly\", \"Betty\", and \"Katie\", each with their distinctive color and small tassel. [0:00:21 - 0:00:25]: The keychains are held more steadily, each clearly displayed. The hands briefly shift the position to allow a full view of the names and tassels against the gray background. [0:00:26 - 0:00:30]: A transition occurs where the hand moves to display the keychains against a plain background instead of the grid mat. The names and tassels remain in clear view, capturing the keychains' intricacies and details. The colors and design elements, such as small hearts beside the names, are distinctly visible.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What are the hands doing right now?",
+                "time_stamp": "00:04:05",
+                "answer": "C",
+                "options": [
+                    "A. Stitching a piece of fabric.",
+                    "B. Writing on a notepad.",
+                    "C. Adjusting a pink keychain.",
+                    "D. Sorting different colored beads."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_49_real.mp4"
+    },
+    {
+        "time": "0:06:00 - 0:06:20",
+        "captions": "[0:06:00 - 0:06:20] [0:06:05 - 0:06:06]: The video begins with the screen displaying a software interface with a grid background. On the screen, various design elements are positioned. At the top, there are eight blobs of colors including beige, light blue, pink, pastel purple, yellow, lavender, green, and another shade of pink, all aligned in a row. Below these colored blobs, there are three large black circles placed horizontally across the middle of the screen. To the right of these black circles, the word \"Shelby\" is written in a stylish script font three times at different locations and sizes. [0:06:06 - 0:06:07]: The word \"Katie\" is typed and added beneath the second black circle, replacing one of the \"Shelby\" texts. The words \"Shelby\" and \"Katie\" appear to be used for designing purposes on this grid-based interface. [0:06:07 - 0:06:09]: \"Katie\" continues to be adjusted and repositioned under the second black circle. The text \"Shelby\" still remains under the first black circle and to the far right. [0:06:09 - 0:06:11]: No significant changes occur. The design on the screen remains mostly the same with an emphasis on the text \"Katie,\" \"Shelby,\" and the black circles. [0:06:11 - 0:06:12]: Another text box appears next to the third circle, but no text has been typed in it. The cursor may be preparing to add another name or word within the editable space. [0:06:12 - 0:06:13]: The new text box remains empty while the design involves the black circles and the various positioned text elements such as \"Shelby\" and \"Katie.\" [0:06:13 - 0:06:14]: The text box continues to exist to the right of the third black circle without any content. The design remains consistent with black circles and corresponding names. [0:06:14 - 0:06:15]: The empty text box remains. The design interface still shows no additional movements or adjustments. [0:06:15 - 0:06:16]: The word \"Millie\" is typed out within the previously empty text box to the right of the third black circle. The layout now includes \"Shelby,\" \"Katie,\" and \"Millie\" under the respective black circles. [0:06:16 - 0:06:17]: The design elements such as \"Shelby,\" \"Katie,\" and \"Millie\" are being fine-tuned possibly for alignment under each black circle within the software interface. [0:06:17 - 0:06:18]: The word Millie is now clearly seen along with \"Shelby\" and \"Katie,\" arranged under the black circles. [0:06:18 - 0:06:19]: The addition of another text box to the right of \"Shelby\" but it remains empty. Text editing and positioning tools visible on the right side of the interface. [0:06:19 - 0:06:20]: The previously empty text box next to \"Shelby\" has its cursor visible, preparing for text input. Other elements remain unchanged. [0:06:20 - 0:06:21]: The design screen with black circles, colored blobs, and texts \"Katie\", \"Shelby,\" and \"Millie\" remains mostly constant. [0:06:21 - 0:06:22]: The empty text box appears again next to \"Shelby.\" The positioning of elements on the screen remains the same. [0:06:22]: The newly added text, \"Holly,\" is placed in the previously empty text box next to \"Shelby.\" All text elements are well-aligned and visible. [0:06:22 - 0:06:23]: Enlarged view of the text shows the names are now clearly seen, with \"Katie\", \"Shelby\", \"Millie\", and newly added \"Holly\" arranged orderly. [0:06:23 - 0:06:24]: The design focuses on the three black circles while the text elements, \"Katie,\" \"Shelby,\" \"Millie,\" and \"Holly\" are arranged for a clear view. [0:06:24 - 0:06:25]: A closer look at \"Shelby,\" showing positioning and editing tools being used. Text alignment features are visible for precision in the design. [0:06:25]: The video ends with the focus on the text elements and their proper alignment. The words \"Katie\", \"Shelby\", \"Millie,\" and \"Holly\" are neatly arranged under the row of black circles.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What name is being typed out right now?",
+                "time_stamp": "00:06:07",
+                "answer": "C",
+                "options": [
+                    "A. Shelby.",
+                    "B. Katie.",
+                    "C. Millie.",
+                    "D. Holly."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_49_real.mp4"
+    },
+    {
+        "time": "0:08:00 - 0:08:20",
+        "captions": "[0:08:00 - 0:08:20] [8:08:05 - 8:08:07]: Four circular designs are displayed horizontally across a grid background. From left to right, the circles contain names: \"Shelby\" on a mint green background, \"Katie\" on a purple background, \"Millie\" on a light blue background, and \"Holly\" on a pink background, all in black cursive writing. [8:08:08 - 8:08:11]: The \"Shelby\" circle is removed, leaving three circles. The \"Katie\" circle now has a small pink heart shape, while the \"Millie\" and \"Holly\" circles remain unchanged. [8:08:12 - 8:08:15]: A small red heart shape is added to the \"Millie\" circle. The \"Katie\" and \"Holly\" circles remain the same. [8:08:16 - 8:08:18]: Another small black heart is added to the \"Millie\" circle. The \"Katie\" and \"Holly\" circles remain the same. [8:08:19 - 8:08:21]: The \"Millie\" circle now has a total of three small hearts: one red and two black. The \"Katie\" and \"Holly\" circles remain the same. [8:08:22 - 8:08:25]: The \"Katie\" circle remains the same with its single pink heart. The \"Millie\" circle is unchanged with its three small hearts. A small black heart is added to the \"Holly\" circle. [8:08:26 - 8:08:29]: Both the \"Millie\" and \"Holly\" circles now each have an additional small heart, making three small hearts in the \"Millie\" circle and one in the \"Holly\" circle. The \"Katie\" circle remains the same. [8:08:30 - 8:08:33]: A black heart is added below the names in all three circles: \"Katie,\" \"Millie,\" and \"Holly.\" [8:08:34 - 8:08:37]: A black heart appears in all three circles. The circles remain in place on the grid background. The \"Katie\" circle is moving out of view to the left. [8:08:38 - 8:08:41]: The frames show the three circles \"Katie,\" \"Millie,\" and \"Holly,\" each with a black heart below their names. The background shows a grid layout.  [8:08:41]: The \"Katie\" circle has moved completely out of sight, leaving just the \"Millie\" and \"Holly\" circles. The grid background remains the same.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the \"Katie\" circle doing right now?",
+                "time_stamp": "0:08:10",
+                "answer": "A",
+                "options": [
+                    "A. Moving to the left.",
+                    "B. Adding a heart shape.",
+                    "C. Displaying a light blue background.",
+                    "D. Removing the label."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_49_real.mp4"
+    }
+]
