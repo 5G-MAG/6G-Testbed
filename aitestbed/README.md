@@ -430,8 +430,29 @@ For **Realtime Video Analysis** and **Chat with Token ID** scenarios, additional
   - [vqgan.yaml](https://huggingface.co/spaces/Junfeng5/Liquid_demo/resolve/main/chameleon/vqgan.yaml)
 - **VLM Model:** Download all model files, put them in `aiortc-main-clean/src/aiortc/liquid/checkpoints/model`
   - [Liquid_V1_7B](https://huggingface.co/Junfeng5/Liquid_V1_7B/tree/main)
-- **Dataset:** Download dataset, unzip to `aitestbed/examples/assets/dataset`
-  - [StreamingBench Dataset](https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Output_1-25.zip)
+- **Dataset:** the scenario supports two task classes, each needing its own dataset and its own `configs/scenarios.yaml` entry:
+
+  | Task class | Dataset | Unzip to |
+  |:-----------|:--------|:---------|
+  | `proactive_output` | [Proactive Output_1-25.zip](https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Output_1-25.zip) | `aitestbed/examples/assets/dataset` |
+  | `real` | [Real-Time Visual Understanding_1-50.zip](https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip) | `aitestbed/examples/assets/dataset_real` |
+
+  `proactive_output` scenario config:
+  ```yaml
+  realtime_video_understanding:
+    type: "realtime_video_understanding"
+    description: "Real-time visual understanding via VLM model"
+    provider: "vlm-local"
+    model: "liquid"
+    target_fps: 2
+    stream: true
+    task_config:
+      task_class: "proactive_output"
+      po_thd: 3
+      results_dir: "examples/assets/dataset/"
+      video_paths: "examples/assets/dataset/"
+    prompts:
+      - "What is in the video? Answer directly!"
 
 **2. Chat with Token ID (`chat_token`)**
 
