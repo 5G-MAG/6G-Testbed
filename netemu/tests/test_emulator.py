@@ -256,3 +256,30 @@ class TestContextManager:
                 pass
 
         mock_clear.assert_called_once()
+
+
+def test_check_sudo_falls_back_to_scoped_tc_probe(monkeypatch):
+    """Hosts with command-scoped NOPASSWD rules (tc/ip/tcpdump only) must
+    report passwordless sudo even though ``sudo -n true`` is denied."""
+    import subprocess as sp
+    from netemu.emulator import NetworkEmulator
+
+    def fake_run(cmd, **kwargs):
+        class R:
+            returncode = 0 if "tc" in cmd else 1
+        return R()
+
+    monkeypatch.setattr(sp, "run", fake_run)
+    emu = NetworkEmulator.__new__(NetworkEmulator)
+    emu._sudo_available = None
+    assert emu.check_sudo() is True
+
+    def fake_run_all_denied(cmd, **kwargs):
+        class R:
+            returncode = 1
+        return R()
+
+    monkeypatch.setattr(sp, "run", fake_run_all_denied)
+    emu = NetworkEmulator.__new__(NetworkEmulator)
+    emu._sudo_available = None
+    assert emu.check_sudo() is False

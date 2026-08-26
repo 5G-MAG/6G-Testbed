@@ -143,21 +143,32 @@ class NetworkEmulator:
 
     def check_sudo(self) -> bool:
         """
-        Check if sudo is available without password.
+        Check if sudo is available without a password for the commands
+        netemu actually runs.
+
+        Probes ``sudo -n true`` first (blanket passwordless sudo), then
+        falls back to ``sudo -n tc qdisc show`` so that hosts with
+        command-scoped NOPASSWD rules (e.g. an /etc/sudoers.d entry listing
+        only tc/ip/tcpdump) are detected correctly. Probing only ``true``
+        reports False on such hosts even though every command netemu issues
+        would succeed.
 
         Returns:
-            True if passwordless sudo is available.
+            True if passwordless sudo covers netemu's commands.
         """
         if self._sudo_available is not None:
             return self._sudo_available
 
-        try:
-            result = subprocess.run(
-                ["sudo", "-n", "true"], capture_output=True, timeout=5
-            )
-            self._sudo_available = result.returncode == 0
-        except Exception:
-            self._sudo_available = False
+        self._sudo_available = False
+        for probe in (["sudo", "-n", "true"],
+                      ["sudo", "-n", "tc", "qdisc", "show"]):
+            try:
+                result = subprocess.run(probe, capture_output=True, timeout=5)
+                if result.returncode == 0:
+                    self._sudo_available = True
+                    break
+            except Exception:
+                continue
 
         return self._sudo_available
 
