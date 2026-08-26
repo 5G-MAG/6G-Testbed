@@ -29,11 +29,22 @@ from .direct_search import (
 from .music_agent import MusicAgentScenario, MusicResearchAgentScenario
 from .playwright_agent import PlaywrightAgentScenario
 from .trading_agent import TradingAgentScenario
+from .weather_agent import WeatherAgentScenario, NavigationWeatherAgentScenario
+from .maps_agent import MapsAgentScenario
+from .exa_search_agent import ExaSearchAgentScenario
+from .twilio_agent import TwilioCommunicationAgentScenario
+from .smart_home_agent import SmartHomeAgentScenario
 from .realtime import (
     RealtimeConversationScenario,
     RealtimeWebRTCConversationScenario,
     RealtimeAudioScenario,
     RealtimeAudioWebRTCScenario,
+)
+from .openclaw_agent import OpenClawScenario
+from .a2a_agent import (
+    A2ASingleTaskScenario,
+    A2AStreamingScenario,
+    A2AMultiAgentScenario,
 )
 
 __all__ = [
@@ -56,6 +67,18 @@ __all__ = [
     "PlaywrightAgentScenario",
     # Trading / market data agent (Alpaca MCP)
     "TradingAgentScenario",
+    # Weather / environment agent (Open-Meteo, no API key)
+    "WeatherAgentScenario",
+    # Combined navigation + weather agent (Google Maps + Open-Meteo)
+    "NavigationWeatherAgentScenario",
+    # Maps / navigation agent (Google Maps)
+    "MapsAgentScenario",
+    # Exa.ai search agent
+    "ExaSearchAgentScenario",
+    # Twilio communications agent (SMS / WhatsApp)
+    "TwilioCommunicationAgentScenario",
+    # Smart home agent (Home Assistant)
+    "SmartHomeAgentScenario",
     # Direct search (no MCP)
     "DirectSearchClient",
     "DirectWebSearchScenario",
@@ -69,4 +92,10 @@ __all__ = [
     "RealtimeWebRTCConversationScenario",
     "RealtimeAudioScenario",
     "RealtimeAudioWebRTCScenario",
+    # OpenClaw local personal-assistant agent
+    "OpenClawScenario",
+    # A2A (Agent2Agent protocol)
+    "A2ASingleTaskScenario",
+    "A2AStreamingScenario",
+    "A2AMultiAgentScenario",
 ]

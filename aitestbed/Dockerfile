@@ -4,19 +4,19 @@
 # =============================================================================
 # Stage 1: Node.js builder for MCP servers
 # =============================================================================
-FROM node:20-slim AS node-builder
+FROM node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS node-builder
 
 # Install npm-based MCP servers (only those actually used in mcp_servers.yaml)
 RUN npm install -g \
-    @modelcontextprotocol/server-brave-search \
-    @modelcontextprotocol/server-filesystem \
-    @modelcontextprotocol/server-memory \
+    @modelcontextprotocol/server-brave-search@0.6.2 \
+    @modelcontextprotocol/server-filesystem@2026.7.10 \
+    @modelcontextprotocol/server-memory@2026.7.4 \
     && npm cache clean --force
 
 # =============================================================================
 # Stage 2: Python application
 # =============================================================================
-FROM python:3.11-slim AS runtime
+FROM python:3.11-slim@sha256:94c50be2dc994b873b55bc123e95e6dbade08095b3dfd790f51c34de3f08cbb7 AS runtime
 
 # Labels
 LABEL maintainer="6G AI Traffic Testbed"
@@ -81,16 +81,18 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true \
     PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Create non-root user for security (but allow sudo for network emulation)
-# The emulator uses: tc, ip, modprobe (for IFB), tcpdump, iptables
-# Paths vary across distros so we grant by command name via ALL
+# Create a non-root user with only the privileged network/capture commands the
+# testbed needs. It does not receive unrestricted passwordless root access.
 RUN useradd -m -s /bin/bash testbed \
     && apt-get update && apt-get install -y sudo \
-    && echo "testbed ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+    && printf '%s\n' \
+      'testbed ALL=(root) NOPASSWD: /usr/sbin/tc *, /usr/sbin/ip *, /usr/sbin/modprobe *, /usr/bin/tcpdump *, /usr/sbin/iptables *, /usr/bin/true' \
+      > /etc/sudoers.d/testbed-network \
+    && chmod 0440 /etc/sudoers.d/testbed-network \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
-WORKDIR /app
+WORKDIR /app/aitestbed
 
 # Copy netemu package and install it first (separate package)
 # Build context must be the repo root: docker build -f aitestbed/Dockerfile .
@@ -99,13 +101,16 @@ RUN pip install --no-cache-dir /tmp/netemu && rm -rf /tmp/netemu
 
 # Copy requirements and install Python dependencies
 # (netemu is already installed above from the sibling directory)
-COPY aitestbed/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir playwright \
-    && playwright install chromium --with-deps || true
+COPY aitestbed/requirements.lock /tmp/aitestbed-requirements.lock
+COPY training/requirements.lock /tmp/training-requirements.lock
+RUN pip install --no-cache-dir \
+    -r /tmp/aitestbed-requirements.lock \
+    -r /tmp/training-requirements.lock
 
-# Copy application code
-COPY aitestbed/ .
+# Copy both sibling components so run_full_tests.sh can execute its documented
+# dataset/training stages inside the image.
+COPY aitestbed/ /app/aitestbed/
+COPY training/ /app/training/
 
 # Create necessary directories
 RUN mkdir -p \

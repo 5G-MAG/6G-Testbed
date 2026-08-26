@@ -9,7 +9,7 @@ scenarios:
   #     already apply loopback tc rules internally when mcp_transport=http.
   # Scenario-level timing fields:
   #   inter_prompt_delay_sec: seconds to sleep BETWEEN prompts within the same
-  #     session (simulates user think-time). Default 0 — prompts fire back-to-back.
+  #     session (simulates user think-time). Default 0, prompts fire back-to-back.
   #     Skipped before the first prompt. Applied by all multi-prompt scenarios
   #     (chat, multimodal, image, video, computer_use, realtime, agent variants).
 
@@ -269,14 +269,14 @@ scenarios:
     type: "multimodal"
     inter_prompt_delay_sec: 0  # sec between prompts; 0 = back-to-back
     description: "Multimodal input analysis (PDF + images + text)"
-    provider: "gemini"
-    model: "gemini-3-flash-preview"
-    # Per-prompt media — one entry per prompt, in order.
+    provider: "anthropic"
+    model: "claude-sonnet-4-6"
+    # Per-prompt media, one entry per prompt, in order.
     # First turn uploads a PDF (uplink-heavy, inline_data Part); remaining
     # three upload images. Resolved relative to the orchestrator's CWD
     # (aitestbed/).
     media:
-      - {document: "../../Math_olympiad.pdf"}
+      - {document: "examples/assets/Math_olympiad.pdf"}
       - {image: "examples/assets/network_diagram.png"}
       - {image: "examples/assets/traffic_pattern.png"}
       - {image: "examples/assets/latency_heatmap_sample.png"}
@@ -656,6 +656,199 @@ scenarios:
       - "Go to https://httpbin.org/get, read the JSON response displayed on the page, and summarize it."
 
   # =============================================================================
+  # Maps / Navigation Agent Scenarios (Google Maps MCP)
+  # Requires GOOGLE_MAPS_API_KEY
+  # TR 22.870: UC 6.6, 6.9, 6.21, 6.44, 6.47, 6.51
+  # =============================================================================
+
+  maps_route_planning:
+    type: "maps_agent"
+    inter_prompt_delay_sec: 0
+    description: "Multi-stop route optimization using Google Maps MCP"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "maps"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 15
+    prompts:
+      - "Plan a route from Beijing to Chengdu via Xi'an. Compare driving time, distance, and suggest rest stops near the midpoint."
+      - "Calculate the optimal route from London Heathrow Airport to Cambridge, considering both motorway and A-road options. Find an EV charging station along the way."
+      - "Get directions from Tokyo Station to Mount Fuji 5th Station. What is the driving time and are there any toll roads?"
+
+  maps_local_discovery:
+    type: "maps_agent"
+    inter_prompt_delay_sec: 0
+    description: "Location-aware place search and recommendation"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "maps"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 15
+    prompts:
+      - "Find the 3 nearest EV charging stations to the Eiffel Tower, get their ratings and opening hours, then calculate walking directions to the best-rated one."
+      - "Search for emergency hospitals within 5km of coordinates 48.1351,11.5820 (Munich). Get details for the top 2 results including phone numbers."
+      - "Find 5-star hotels near the Colosseum in Rome. Get details and calculate taxi distance from Fiumicino Airport to the best-rated one."
+
+  maps_traffic_analysis:
+    type: "maps_agent"
+    inter_prompt_delay_sec: 0
+    description: "Multi-point distance matrix for traffic study"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "maps"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 10
+    prompts:
+      - "Calculate the travel time matrix between these 5 locations: Tokyo Station, Shibuya, Shinjuku, Ikebukuro, Ueno. Which pair has the worst commute?"
+      - "Compare driving distances between San Francisco, San Jose, Oakland, and Palo Alto. Build a distance matrix and identify the shortest inter-city trip."
+
+  # =============================================================================
+  # Exa Neural Search Agent Scenarios
+  # Requires EXA_API_KEY (free tier)
+  # TR 22.870: UC 6.32 (knowledge), 6.51 Cat.3 (knowledge DBs)
+  # =============================================================================
+
+  exa_research:
+    type: "exa_search_agent"
+    inter_prompt_delay_sec: 0
+    description: "Deep neural search with content extraction"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "exa"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 10
+    prompts:
+      - "Search for the latest 3GPP Release 20 AI/ML specifications published in 2026. Get the full content of the top 3 results and summarize the key requirements."
+      - "Find recent academic papers on AI agent traffic characterization over mobile networks. Extract content from the top 3 and identify common measurement methodologies."
+      - "Research how 6G networks will support autonomous driving AI agents. Find and extract the 3 most relevant technical sources."
+
+  exa_similarity_search:
+    type: "exa_search_agent"
+    inter_prompt_delay_sec: 0
+    description: "Find-similar pattern for related resource discovery"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "research"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 12
+    prompts:
+      - "Find web pages similar to 'https://www.3gpp.org/technologies/6g'. Extract the content of the top 5 results and identify common themes about AI integration in 6G."
+      - "Search for 'MCP Model Context Protocol agent tools' and then find similar pages to the best result. Summarize the ecosystem of MCP-based AI agent tooling."
+
+  # =============================================================================
+  # Twilio Communication Agent Scenarios
+  # Requires TWILIO_ACCOUNT_SID + TWILIO_API_KEY + TWILIO_API_SECRET (sends real SMS)
+  # TR 22.870: UC 6.46 (elderly care alerts), 6.47 (safety), 6.62 (rescue)
+  # =============================================================================
+
+  twilio_emergency_notification:
+    type: "twilio_agent"
+    inter_prompt_delay_sec: 0
+    description: "Emergency alert dispatch via SMS with phone verification"
+    disabled: true
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "communication"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 8
+    prompts:
+      - "A distress signal was detected from a user at coordinates 48.8566,2.3522. Look up the phone number ${TWILIO_TEST_PHONE_NUMBER} to verify it is reachable. Then send an SMS alert with the location details and check delivery status."
+      - "An elderly person has fallen at home. Send an SMS to the emergency contact at ${TWILIO_TEST_PHONE_NUMBER} saying 'Fall detected at home. Heart rate elevated. Awaiting response.' Then verify the message was delivered."
+      - "Send a test alert SMS to ${TWILIO_TEST_PHONE_NUMBER} with message 'Testbed alert: Network QoS degradation detected in sector 7.' List recent messages to confirm delivery."
+
+  twilio_communication_chain:
+    type: "twilio_agent"
+    inter_prompt_delay_sec: 0
+    description: "Multi-step communication workflow with conditional logic"
+    disabled: true
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "communication"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 10
+    prompts:
+      - "Look up ${TWILIO_TEST_PHONE_NUMBER}. If it is a mobile number, send an SMS: 'Smart home alert: Motion detected in living room while away mode is active.' Then fetch the message details to confirm delivery status."
+      - "Look up ${TWILIO_TEST_PHONE_NUMBER}. Send two SMS messages to it: the first saying 'Primary alert: System check required' and the second saying 'Secondary alert: Backup notification.' Verify both deliveries."
+
+  # =============================================================================
+  # Smart Home / IoT Agent Scenarios (Home Assistant MCP)
+  # Requires a reachable Home Assistant + HA_ACCESS_TOKEN
+  # TR 22.870: UC 6.8 (device agents), 6.45 (UE coordination), 6.46 (elderly care)
+  # =============================================================================
+
+  smart_home_monitoring:
+    type: "smart_home_agent"
+    inter_prompt_delay_sec: 0
+    description: "Multi-device status monitoring and coordination"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "smart_home"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 20
+    prompts:
+      - "List all available devices. Check the status of any motion sensors and temperature sensors. If any motion is detected, get the last 5 minutes of history for that sensor and summarize the situation."
+      - "Check the state of all lights, locks, and the thermostat. Report which lights are on, whether all doors are locked, and the current temperature setting."
+      - "Get the state of the front door lock, the garage door, and the alarm system. Report the security status of the home."
+
+  smart_home_coordination:
+    type: "smart_home_agent"
+    inter_prompt_delay_sec: 0
+    description: "Multi-device orchestration and automation"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "smart_home"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 20
+    prompts:
+      - "Turn on the living room lights, set the thermostat to 22C, check the front door lock status, and if it is unlocked, lock it. Report all changes made."
+      - "It is bedtime. Turn off all lights, lock all doors, set the thermostat to 18C, and arm the alarm system. Verify each action was successful."
+      - "A guest is arriving. Turn on the porch light, unlock the front door, and set the living room temperature to 21C. Then check the doorbell camera status."
+
+  # =============================================================================
+  # Weather / Environment Agent Scenarios (Open-Meteo, no API key)
+  # TR 22.870: UC 6.21 (outdoor safety), 6.47 (risk assessment), 6.51 (driving)
+  # =============================================================================
+
+  weather_risk_assessment:
+    type: "weather_agent"
+    inter_prompt_delay_sec: 0
+    description: "Environmental risk assessment for personal safety"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "weather"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 10
+    prompts:
+      - "Get the current weather and 48-hour forecast for Paris, France. Assess outdoor safety risks including temperature, precipitation, wind speed, and UV index."
+      - "Check current weather and air quality for Beijing. Is it safe for outdoor exercise today? Provide specific AQI values and health recommendations."
+      - "Get the 3-day forecast for Tokyo. Identify any time windows with adverse conditions (heavy rain, strong winds, extreme heat) and suggest safe outdoor activity periods."
+
+  weather_route_planning:
+    type: "navigation_weather_agent"
+    inter_prompt_delay_sec: 0
+    description: "Weather-aware route planning combining maps and forecasts"
+    provider: "openai"
+    model: "gpt-5-mini"
+    server_group: "navigation"
+    mcp_transport: "http"
+    loopback_interface: "lo"
+    max_tool_calls: 15
+    prompts:
+      - "Plan a driving route from Munich to Vienna. Check weather at Munich, a midpoint near Salzburg, and Vienna. Flag any sections with adverse driving conditions."
+      - "Get directions from London to Edinburgh. Check weather at London, Birmingham (midpoint), and Edinburgh. Are there any weather-related driving risks on this route?"
+      - "Plan a route from San Francisco to Los Angeles via the coastal highway. Check weather at 3 points along the route and flag fog, rain, or high wind risks."
+
+  # =============================================================================
   # Direct Web Search Scenarios (No MCP - Multi-threaded HTTP)
   # =============================================================================
 
@@ -746,6 +939,120 @@ scenarios:
       - "deep learning"
       - "neural networks"
       - "computer vision"
+
+  # =============================================================================
+  # OpenClaw, local self-hosted personal-assistant agent (gateway on lo:18789)
+  # =============================================================================
+  # OpenClaw calls its own LLM inside the Node process, so provider is the
+  # no-LLM stub here. The control channel (lo:18789) is shaped + captured via
+  # loopback_ports; OpenClaw's LLM/tool egress is shaped by the main interface.
+  # Requires: npm install -g openclaw@latest && openclaw onboard --install-daemon
+  # The exact gateway route / provider config keys are version dependent, pin
+  # gateway_endpoint / drive here once confirmed (see AGENTIC.md "Open items").
+  openclaw_personal_assistant:
+    type: "openclaw_agent"
+    inter_prompt_delay_sec: 0
+    description: "Local OpenClaw personal assistant driving deterministic tasks"
+    provider: "openclaw"
+    model: "openclaw"
+    drive: "cli"                  # "cli" runs `openclaw agent ...`; "http" POSTs to the gateway
+    cli_bin: "openclaw"
+    # -> openclaw agent --json --session-id testbed-<rand> -m "<prompt>" (via the gateway)
+    cli_args: ["agent", "--json", "--session-id", "{session}", "-m", "{prompt}"]
+    gateway_url: "http://127.0.0.1:18789"
+    loopback_ports: [18789]
+    task_timeout_sec: 180
+    prompts:
+      - "List my three most urgent tasks for today and summarize each in one sentence."
+      - "Draft a short calendar note reminding me to review the 6G media study contributions tomorrow morning."
+
+  # =============================================================================
+  # A2A (Agent2Agent protocol), local reproducible agents on loopback
+  # =============================================================================
+  # Local A2A agents are launched as subprocesses on fixed loopback ports and
+  # shaped/captured like MCP-over-HTTP. No API keys required (deterministic
+  # agents). Requires: pip install a2a-sdk.
+  a2a_single_task_local:
+    type: "a2a_single_task"
+    inter_prompt_delay_sec: 0
+    description: "A2A non-streaming message/send against a local echo agent"
+    provider: "a2a"
+    model: "echo"
+    streaming: false
+    loopback_ports: [9001]
+    target_port: 9001
+    agents:
+      - module: "a2a_agents.echo_agent"
+        port: 9001
+        args: ["--behavior", "echo", "--stream-chunks", "1"]
+    prompts:
+      - "Summarize the goals of the 6G media study in one sentence."
+      - "What network conditions most affect agent-to-agent traffic?"
+
+  a2a_streaming_local:
+    type: "a2a_streaming"
+    inter_prompt_delay_sec: 0
+    description: "A2A streaming message/stream (SSE) against a local echo agent"
+    provider: "a2a"
+    model: "echo"
+    streaming: true
+    loopback_ports: [9001]
+    target_port: 9001
+    agents:
+      - module: "a2a_agents.echo_agent"
+        port: 9001
+        args: ["--behavior", "echo", "--stream-chunks", "6", "--stream-delay-ms", "40"]
+    prompts:
+      - "Describe how streaming artifact updates arrive over A2A as a short paragraph of several words."
+
+  a2a_multi_agent_local:
+    type: "a2a_multi_agent"
+    inter_prompt_delay_sec: 0
+    description: "A2A multi-agent delegation: orchestrator fans out to two echo agents"
+    provider: "a2a"
+    model: "orchestrator"
+    streaming: false
+    loopback_ports: [9001, 9002, 9003]
+    target_port: 9003
+    agents:
+      - module: "a2a_agents.echo_agent"
+        port: 9001
+        args: ["--behavior", "echo"]
+      - module: "a2a_agents.echo_agent"
+        port: 9002
+        args: ["--behavior", "upper"]
+      - module: "a2a_agents.orchestrator_agent"
+        port: 9003
+        args: ["--downstream", "http://127.0.0.1:9001,http://127.0.0.1:9002"]
+    prompts:
+      - "Coordinate a summary of 6G agentic traffic across your downstream agents."
+
+  # Remote A2A variants (opt-in): point at an external A2A agent. Set the
+  # A2A_REMOTE_AGENT_URL env var (or a literal agent_card_url). Shaped by the
+  # main-interface egress netem; captured by the primary pcap.
+  a2a_single_task_remote:
+    type: "a2a_single_task"
+    inter_prompt_delay_sec: 0
+    description: "A2A non-streaming task against a remote/hosted agent"
+    provider: "a2a"
+    model: "remote"
+    streaming: false
+    agent_card_url_env: "A2A_REMOTE_AGENT_URL"   # or agent_card_url: "https://..."
+    request_timeout_sec: 60                       # cold starts / high-RTT profiles
+    # agent_card_path: "/.well-known/agent.json"  # only for agents on the legacy card path
+    prompts:
+      - "Summarize the goals of the 6G media study in one sentence."
+
+  a2a_streaming_remote:
+    type: "a2a_streaming"
+    inter_prompt_delay_sec: 0
+    description: "A2A streaming task against a remote/hosted agent"
+    provider: "a2a"
+    model: "remote"
+    streaming: true
+    agent_card_url_env: "A2A_REMOTE_AGENT_URL"
+    prompts:
+      - "Describe agent-to-agent streaming traffic in a few words."
 
 # Default experiment settings
 defaults:
@@ -944,3 +1251,48 @@ test_matrix:
     prereqs:
       - "http://localhost:8000/v1/models"
       - "examples/assets/test_video.mp4"
+
+  # OpenClaw, opt-in (needs the openclaw runtime installed + a daemon running)
+  - scenario: "openclaw_personal_assistant"
+    phase: "openclaw"
+    profiles: *full_suite_profiles
+    priority: "medium"
+    runner_enabled_by_default: false
+    prereqs:
+      - "cmd:openclaw"
+      - "http://127.0.0.1:18789/"
+
+  # A2A local, opt-in (needs a2a-sdk; agents are launched on loopback)
+  - scenario: "a2a_single_task_local"
+    phase: "a2a"
+    profiles: *full_suite_profiles
+    priority: "high"
+    runner_enabled_by_default: false
+    prereqs:
+      - "pymod:a2a"
+
+  - scenario: "a2a_streaming_local"
+    phase: "a2a"
+    profiles: *full_suite_profiles
+    priority: "high"
+    runner_enabled_by_default: false
+    prereqs:
+      - "pymod:a2a"
+
+  - scenario: "a2a_multi_agent_local"
+    phase: "a2a"
+    profiles: *full_suite_profiles
+    priority: "medium"
+    runner_enabled_by_default: false
+    prereqs:
+      - "pymod:a2a"
+
+  # A2A remote, opt-in (needs a2a-sdk + a reachable external agent)
+  - scenario: "a2a_single_task_remote"
+    phase: "a2a"
+    profiles: *full_suite_profiles
+    priority: "low"
+    runner_enabled_by_default: false
+    prereqs:
+      - "pymod:a2a"
+      - "A2A_REMOTE_AGENT_URL"

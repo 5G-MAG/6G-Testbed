@@ -1,35 +1,33 @@
 """
-Trading / Market Data Agent Scenario for the 6G AI Traffic Testbed.
+Maps / Navigation Agent Scenario for the 6G AI Traffic Testbed.
 
-Implements financial market data analysis via the Alpaca MCP server.
-Uses market data API only (no trading/account operations).
+Implements location-aware navigation and routing via Google Maps MCP server.
+Maps to TR 22.870 use cases: 6.6, 6.9, 6.21, 6.44, 6.47, 6.51.
 """
 
 from .base import ScenarioResult
 from .agent import BaseAgentScenario
 
 
-class TradingAgentScenario(BaseAgentScenario):
+class MapsAgentScenario(BaseAgentScenario):
     """
-    Market data agent scenario using Alpaca MCP tools.
+    Navigation agent scenario using Google Maps MCP tools.
 
-    Uses the Alpaca MCP server (market data API) to:
-    - Retrieve stock/crypto quotes, bars, and snapshots
-    - Look up option contracts and quotes
-    - Check market calendar and clock
-    - Look up asset information
-
-    NOTE: This scenario uses a market-data-only API key.
-    No account, portfolio, order, or position tools are available.
+    Uses the Google Maps MCP server to:
+    - Geocode addresses and coordinates
+    - Search for nearby places (POIs)
+    - Calculate routes and directions
+    - Build distance matrices between locations
+    - Query elevation data
     """
 
     def __init__(self, client, logger, config):
-        config.setdefault("server_group", "trading")
+        config.setdefault("server_group", "maps")
         super().__init__(client, logger, config)
 
     @property
     def scenario_type(self) -> str:
-        return "trading_agent"
+        return "maps_agent"
 
     async def run_async(
         self,
@@ -39,7 +37,7 @@ class TradingAgentScenario(BaseAgentScenario):
         session_id = self._create_session_id()
         model = self.config.get("model", "gpt-5-mini")
         prompts = self.config.get("prompts", [
-            "Get the latest quote and a 5-day bar chart for AAPL and MSFT, then compare their recent performance."
+            "Plan a route from Berlin to Munich via Nuremberg. Compare driving time and distance, and suggest a rest stop near the midpoint."
         ])
 
         result = ScenarioResult(
@@ -49,14 +47,13 @@ class TradingAgentScenario(BaseAgentScenario):
             run_index=run_index,
         )
 
-        system_prompt = self.config.get("system_prompt", DEFAULT_TRADING_SYSTEM_PROMPT)
+        system_prompt = self.config.get("system_prompt", DEFAULT_MAPS_SYSTEM_PROMPT)
 
         try:
             await self.setup()
             self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
-                await self._wait_between_prompts_async(prompt_index)
                 turn_result = await self._run_agent_turn(
                     user_prompt=user_prompt,
                     system_prompt=system_prompt,
@@ -93,30 +90,24 @@ class TradingAgentScenario(BaseAgentScenario):
         return result
 
 
-DEFAULT_TRADING_SYSTEM_PROMPT = """\
-You are a financial market data analyst with access to Alpaca market data tools.
-Use them to retrieve and analyze stock, crypto, and options data.
+DEFAULT_MAPS_SYSTEM_PROMPT = """\
+You are a navigation and location intelligence assistant with access to Google Maps tools.
+Use them to help users with routing, place discovery, and geospatial analysis.
 
 Available tools:
-- get_stock_latest_quote: Get the latest bid/ask quote for a stock symbol
-- get_stock_latest_trade: Get the most recent trade for a stock
-- get_stock_bars: Get OHLCV bars (historical price data) for a stock
-- get_stock_snapshot: Get a full snapshot (quote, trade, bar) for a stock
-- get_crypto_latest_quote: Get the latest quote for a crypto pair
-- get_crypto_bars: Get historical OHLCV bars for a crypto pair
-- get_crypto_snapshot: Get a full snapshot for a crypto pair
-- get_option_contracts: Search for available option contracts
-- get_option_latest_quote: Get the latest quote for an option contract
-- get_asset: Look up details about a specific asset by symbol
-- get_all_assets: List all available assets
-- get_calendar: Get the market calendar (trading days, open/close times)
-- get_clock: Check if the market is currently open
+- maps_geocode: Convert an address or place name to coordinates
+- maps_reverse_geocode: Convert coordinates to a human-readable address
+- maps_search_places: Search for nearby places (restaurants, EV chargers, etc.)
+- maps_place_details: Get detailed info about a specific place (hours, rating, etc.)
+- maps_distance_matrix: Calculate travel time/distance between multiple origins and destinations
+- maps_directions: Get turn-by-turn route between two points
+- maps_elevation: Get elevation data for coordinates
 
 Analysis workflow:
-1. Use get_clock / get_calendar to check market status
-2. Retrieve quotes and bars for the requested symbols
-3. Compare metrics across assets (price, volume, spread)
-4. Provide clear analysis with specific numbers
+1. Geocode any named locations to get coordinates
+2. Use directions or distance_matrix for routing analysis
+3. Search for relevant places along routes or near points of interest
+4. Get place details for specific recommendations
+5. Provide clear analysis with distances, durations, and specific place recommendations
 
-Be precise with numbers. Always state the data timestamp so the user knows \
-how fresh the data is."""
+Always include travel times and distances in your responses."""

@@ -18,7 +18,7 @@ mcpServers:
     command: npx
     args:
       - "-y"
-      - "@modelcontextprotocol/server-brave-search"
+      - "@modelcontextprotocol/server-brave-search@0.6.2"
     env:
       BRAVE_API_KEY: "${BRAVE_API_KEY}"
     description: "Web search using Brave Search API"
@@ -47,7 +47,7 @@ mcpServers:
     command: npx
     args:
       - "-y"
-      - "@modelcontextprotocol/server-filesystem"
+      - "@modelcontextprotocol/server-filesystem@2026.7.10"
       - "/tmp/testbed-sandbox"  # Sandboxed directory
     env: {}
     description: "Sandboxed filesystem access"
@@ -123,7 +123,7 @@ mcpServers:
       - "-m"
       - "mcp_servers.http_bridge"
       - "uvx"
-      - "alpaca-mcp-server"
+      - "alpaca-mcp-server==2.2.0"
     env:
       ALPACA_API_KEY: "${ALPACA_API_KEY}"
       ALPACA_SECRET_KEY: "${ALPACA_SECRET_KEY}"
@@ -160,13 +160,130 @@ mcpServers:
     command: npx
     args:
       - "-y"
-      - "@modelcontextprotocol/server-memory"
+      - "@modelcontextprotocol/server-memory@2026.7.4"
     env: {}
     description: "Persistent memory for agent context"
     tools:
       - store
       - retrieve
       - list_keys
+
+  # Google Maps - Geocoding, directions, places, distance matrix
+  # Provides: maps_geocode, maps_reverse_geocode, maps_search_places,
+  #           maps_place_details, maps_distance_matrix, maps_directions, maps_elevation
+  # Auth: https://console.cloud.google.com/apis/credentials → API key with Maps APIs enabled
+  google-maps:
+    name: google-maps
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-google-maps@0.6.2"
+    env:
+      GOOGLE_MAPS_API_KEY: "${GOOGLE_MAPS_API_KEY}"
+    description: "Geocoding, directions, places, distance matrix via Google Maps"
+    supports_http: false
+    tools:
+      - maps_geocode
+      - maps_reverse_geocode
+      - maps_search_places
+      - maps_place_details
+      - maps_distance_matrix
+      - maps_directions
+      - maps_elevation
+
+  # Exa Neural Search - Semantic web search and content extraction
+  # Provides: web_search_exa, find_similar, get_contents
+  # Auth: https://exa.ai/ → API key (free tier available)
+  exa:
+    name: exa
+    command: npx
+    args:
+      - "-y"
+      - "exa-mcp-server@3.4.0"
+    env:
+      EXA_API_KEY: "${EXA_API_KEY}"
+    description: "Neural web search and full page content extraction"
+    supports_http: false
+    tools:
+      - web_search_exa
+      - find_similar
+      - get_contents
+
+  # Twilio - SMS, voice calls, and phone lookups
+  # Provides: send_message, list_messages, fetch_message, lookup_phone_number, etc.
+  # Auth: https://console.twilio.com/ → Account SID + API Key/Secret
+  # Filtered to messaging + lookups services only.
+  twilio:
+    name: twilio
+    command: python
+    args:
+      - "-m"
+      - "mcp_servers.http_bridge"
+      - "npx"
+      - "-y"
+      - "@twilio-alpha/mcp@0.7.0"
+      - "${TWILIO_ACCOUNT_SID}/${TWILIO_API_KEY}:${TWILIO_API_SECRET}"
+      - "--services"
+      - "twilio_api_v2010,twilio_lookups_v2"
+      - "--tags"
+      - "Api20100401Message,LookupsV2PhoneNumber"
+    env:
+      TWILIO_ACCOUNT_SID: "${TWILIO_ACCOUNT_SID}"
+      TWILIO_API_KEY: "${TWILIO_API_KEY}"
+      TWILIO_API_SECRET: "${TWILIO_API_SECRET}"
+    description: "SMS messaging and phone number lookups via Twilio"
+    supports_http: true
+    tools:
+      - TwilioApiV2010--CreateMessage
+      - TwilioApiV2010--ListMessage
+      - TwilioApiV2010--FetchMessage
+      - TwilioLookupsV2--FetchPhoneNumber
+
+  # Home Assistant - Smart home device control and monitoring
+  # Provides: list_entities, get_entity_state, call_service, get_history, fire_event
+  # Auth: Home Assistant long-lived access token
+  # Requires a running Home Assistant instance.
+  home-assistant:
+    name: home-assistant
+    command: python
+    args:
+      - "-m"
+      - "mcp_servers.http_bridge"
+      - "npx"
+      - "-y"
+      - "homeassistant-mcp"
+    env:
+      HA_BASE_URL: "${HA_BASE_URL}"
+      HA_ACCESS_TOKEN: "${HA_ACCESS_TOKEN}"
+    description: "Smart home device control and monitoring via Home Assistant"
+    supports_http: true
+    tools:
+      - list_entities
+      - get_entity_state
+      - call_service
+      - get_history
+      - fire_event
+
+  # Weather - Current conditions, forecasts, geocoding, air quality (Open-Meteo, free)
+  # Provides: geocode_location, get_current_weather, get_forecast, get_air_quality
+  # No API key required.
+  weather:
+    name: weather
+    command: python
+    args:
+      - "-m"
+      - "mcp_servers.http_bridge"
+      - "python"
+      - "-m"
+      - "mcp_servers.weather_server"
+    env: {}
+    description: "Weather conditions, forecasts, and air quality via Open-Meteo"
+    supports_http: true
+    tools:
+      - geocode_location
+      - get_current_weather
+      - get_forecast
+      - get_air_quality
 
 # Server Groups for Different Scenarios
 serverGroups:
@@ -198,6 +315,42 @@ serverGroups:
   # Playwright browser automation agent
   playwright:
     - playwright
+
+  # Weather / environment agent (Open-Meteo, no API key)
+  weather:
+    - weather
+
+  # Maps / navigation agent (Google Maps)
+  maps:
+    - google-maps
+
+  # Navigation + weather combined agent
+  navigation:
+    - google-maps
+    - weather
+
+  # Exa neural search agent
+  exa:
+    - exa
+
+  # Exa + Brave research agent
+  research:
+    - exa
+    - brave-search
+    - fetch
+
+  # Twilio communication / emergency agent
+  communication:
+    - twilio
+
+  # Emergency agent (communication + location)
+  emergency:
+    - twilio
+    - google-maps
+
+  # Smart home / IoT agent (Home Assistant)
+  smart_home:
+    - home-assistant
 
   # General Purpose Agent
   general:

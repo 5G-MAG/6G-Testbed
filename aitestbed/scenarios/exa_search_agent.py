@@ -1,35 +1,31 @@
 """
-Trading / Market Data Agent Scenario for the 6G AI Traffic Testbed.
+Exa Neural Search Agent Scenario for the 6G AI Traffic Testbed.
 
-Implements financial market data analysis via the Alpaca MCP server.
-Uses market data API only (no trading/account operations).
+Implements deep web research via Exa's neural search MCP server.
+Maps to TR 22.870 use cases: 6.32 (external knowledge), 6.51 Cat.3 (knowledge DBs).
 """
 
 from .base import ScenarioResult
 from .agent import BaseAgentScenario
 
 
-class TradingAgentScenario(BaseAgentScenario):
+class ExaSearchAgentScenario(BaseAgentScenario):
     """
-    Market data agent scenario using Alpaca MCP tools.
+    Neural search agent scenario using Exa MCP tools.
 
-    Uses the Alpaca MCP server (market data API) to:
-    - Retrieve stock/crypto quotes, bars, and snapshots
-    - Look up option contracts and quotes
-    - Check market calendar and clock
-    - Look up asset information
-
-    NOTE: This scenario uses a market-data-only API key.
-    No account, portfolio, order, or position tools are available.
+    Uses the Exa MCP server to:
+    - Perform semantic/neural web searches
+    - Find pages similar to a given URL
+    - Extract full page content for analysis
     """
 
     def __init__(self, client, logger, config):
-        config.setdefault("server_group", "trading")
+        config.setdefault("server_group", "exa")
         super().__init__(client, logger, config)
 
     @property
     def scenario_type(self) -> str:
-        return "trading_agent"
+        return "exa_search_agent"
 
     async def run_async(
         self,
@@ -39,7 +35,7 @@ class TradingAgentScenario(BaseAgentScenario):
         session_id = self._create_session_id()
         model = self.config.get("model", "gpt-5-mini")
         prompts = self.config.get("prompts", [
-            "Get the latest quote and a 5-day bar chart for AAPL and MSFT, then compare their recent performance."
+            "Search for the latest 3GPP Release 20 AI/ML specifications published in 2026. Get the full content of the top 3 results and summarize the key requirements."
         ])
 
         result = ScenarioResult(
@@ -49,14 +45,13 @@ class TradingAgentScenario(BaseAgentScenario):
             run_index=run_index,
         )
 
-        system_prompt = self.config.get("system_prompt", DEFAULT_TRADING_SYSTEM_PROMPT)
+        system_prompt = self.config.get("system_prompt", DEFAULT_EXA_SYSTEM_PROMPT)
 
         try:
             await self.setup()
             self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
-                await self._wait_between_prompts_async(prompt_index)
                 turn_result = await self._run_agent_turn(
                     user_prompt=user_prompt,
                     system_prompt=system_prompt,
@@ -93,30 +88,20 @@ class TradingAgentScenario(BaseAgentScenario):
         return result
 
 
-DEFAULT_TRADING_SYSTEM_PROMPT = """\
-You are a financial market data analyst with access to Alpaca market data tools.
-Use them to retrieve and analyze stock, crypto, and options data.
+DEFAULT_EXA_SYSTEM_PROMPT = """\
+You are a deep research assistant with access to Exa neural search tools.
+Use them to find high-quality, semantically relevant information.
 
 Available tools:
-- get_stock_latest_quote: Get the latest bid/ask quote for a stock symbol
-- get_stock_latest_trade: Get the most recent trade for a stock
-- get_stock_bars: Get OHLCV bars (historical price data) for a stock
-- get_stock_snapshot: Get a full snapshot (quote, trade, bar) for a stock
-- get_crypto_latest_quote: Get the latest quote for a crypto pair
-- get_crypto_bars: Get historical OHLCV bars for a crypto pair
-- get_crypto_snapshot: Get a full snapshot for a crypto pair
-- get_option_contracts: Search for available option contracts
-- get_option_latest_quote: Get the latest quote for an option contract
-- get_asset: Look up details about a specific asset by symbol
-- get_all_assets: List all available assets
-- get_calendar: Get the market calendar (trading days, open/close times)
-- get_clock: Check if the market is currently open
+- web_search_exa: Perform a neural/semantic web search (returns URLs and snippets)
+- find_similar: Find web pages similar to a given URL
+- get_contents: Extract the full text content of one or more URLs
 
-Analysis workflow:
-1. Use get_clock / get_calendar to check market status
-2. Retrieve quotes and bars for the requested symbols
-3. Compare metrics across assets (price, volume, spread)
-4. Provide clear analysis with specific numbers
+Research workflow:
+1. Use web_search_exa to find relevant pages for the query
+2. Use get_contents to extract full text from the most promising results
+3. Optionally use find_similar to discover related resources
+4. Synthesize findings into a clear, well-sourced summary
 
-Be precise with numbers. Always state the data timestamp so the user knows \
-how fresh the data is."""
+Be thorough. Always cite specific URLs as sources. Prefer primary sources \
+(specifications, official docs, research papers) over secondary commentary."""

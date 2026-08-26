@@ -27,6 +27,9 @@ class Anonymizer:
         if strict is None:
             strict = os.environ.get("ANONYMIZATION_STRICT", "0") == "1"
         self._strict = bool(strict)
+        self._enabled = os.environ.get("ANONYMIZE_AT_SOURCE", "1").lower() not in (
+            "0", "false", "no"
+        )
 
         self._provider_aliases = set(self._providers.values())
         self._model_aliases = set(self._models.values())
@@ -46,6 +49,8 @@ class Anonymizer:
 
     def _alias(self, value: Optional[str], mapping: dict, aliases: set, category: str) -> Optional[str]:
         if value is None or value == "":
+            return value
+        if not self._enabled:
             return value
         if value in aliases:
             return value
