@@ -5,6 +5,7 @@ from pathlib import Path
 
 import dpkt
 
+from clients.realtime_client import RealtimeClient
 from clients.realtime_webrtc_client import RealtimeWebRTCClient
 from configs import DEFAULT_CAPTURE_FILTER, WEBRTC_UDP_PORTS
 from netemu.pcap import PcapAnalyzer
@@ -65,6 +66,45 @@ def test_webrtc_session_config_uses_ga_schema():
     assert session["max_output_tokens"] == 256
     assert "modalities" not in session
     assert "temperature" not in session
+
+
+def test_ws_realtime_uses_ga_handshake_and_schema():
+    """The retired Beta WS handshake and session schema must not return."""
+    client = object.__new__(RealtimeClient)
+    client.api_key = "test-key"
+    client.model = "gpt-realtime-mini"
+
+    headers = client._connection_headers()
+    assert "OpenAI-Beta" not in headers
+    assert headers["Authorization"] == "Bearer test-key"
+
+    update = client._build_session_update(
+        modalities=["text", "audio"],
+        voice="sage",
+        instructions="Be concise.",
+        turn_detection={"type": "server_vad", "create_response": False},
+        input_audio_transcription={"model": "whisper-1"},
+        max_response_output_tokens=256,
+    )
+    assert update["type"] == "session.update"
+    session = update["session"]
+    assert session["type"] == "realtime"
+    assert session["output_modalities"] == ["audio"]
+    assert session["audio"]["output"]["voice"] == "sage"
+    assert session["audio"]["input"]["transcription"]["model"] == "whisper-1"
+    assert session["audio"]["input"]["turn_detection"]["type"] == "server_vad"
+    assert session["max_output_tokens"] == 256
+    assert "modalities" not in session
+    assert "temperature" not in session
+    assert "input_audio_format" not in session
+
+    text_only = client._build_session_update(
+        modalities=["text"], voice="sage", instructions=None,
+        turn_detection=None, input_audio_transcription=None,
+        max_response_output_tokens=None,
+    )
+    assert text_only["session"]["output_modalities"] == ["text"]
+    assert "audio" not in text_only["session"]
 
 
 def test_retransmissions_use_payload_intervals_per_direction():
