@@ -1,32 +1,32 @@
 """
-Music Agent Scenario for the 6G AI Traffic Testbed.
+Weather / Environment Agent Scenario for the 6G AI Traffic Testbed.
 
-Implements music search and playlist composition via Spotify MCP tools.
+Implements environmental awareness via a custom Open-Meteo MCP server.
+Maps to TR 22.870 use cases: 6.21, 6.47, 6.51.
 """
 
-import json
-
-from .base import BaseScenario, ScenarioResult
+from .base import ScenarioResult
 from .agent import BaseAgentScenario
 
 
-class MusicAgentScenario(BaseAgentScenario):
+class WeatherAgentScenario(BaseAgentScenario):
     """
-    Music agent scenario using Spotify MCP tools.
+    Weather/environment agent scenario using the Open-Meteo MCP server.
 
-    Uses the Spotify MCP server to:
-    - Search for tracks, artists, and albums
-    - Get personalized recommendations
-    - Compose playlists based on user criteria
+    Uses the weather MCP server to:
+    - Get current weather conditions for coordinates
+    - Retrieve multi-day forecasts
+    - Geocode location names to coordinates
+    - Query air quality data
     """
 
     def __init__(self, client, logger, config):
-        config.setdefault("server_group", "music")
+        config.setdefault("server_group", "weather")
         super().__init__(client, logger, config)
 
     @property
     def scenario_type(self) -> str:
-        return "music_agent"
+        return "weather_agent"
 
     async def run_async(
         self,
@@ -36,7 +36,9 @@ class MusicAgentScenario(BaseAgentScenario):
         session_id = self._create_session_id()
         model = self.config.get("model", "gpt-5-mini")
         prompts = self.config.get("prompts", [
-            "Find me upbeat pop songs for a workout playlist with at least 10 tracks."
+            "Get the current weather and 48-hour forecast for Paris, France. "
+            "Assess outdoor safety risks including temperature, precipitation, "
+            "wind, and UV index."
         ])
 
         result = ScenarioResult(
@@ -46,14 +48,13 @@ class MusicAgentScenario(BaseAgentScenario):
             run_index=run_index,
         )
 
-        system_prompt = self.config.get("system_prompt", DEFAULT_MUSIC_SYSTEM_PROMPT)
+        system_prompt = self.config.get("system_prompt", DEFAULT_WEATHER_SYSTEM_PROMPT)
 
         try:
             await self.setup()
             self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
-                await self._wait_between_prompts_async(prompt_index)
                 turn_result = await self._run_agent_turn(
                     user_prompt=user_prompt,
                     system_prompt=system_prompt,
@@ -90,21 +91,21 @@ class MusicAgentScenario(BaseAgentScenario):
         return result
 
 
-class MusicResearchAgentScenario(BaseAgentScenario):
+class NavigationWeatherAgentScenario(BaseAgentScenario):
     """
-    Music research agent combining Spotify tools with web search.
+    Combined navigation + weather agent for route weather assessment.
 
-    Multi-hop scenario: searches Spotify for music, then uses web search
-    to find reviews, concert info, or background on artists.
+    Uses both Google Maps and weather tools to evaluate weather
+    conditions along a travel route (TR 22.870 UC 6.51).
     """
 
     def __init__(self, client, logger, config):
-        config.setdefault("server_group", "music_research")
+        config.setdefault("server_group", "navigation")
         super().__init__(client, logger, config)
 
     @property
     def scenario_type(self) -> str:
-        return "music_research_agent"
+        return "navigation_weather_agent"
 
     async def run_async(
         self,
@@ -114,7 +115,9 @@ class MusicResearchAgentScenario(BaseAgentScenario):
         session_id = self._create_session_id()
         model = self.config.get("model", "gpt-5-mini")
         prompts = self.config.get("prompts", [
-            "Research the top jazz albums of 2025 and create a playlist of standout tracks with background on each artist."
+            "Plan a driving route from Munich to Vienna. Check weather at the "
+            "origin, a midpoint waypoint, and the destination. Flag any "
+            "sections with adverse conditions."
         ])
 
         result = ScenarioResult(
@@ -125,7 +128,7 @@ class MusicResearchAgentScenario(BaseAgentScenario):
         )
 
         system_prompt = self.config.get(
-            "system_prompt", DEFAULT_MUSIC_RESEARCH_SYSTEM_PROMPT
+            "system_prompt", DEFAULT_NAVIGATION_WEATHER_SYSTEM_PROMPT
         )
 
         try:
@@ -133,7 +136,6 @@ class MusicResearchAgentScenario(BaseAgentScenario):
             self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
-                await self._wait_between_prompts_async(prompt_index)
                 turn_result = await self._run_agent_turn(
                     user_prompt=user_prompt,
                     system_prompt=system_prompt,
@@ -170,38 +172,41 @@ class MusicResearchAgentScenario(BaseAgentScenario):
         return result
 
 
-DEFAULT_MUSIC_SYSTEM_PROMPT = """\
-You are a music assistant with access to Spotify tools. Use them to help the user.
+DEFAULT_WEATHER_SYSTEM_PROMPT = """\
+You are an environmental awareness assistant with access to weather tools.
+Use them to provide weather analysis, safety assessments, and forecasts.
 
 Available tools:
-- spotify_search_tracks: Search for songs by name, artist, or genre
-- spotify_search_artists: Find artists
-- spotify_search_albums: Find albums
-- spotify_search_playlists: Find curated playlists by mood, genre, or activity
-- spotify_artist_albums: Get an artist's albums and singles (by artist ID)
-- spotify_album_tracks: Get the track listing for an album (by album ID)
+- get_current_weather: Get current conditions (temp, wind, humidity, etc.)
+- get_forecast: Get hourly or daily forecast for a location
+- geocode_location: Convert a place name to latitude/longitude coordinates
+- get_air_quality: Get current air quality index and pollutant levels
 
-When building playlists:
-1. Search for relevant tracks, artists, or playlists
-2. Use artist IDs to browse their albums, then get album tracks
-3. Search playlists for mood/genre-based discovery
-4. Compile a cohesive playlist with song name, artist, and Spotify link
+Assessment workflow:
+1. Geocode any named locations to get coordinates
+2. Get current weather conditions
+3. Get the forecast for the requested time period
+4. Assess safety risks (extreme temps, storms, high winds, poor air quality)
+5. Provide clear recommendations with specific numbers
 
-Be creative and thorough. Explain your choices."""
+Always include temperature, precipitation probability, wind speed, and \
+any relevant warnings in your response."""
 
-DEFAULT_MUSIC_RESEARCH_SYSTEM_PROMPT = """\
-You are a music research assistant with access to Spotify and web search tools.
+DEFAULT_NAVIGATION_WEATHER_SYSTEM_PROMPT = """\
+You are a navigation and weather assistant with access to both Google Maps \
+and weather tools. Use them together to provide weather-aware route planning.
 
-Available tools:
-- spotify_search_tracks, spotify_search_artists, spotify_search_albums
-- spotify_search_playlists, spotify_artist_albums, spotify_album_tracks
-- brave_web_search: Search the web for reviews, articles, concert info
-- fetch: Retrieve content from web pages
+Maps tools:
+- maps_geocode, maps_directions, maps_search_places, maps_distance_matrix
 
-Research workflow:
-1. Use Spotify tools to find music (tracks, artists, albums, playlists)
-2. Use web search to find reviews, background info, or concert schedules
-3. Fetch relevant articles for deeper analysis
-4. Synthesize findings into a well-organized response with Spotify links and sources
+Weather tools:
+- get_current_weather, get_forecast, geocode_location, get_air_quality
 
-Be thorough and cite your sources."""
+Route weather workflow:
+1. Use maps_directions to plan the route and identify waypoints
+2. Get weather at origin, key waypoints, and destination
+3. Flag any route segments with adverse conditions (rain, snow, fog, high winds)
+4. Suggest timing adjustments or alternative routes if needed
+5. Provide a clear route summary with weather overlay
+
+Always include driving time, distance, and weather conditions at each waypoint."""

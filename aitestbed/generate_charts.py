@@ -6,6 +6,7 @@ Generate visualization charts from traffic test data.
 import sqlite3
 import json
 import argparse
+import statistics
 from pathlib import Path
 from collections import defaultdict
 from typing import Optional
@@ -35,9 +36,15 @@ except ImportError:
 
 # Optional pcap analysis
 try:
-    from analysis import HAS_PCAP_ANALYZER, analyze_multiple_pcaps, merge_pcap_metrics
+    from analysis import (
+        HAS_PCAP_ANALYZER,
+        LOOPBACK_PCAP_NAME_PATTERNS,
+        analyze_multiple_pcaps,
+        merge_pcap_metrics,
+    )
 except ImportError:
     HAS_PCAP_ANALYZER = False
+    LOOPBACK_PCAP_NAME_PATTERNS = ()
     analyze_multiple_pcaps = None
     merge_pcap_metrics = None
 
@@ -618,54 +625,90 @@ def generate_protocol_comparison_chart(records: list[dict], output_dir: Path) ->
 
 
 def generate_success_rate_chart(records: list[dict], output_dir: Path) -> str:
-    """Generate success rate chart by scenario."""
+    """Generate success rate chart by scenario, with per-profile min/max range.
+
+    For each scenario, plots the mean success rate across all profiles as a
+    bar and the min/max success rate across profiles as a vertical whisker.
+    This surfaces scenarios whose failure mode is network-dependent (wide
+    whisker) versus scenarios that fail at the same rate everywhere.
+    """
     if not HAS_MATPLOTLIB:
         return None
 
-    by_scenario = aggregate_by_scenario(records)
+    # Scenarios excluded because their failure modes are external (third-party
+    # search-engine throttling, not the provider) and would compress the
+    # visible range of the remaining scenarios.
+    exclude_scenarios = {"direct_web_search_deepseek"}
 
-    labels = []
-    success_rates = []
-    bar_colors = []
+    # Per-(scenario, profile) success rate, then aggregate across profiles.
+    by_sp: dict[tuple[str, str], list[dict]] = defaultdict(list)
+    scenario_recs: dict[str, list[dict]] = defaultdict(list)
+    for r in records:
+        scenario = r.get("scenario_id") or "unknown"
+        profile = r.get("network_profile") or "unknown"
+        if scenario in exclude_scenarios:
+            continue
+        by_sp[(scenario, profile)].append(r)
+        scenario_recs[scenario].append(r)
 
-    for scenario, recs in sorted(by_scenario.items()):
-        if recs:
-            success_count = sum(1 for r in recs if r.get("success", True))
-            rate = (success_count / len(recs)) * 100
-            labels.append(format_scenario_label(scenario, recs))
-            success_rates.append(rate)
-            # Color based on success rate
-            if rate >= 95:
-                bar_colors.append('#27ae60')  # Green
-            elif rate >= 50:
-                bar_colors.append('#f39c12')  # Orange
-            else:
-                bar_colors.append('#e74c3c')  # Red
+    per_scenario_rates: dict[str, list[float]] = defaultdict(list)
+    for (scenario, profile), recs in by_sp.items():
+        if not recs:
+            continue
+        success = sum(1 for r in recs if r.get("success", True))
+        per_scenario_rates[scenario].append((success / len(recs)) * 100)
 
-    if not labels:
+    if not per_scenario_rates:
         return None
+
+    scenarios = sorted(per_scenario_rates.keys())
+    labels = [format_scenario_label(s, scenario_recs[s]) for s in scenarios]
+    means = [sum(per_scenario_rates[s]) / len(per_scenario_rates[s]) for s in scenarios]
+    mins = [min(per_scenario_rates[s]) for s in scenarios]
+    maxs = [max(per_scenario_rates[s]) for s in scenarios]
+    yerr_lower = [m - lo for m, lo in zip(means, mins)]
+    yerr_upper = [hi - m for m, hi in zip(means, maxs)]
+
+    bar_colors = []
+    for m in means:
+        if m >= 99:
+            bar_colors.append('#27ae60')
+        elif m >= 95:
+            bar_colors.append('#f39c12')
+        else:
+            bar_colors.append('#e74c3c')
 
     fig, ax = plt.subplots(figsize=(16, 7))
 
-    bars = ax.bar(range(len(labels)), success_rates, color=bar_colors)
+    bars = ax.bar(
+        range(len(scenarios)), means, color=bar_colors,
+        yerr=[yerr_lower, yerr_upper],
+        capsize=5, error_kw={"ecolor": "#333", "elinewidth": 1.2, "alpha": 0.9},
+    )
 
     ax.set_xlabel('Scenario (Provider)')
     ax.set_ylabel('Success Rate (%)')
-    ax.set_title('Success Rate by Scenario Type')
-    ax.set_xticks(range(len(labels)))
+    ax.set_title('Success Rate by Scenario Type (bar = mean across profiles, whiskers = min/max)')
+    ax.set_xticks(range(len(scenarios)))
     ax.set_xticklabels(labels, fontsize=8, rotation=45, ha='right')
-    ax.set_ylim(0, 105)
+    ax.set_ylim(90, 101)
     ax.axhline(y=100, color='green', linestyle='--', alpha=0.3)
     ax.axhline(y=95, color='orange', linestyle='--', alpha=0.3, label='95% threshold')
     ax.grid(axis='y', alpha=0.3)
 
-    # Add value labels
-    for bar, rate in zip(bars, success_rates):
-        height = bar.get_height()
-        ax.annotate(f'{rate:.0f}%',
-                   xy=(bar.get_x() + bar.get_width() / 2, height),
-                   xytext=(0, 3), textcoords="offset points",
-                   ha='center', va='bottom', fontsize=8)
+    for i, (bar, mean_v, lo, hi) in enumerate(zip(bars, means, mins, maxs)):
+        ax.annotate(
+            f'{mean_v:.1f}%',
+            xy=(bar.get_x() + bar.get_width() / 2, mean_v),
+            xytext=(0, 4), textcoords='offset points',
+            ha='center', va='bottom', fontsize=8, fontweight='bold',
+        )
+        if hi - lo > 0.05:
+            ax.annotate(
+                f'min {lo:.1f}',
+                xy=(i, lo), xytext=(0, -10), textcoords='offset points',
+                ha='center', va='top', fontsize=7, color='#555',
+            )
 
     plt.tight_layout()
     output_path = output_dir / "success_rate.png"
@@ -1390,9 +1433,13 @@ def generate_mcp_loop_factor_by_profile_chart(records: list[dict], output_dir: P
         if sid:
             sessions[sid].append(r)
 
-    # Collect loop factors per profile per scenario
+    # Collect loop factors per profile per scenario, restricted to sessions
+    # that actually exercise the MCP agent loop (at least one tool-call
+    # record present). Same marker as generate_mcp_efficiency_chart.
     data: dict[str, dict[str, list[int]]] = defaultdict(lambda: defaultdict(list))
     for sid, recs in sessions.items():
+        if not any(_parse_metadata(r).get("type") == "mcp_tool_call" for r in recs):
+            continue
         profile = recs[0].get("network_profile", "unknown")
         scenario = recs[0].get("scenario_id", "unknown")
         n_calls = len(recs)
@@ -1520,7 +1567,7 @@ def generate_mcp_protocol_overhead_chart(records: list[dict], output_dir: Path) 
     stdio_means = [np.mean(tool_data[t]["stdio_bytes"]) / 1024 for t in tools]
     backend_means = [np.mean(tool_data[t]["backend_bytes"]) / 1024 for t in tools]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    fig, ax1 = plt.subplots(1, 1, figsize=(10, 6))
 
     x = range(len(tools))
     bar_width = 0.35
@@ -1529,29 +1576,13 @@ def generate_mcp_protocol_overhead_chart(records: list[dict], output_dir: Path) 
     ax1.bar([i + bar_width / 2 for i in x], backend_means, bar_width,
             label="Backend HTTP", color="#e67e22")
     ax1.set_xlabel("Tool")
-    ax1.set_ylabel("Average Bytes (KB)")
+    ax1.set_ylabel("Average Bytes (KB, log scale)")
+    ax1.set_yscale("log")
     ax1.set_title("MCP Protocol vs Backend Traffic per Tool")
     ax1.set_xticks(x)
     ax1.set_xticklabels(tools, fontsize=7, rotation=45, ha="right")
     ax1.legend(fontsize=8)
-    ax1.grid(axis="y", alpha=0.3)
-
-    # Overhead ratio
-    overhead_pct = []
-    for s, b in zip(stdio_means, backend_means):
-        if b > 0:
-            overhead_pct.append(((s - b) / b) * 100)
-        else:
-            overhead_pct.append(0)
-
-    bars = ax2.bar(x, overhead_pct, color=["#e74c3c" if v > 0 else "#2ecc71" for v in overhead_pct])
-    ax2.set_xlabel("Tool")
-    ax2.set_ylabel("MCP Overhead (%)")
-    ax2.set_title("MCP Protocol Overhead vs Backend")
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(tools, fontsize=7, rotation=45, ha="right")
-    ax2.axhline(y=0, color="black", linewidth=0.5)
-    ax2.grid(axis="y", alpha=0.3)
+    ax1.grid(axis="y", alpha=0.3, which="both")
 
     plt.tight_layout()
     output_path = output_dir / "mcp_protocol_overhead.png"
@@ -1758,7 +1789,12 @@ def generate_all_agent_waterfall_charts(records: list[dict], output_dir: Path) -
     waterfall_dir.mkdir(parents=True, exist_ok=True)
 
     generated = {}
-    colors_map = {"llm_api_call": "#3498db", "mcp_tool_call": "#e67e22"}
+    colors_map = {
+        "llm_api_call": "#3498db",
+        "mcp_tool_call": "#e67e22",
+        "mcp_initialize": "#9b59b6",
+        "mcp_tools_list": "#8e44ad",
+    }
 
     for scenario, (sid, recs) in sorted(best_per_scenario.items()):
         recs.sort(key=lambda r: r.get("t_request_start", 0) or r.get("timestamp", 0))
@@ -1781,6 +1817,16 @@ def generate_all_agent_waterfall_charts(records: list[dict], output_dir: Path) -
                 tool_name = meta.get("tool_name", "tool")
                 y_labels.append(f"Tool: {tool_name}")
                 ax.text(start + duration + 0.05, i, f"{duration:.2f}s", va="center", fontsize=7)
+            elif rec_type == "mcp_initialize":
+                server = meta.get("server", "")
+                y_labels.append(f"MCP init [{server}]")
+                ax.text(start + duration + 0.05, i, f"{duration:.3f}s", va="center", fontsize=7)
+            elif rec_type == "mcp_tools_list":
+                server = meta.get("server", "")
+                n_tools = meta.get("tool_count")
+                tool_suffix = f" · {n_tools} tools" if n_tools is not None else ""
+                y_labels.append(f"tools/list [{server}]")
+                ax.text(start + duration + 0.05, i, f"{duration:.3f}s{tool_suffix}", va="center", fontsize=7)
             else:
                 iteration = meta.get("iteration", "?")
                 y_labels.append(f"LLM #{iteration}")
@@ -1798,6 +1844,8 @@ def generate_all_agent_waterfall_charts(records: list[dict], output_dir: Path) -
         ax.grid(axis="x", alpha=0.3)
 
         legend_elements = [
+            Patch(facecolor="#9b59b6", label="MCP initialize"),
+            Patch(facecolor="#8e44ad", label="MCP tools/list"),
             Patch(facecolor="#3498db", label="LLM API Call"),
             Patch(facecolor="#e67e22", label="MCP Tool Call"),
         ]
@@ -2462,61 +2510,107 @@ def generate_error_analysis_chart(records: list[dict], output_dir: Path) -> str:
 
 
 def generate_latency_by_profile_chart(records: list[dict], output_dir: Path) -> str:
-    """Generate latency comparison by network profile."""
+    """Latency by network profile, faceted across 6 representative scenarios.
+
+    Pooling all scenarios into one bar inflates std-dev far beyond the mean
+    because the scenario mix spans three orders of magnitude in per-call
+    duration. Splitting per scenario keeps the std-dev physically meaningful
+    (within-scenario run-to-run variation) and makes the per-profile delta
+    actually readable.
+    """
     if not HAS_MATPLOTLIB:
         return None
 
-    by_profile = defaultdict(list)
+    # 6 scenarios chosen to span the workload archetypes used by the SA4
+    # study: non-streaming chat, streaming chat, reasoning model (compute-
+    # dominated), heavy-downlink image generation, real-time audio over
+    # WebRTC (UDP-borne, network-sensitive), and an MCP agentic loop.
+    featured = [
+        "chat_basic",
+        "chat_streaming",
+        "chat_deepseek_reasoner",
+        "image_generation",
+        "realtime_audio_webrtc",
+        "playwright_web_test",
+    ]
+
+    # Bucket by (scenario, profile). Drop timeout sentinels (they inflate
+    # the per-cell mean by the timeout ceiling, not by the real latency).
+    by_sp: dict[tuple[str, str], list[float]] = defaultdict(list)
+    scenario_recs: dict[str, list[dict]] = defaultdict(list)
     for r in records:
-        profile = r.get("network_profile", "unknown")
+        scenario = r.get("scenario_id")
+        if scenario not in featured:
+            continue
+        sid = r.get("session_id") or ""
+        if sid.startswith("timeout_"):
+            continue
         latency = r.get("latency_sec")
         if latency and latency > 0:
-            by_profile[profile].append(latency)
+            profile = r.get("network_profile", "unknown")
+            by_sp[(scenario, profile)].append(latency)
+            scenario_recs[scenario].append(r)
 
-    if not by_profile:
+    present = [s for s in featured if any(k[0] == s for k in by_sp)]
+    if not present:
         return None
 
-    profiles = sorted(by_profile.keys())
-    means = [sum(by_profile[p])/len(by_profile[p]) for p in profiles]
-    stds = []
-    for p in profiles:
-        vals = by_profile[p]
-        mean = sum(vals)/len(vals)
-        std = (sum((v-mean)**2 for v in vals)/len(vals))**0.5
-        stds.append(std)
+    all_profiles = sorted({p for (_, p) in by_sp.keys()})
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-
-    x = range(len(profiles))
-    yerr_lower = [min(std, mean) for std, mean in zip(stds, means)]
-    yerr_upper = stds
-    bars = ax.bar(
-        x,
-        means,
-        yerr=[yerr_lower, yerr_upper],
-        capsize=5,
-        color='#3498db',
-        alpha=0.8,
+    fig, axes = plt.subplots(2, 3, figsize=(20, 11), sharex=True)
+    fig.suptitle(
+        "Latency by Network Profile across Representative Scenarios "
+        "(bar = mean, whiskers = ±1 std dev)",
+        fontsize=13, fontweight="bold",
     )
 
-    ax.set_xlabel('Network Profile')
-    ax.set_ylabel('Mean Latency (seconds)')
-    ax.set_title('Latency by Network Profile (with Std Dev)')
-    ax.set_xticks(x)
-    ax.set_xticklabels(profiles, rotation=45, ha='right')
-    ax.grid(axis='y', alpha=0.3)
+    for idx, scenario in enumerate(present):
+        ax = axes[idx // 3][idx % 3]
+        means, stds, present_profiles = [], [], []
+        for p in all_profiles:
+            vals = by_sp.get((scenario, p), [])
+            if not vals:
+                continue
+            mu = sum(vals) / len(vals)
+            sigma = (sum((v - mu) ** 2 for v in vals) / len(vals)) ** 0.5
+            means.append(mu)
+            stds.append(sigma)
+            present_profiles.append(p)
 
-    # Add value labels
-    for bar, mean in zip(bars, means):
-        height = bar.get_height()
-        ax.annotate(f'{mean:.1f}s',
-                   xy=(bar.get_x() + bar.get_width() / 2, height),
-                   xytext=(0, 3), textcoords="offset points",
-                   ha='center', va='bottom', fontsize=9)
+        if not means:
+            ax.set_visible(False)
+            continue
 
-    plt.tight_layout()
+        yerr_lower = [min(s, m) for s, m in zip(stds, means)]
+        yerr_upper = stds
+        bars = ax.bar(
+            range(len(present_profiles)), means,
+            yerr=[yerr_lower, yerr_upper],
+            capsize=4, color="#3498db", alpha=0.85,
+            error_kw={"ecolor": "#333", "elinewidth": 1.0, "alpha": 0.9},
+        )
+        label = format_scenario_label(scenario, scenario_recs[scenario])
+        ax.set_title(label, fontsize=11)
+        ax.set_ylabel("Latency (s)")
+        ax.set_xticks(range(len(present_profiles)))
+        ax.set_xticklabels(present_profiles, rotation=45, ha="right", fontsize=8)
+        ax.grid(axis="y", alpha=0.3)
+
+        for bar, mu in zip(bars, means):
+            ax.annotate(
+                f"{mu:.1f}",
+                xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+                xytext=(0, 3), textcoords="offset points",
+                ha="center", va="bottom", fontsize=8,
+            )
+
+    # Hide unused axes if fewer than 6 scenarios are present.
+    for idx in range(len(present), 6):
+        axes[idx // 3][idx % 3].set_visible(False)
+
+    plt.tight_layout(rect=(0, 0, 1, 0.96))
     output_path = output_dir / "latency_by_profile.png"
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close()
 
     return str(output_path)
@@ -2938,31 +3032,64 @@ def _fmt_scenario(s: str) -> str:
 
 
 def generate_ran2_per_direction_packets_chart(ran2: dict, output_dir: Path) -> Optional[str]:
-    """Q1.3 — UL vs DL packet counts + mean packet sizes per pcap."""
-    rows = ran2.get("Q1", {}).get("pcap_per_direction") or []
+    """Q1.3 — UL/DL byte ratio heatmap (scenarios × profiles)."""
+    sp_data = ran2.get("Q1", {}).get("per_scenario_profile") or {}
+    if not sp_data:
+        return None
+    rows: dict[tuple[str, str], dict] = {}
+    for key, v in sp_data.items():
+        if "/" not in key:
+            continue
+        sc, pr = key.split("/", 1)
+        rows[(sc, pr)] = v
     if not rows:
         return None
-    labels = [Path(r["pcap_file"]).name[:28] for r in rows]
-    ul_pkts = [r.get("ul_packets", 0) for r in rows]
-    dl_pkts = [r.get("dl_packets", 0) for r in rows]
-    ul_size = [r.get("ul_mean_pkt_size") or 0 for r in rows]
-    dl_size = [r.get("dl_mean_pkt_size") or 0 for r in rows]
+    scenarios = sorted({sc for sc, _ in rows.keys()})
+    profiles = sorted({pr for _, pr in rows.keys()})
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 6))
-    x = range(len(labels))
-    width = 0.38
-    ax1.bar([i - width/2 for i in x], ul_pkts, width, label="UL", color="#1f77b4")
-    ax1.bar([i + width/2 for i in x], dl_pkts, width, label="DL", color="#ff7f0e")
-    ax1.set_xticks(list(x)); ax1.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
-    ax1.set_ylabel("Packet count"); ax1.set_title("Q1.3 — Per-direction packet count (per pcap)")
-    ax1.legend(); ax1.grid(axis="y", alpha=0.3)
+    import numpy as np
+    ratio = np.full((len(scenarios), len(profiles)), np.nan)
+    ul_size = np.full((len(scenarios), len(profiles)), np.nan)
+    dl_size = np.full((len(scenarios), len(profiles)), np.nan)
+    for i, sc in enumerate(scenarios):
+        for j, pr in enumerate(profiles):
+            v = rows.get((sc, pr))
+            if v:
+                r = v.get("ul_dl_ratio")
+                if r is not None:
+                    ratio[i, j] = r
+                u = (v.get("ul_bytes_per_turn") or {}).get("p50")
+                d = (v.get("dl_bytes_per_turn") or {}).get("p50")
+                if u is not None: ul_size[i, j] = u
+                if d is not None: dl_size[i, j] = d
 
-    ax2.bar([i - width/2 for i in x], ul_size, width, label="UL", color="#1f77b4")
-    ax2.bar([i + width/2 for i in x], dl_size, width, label="DL", color="#ff7f0e")
-    ax2.set_xticks(list(x)); ax2.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
-    ax2.set_ylabel("Mean packet size (bytes)")
-    ax2.set_title("Q1.3 — Per-direction mean packet size")
-    ax2.legend(); ax2.grid(axis="y", alpha=0.3)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(max(12, 1 + 0.6 * len(profiles) * 2),
+                                                    max(5, 0.35 * len(scenarios))))
+    sc_labels = [_fmt_scenario(s) for s in scenarios]
+    # Panel 1: UL/DL ratio (log color scale because realtime can be 1:50 000)
+    finite = ratio[np.isfinite(ratio) & (ratio > 0)]
+    vmin = max(float(np.min(finite)), 1e-4) if finite.size else 1e-4
+    vmax = max(float(np.max(finite)), 1.0) if finite.size else 1.0
+    from matplotlib.colors import LogNorm
+    im1 = ax1.imshow(ratio, aspect="auto", cmap="RdYlBu_r",
+                     norm=LogNorm(vmin=vmin, vmax=vmax))
+    ax1.set_xticks(range(len(profiles))); ax1.set_xticklabels(profiles, rotation=30, ha="right")
+    ax1.set_yticks(range(len(scenarios))); ax1.set_yticklabels(sc_labels, fontsize=9)
+    ax1.set_title("Q1.3 — UL / DL byte ratio (log scale)\n< 1 = downlink-heavy, > 1 = uplink-heavy")
+    plt.colorbar(im1, ax=ax1, label="UL / DL ratio")
+
+    # Panel 2: per-turn byte size scatter (UL p50 vs DL p50, one point per cell)
+    ax2.scatter(ul_size.flatten(), dl_size.flatten(), s=20, alpha=0.65, edgecolors="black", linewidths=0.4)
+    ax2.set_xscale("log"); ax2.set_yscale("log")
+    ax2.set_xlabel("UL bytes per turn (p50)"); ax2.set_ylabel("DL bytes per turn (p50)")
+    ax2.set_title("Q1.3 — Median per-turn byte size (one point / scenario × profile)")
+    # 1:1 reference line
+    lo = float(np.nanmin(np.concatenate([ul_size[np.isfinite(ul_size)],
+                                          dl_size[np.isfinite(dl_size)]]))) or 1
+    hi = float(np.nanmax(np.concatenate([ul_size[np.isfinite(ul_size)],
+                                          dl_size[np.isfinite(dl_size)]]))) or 1e7
+    ax2.plot([lo, hi], [lo, hi], "k--", alpha=0.4, label="1:1")
+    ax2.legend(loc="lower right"); ax2.grid(True, alpha=0.3, which="both")
 
     plt.tight_layout()
     out = output_dir / "ran2_q1_per_direction_packets.png"
@@ -2971,25 +3098,56 @@ def generate_ran2_per_direction_packets_chart(ran2: dict, output_dir: Path) -> O
 
 
 def generate_ran2_multiwindow_throughput_chart(ran2: dict, output_dir: Path) -> Optional[str]:
-    """Q1.4 — peak Mbps per window (1/10/100ms/1s/10s), per pcap."""
+    """Q1.4 — peak Mbps per window (1/10/100ms/1s/10s), one line per profile.
+    Aggregates across all (scenario × profile) pcaps by taking the p95 peak per profile."""
     rows = ran2.get("Q1", {}).get("pcap_per_direction") or []
     if not rows:
         return None
-
-    fig, ax = plt.subplots(figsize=(14, 7))
-    x = list(range(len(_WINDOW_ORDER)))
+    import numpy as np
+    # Only include pcaps that actually carry throughput data (lo captures of
+    # non-MCP scenarios are mostly empty).
+    by_profile: dict[str, dict[str, list[float]]] = {}
     for r in rows:
+        pr = r.get("network_profile") or "?"
+        if pr == "?":
+            continue
         peaks = r.get("peak_mbps_by_window") or {}
-        y = [peaks.get(w, 0) for w in _WINDOW_ORDER]
-        ax.plot(x, y, marker="o", label=Path(r["pcap_file"]).name[:32])
+        if not peaks:
+            continue
+        slot = by_profile.setdefault(pr, {w: [] for w in _WINDOW_ORDER})
+        for w in _WINDOW_ORDER:
+            v = peaks.get(w)
+            if v is not None and v > 0:
+                slot[w].append(float(v))
+    by_profile = {pr: slot for pr, slot in by_profile.items() if any(slot.values())}
+    if not by_profile:
+        return None
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+    x = list(range(len(_WINDOW_ORDER)))
+    cmap = plt.get_cmap("tab10")
+    plotted_any = False
+    for i, pr in enumerate(sorted(by_profile.keys())):
+        slot = by_profile[pr]
+        y_p50 = [float(np.median(slot[w])) if slot[w] else float("nan") for w in _WINDOW_ORDER]
+        y_p95 = [float(np.percentile(slot[w], 95)) if slot[w] else float("nan") for w in _WINDOW_ORDER]
+        if not any(np.isfinite(v) and v > 0 for v in y_p50 + y_p95):
+            continue
+        color = cmap(i % 10)
+        ax.plot(x, y_p50, marker="o", color=color, label=f"{pr} (p50)")
+        ax.plot(x, y_p95, marker="^", linestyle="--", color=color, alpha=0.55, label=f"{pr} (p95)")
+        plotted_any = True
+    if not plotted_any:
+        plt.close()
+        return None
     ax.set_xticks(x); ax.set_xticklabels(_WINDOW_ORDER)
     ax.set_xlabel("Averaging window")
     ax.set_ylabel("Peak throughput (Mbps)")
-    ax.set_title("Q1.4 — Per-direction peak throughput across 1ms…10s windows\n"
-                 "Short windows reveal sub-second bursts; long windows show sustained rate")
+    ax.set_title("Q1.4 — Peak throughput across 1ms…10s windows (per profile)\n"
+                 "Solid = p50 across pcaps, dashed = p95. Steeper slope at short windows = burstier.")
     ax.set_yscale("log")
-    ax.legend(loc="best", fontsize=8, ncol=2)
-    ax.grid(True, alpha=0.3)
+    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=8)
+    ax.grid(True, alpha=0.3, which="both")
     plt.tight_layout()
     out = output_dir / "ran2_q1_multiwindow_throughput.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
@@ -2997,26 +3155,53 @@ def generate_ran2_multiwindow_throughput_chart(ran2: dict, output_dir: Path) -> 
 
 
 def generate_ran2_burstiness_by_window_chart(ran2: dict, output_dir: Path) -> Optional[str]:
-    """Q2.3 — peak/mean burstiness index at 1ms/10ms/100ms/1s/10s windows."""
+    """Q2.3 — peak/mean burstiness index across averaging windows, aggregated per profile."""
     rows = ran2.get("Q2", {}).get("per_pcap") or []
     if not rows:
         return None
-    fig, ax = plt.subplots(figsize=(14, 6))
-    x = list(range(len(_WINDOW_ORDER)))
+    import numpy as np
+    by_profile: dict[str, dict[str, list[float]]] = {}
     for r in rows:
+        pr = r.get("network_profile") or "?"
+        if pr == "?":
+            continue
         vals = r.get("burstiness_by_window") or {}
-        y = [vals.get(w) or 0 for w in _WINDOW_ORDER]
-        ax.plot(x, y, marker="s", label=Path(r["pcap_file"]).name[:32])
+        if not vals:
+            continue
+        slot = by_profile.setdefault(pr, {w: [] for w in _WINDOW_ORDER})
+        for w in _WINDOW_ORDER:
+            v = vals.get(w)
+            if v is not None and v > 0:
+                slot[w].append(float(v))
+    by_profile = {pr: slot for pr, slot in by_profile.items() if any(slot.values())}
+    if not by_profile:
+        return None
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+    x = list(range(len(_WINDOW_ORDER)))
+    cmap = plt.get_cmap("tab10")
+    plotted_any = False
+    for i, pr in enumerate(sorted(by_profile.keys())):
+        slot = by_profile[pr]
+        y = [float(np.median(slot[w])) if slot[w] else float("nan") for w in _WINDOW_ORDER]
+        if not any(np.isfinite(v) and v > 0 for v in y):
+            continue
+        ax.plot(x, y, marker="s", color=cmap(i % 10), label=pr)
+        plotted_any = True
+    if not plotted_any:
+        plt.close()
+        return None
     ax.set_xticks(x); ax.set_xticklabels(_WINDOW_ORDER)
     ax.set_xlabel("Averaging window")
-    ax.set_ylabel("Burstiness index (peak / mean)")
-    ax.set_title("Q2.3 — Burstiness across averaging windows\n"
+    ax.set_ylabel("Burstiness index (peak / mean), median across pcaps")
+    ax.set_title("Q2.3 — Burstiness across averaging windows (per profile)\n"
                  "Higher at short windows = bursty; flat curve = smooth")
-    ax.legend(loc="best", fontsize=8, ncol=2)
-    ax.grid(True, alpha=0.3)
-    # Annotate OS-scheduler-jitter caveat for <10ms
-    ax.axvspan(-0.4, 0.4, alpha=0.15, color="red")
-    ax.text(0, ax.get_ylim()[1] * 0.95,
+    ax.set_yscale("log")
+    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=9)
+    ax.grid(True, alpha=0.3, which="both")
+    # Annotate OS-scheduler-jitter caveat for <10ms (1ms is the first window)
+    ax.axvspan(-0.4, 0.4, alpha=0.12, color="red")
+    ax.text(0, ax.get_ylim()[1] * 0.85,
             "OS jitter region", ha="center", fontsize=8, color="darkred")
     plt.tight_layout()
     out = output_dir / "ran2_q2_burstiness_by_window.png"
@@ -3025,41 +3210,61 @@ def generate_ran2_burstiness_by_window_chart(ran2: dict, output_dir: Path) -> Op
 
 
 def generate_ran2_interburst_idle_cdf_chart(ran2: dict, output_dir: Path) -> Optional[str]:
-    """Q2.2 / Q4.5 — inter-burst idle-gap CDF per direction at 10ms + 100ms gap."""
-    # Reach into the raw pcap_metrics? No — ran2_metrics emits distributions.
-    # We draw one bar group per (gap, direction) showing p50/p95/p99 of idle gaps.
+    """Q2.2 / Q4.5 — inter-burst idle-gap distribution percentile bars,
+    aggregated per profile × direction. One panel per gap threshold (10ms / 100ms)."""
     rows = ran2.get("Q2", {}).get("per_pcap") or []
     if not rows:
         return None
+    import numpy as np
 
-    categories: list[str] = []
-    p50: list[float] = []
-    p95: list[float] = []
-    p99: list[float] = []
+    # bucket: gap -> direction -> profile -> dict of distributions to merge
+    bucket: dict[str, dict[str, dict[str, dict[str, list[float]]]]] = {}
     for r in rows:
-        name = Path(r["pcap_file"]).name[:20]
+        pr = r.get("network_profile") or "?"
+        if pr == "?":
+            continue
         for gap in ("10ms", "100ms"):
             for direction in ("ul", "dl"):
                 d = (((r.get("interburst_idle_by_gap") or {}).get(gap) or {}).get(direction) or {}).get("cdf_sec") or {}
-                if d.get("n"):
-                    categories.append(f"{name}\n{direction.upper()}@{gap}")
-                    p50.append((d.get("p50") or 0) * 1000)
-                    p95.append((d.get("p95") or 0) * 1000)
-                    p99.append((d.get("p99") or 0) * 1000)
-    if not categories:
+                if not d.get("n"):
+                    continue
+                slot = bucket.setdefault(gap, {}).setdefault(direction, {}).setdefault(pr, {"p50": [], "p95": [], "p99": []})
+                for k in ("p50", "p95", "p99"):
+                    v = d.get(k)
+                    if v is not None:
+                        slot[k].append(float(v) * 1000.0)  # ms
+    if not bucket:
         return None
 
-    x = range(len(categories))
-    width = 0.25
-    fig, ax = plt.subplots(figsize=(max(14, len(categories) * 0.8), 6))
-    ax.bar([i - width for i in x], p50, width, label="p50", color="#4daf4a")
-    ax.bar(list(x), p95, width, label="p95", color="#ff7f00")
-    ax.bar([i + width for i in x], p99, width, label="p99", color="#e41a1c")
-    ax.set_xticks(list(x)); ax.set_xticklabels(categories, rotation=45, ha="right", fontsize=7)
-    ax.set_ylabel("Inter-burst idle gap (ms)")
-    ax.set_yscale("log")
-    ax.set_title("Q2.2 / Q4.5 — Inter-burst idle-gap distribution (per direction, gap threshold)")
-    ax.legend(); ax.grid(axis="y", alpha=0.3)
+    gaps = [g for g in ("10ms", "100ms") if g in bucket]
+    fig, axes = plt.subplots(1, len(gaps), figsize=(7.5 * len(gaps), 6), squeeze=False)
+    for ax_idx, gap in enumerate(gaps):
+        ax = axes[0][ax_idx]
+        directions = ["ul", "dl"]
+        profiles = sorted({pr for direction in directions for pr in bucket[gap].get(direction, {}).keys()})
+        x = np.arange(len(profiles))
+        n_bars = 6  # 2 directions × 3 percentiles
+        width = 0.13
+        # Order: UL p50, UL p95, UL p99, DL p50, DL p95, DL p99
+        layouts = [
+            ("ul", "p50", "#1f77b4", "UL p50"),
+            ("ul", "p95", "#3a7bb8", "UL p95"),
+            ("ul", "p99", "#5680b6", "UL p99"),
+            ("dl", "p50", "#ff7f0e", "DL p50"),
+            ("dl", "p95", "#e0791f", "DL p95"),
+            ("dl", "p99", "#bd6921", "DL p99"),
+        ]
+        for k, (direction, pct, color, label) in enumerate(layouts):
+            ys = [float(np.median(bucket[gap].get(direction, {}).get(pr, {}).get(pct, []) or [np.nan]))
+                  for pr in profiles]
+            ax.bar(x + (k - (n_bars - 1)/2) * width, ys, width, label=label, color=color)
+        ax.set_xticks(x); ax.set_xticklabels(profiles, rotation=30, ha="right")
+        ax.set_yscale("log")
+        ax.set_ylabel("Inter-burst idle gap (ms)")
+        ax.set_title(f"Q2.2 / Q4.5 — Idle gaps, {gap} threshold")
+        ax.grid(axis="y", alpha=0.3, which="both")
+        if ax_idx == len(gaps) - 1:
+            ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=8)
     plt.tight_layout()
     out = output_dir / "ran2_q2_interburst_idle_cdf.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
@@ -3067,32 +3272,39 @@ def generate_ran2_interburst_idle_cdf_chart(ran2: dict, output_dir: Path) -> Opt
 
 
 def generate_ran2_rtt_components_chart(ran2: dict, output_dir: Path) -> Optional[str]:
-    """Q3.1/Q3.2 — TCP handshake RTT vs TLS handshake vs HTTP setup RTT distributions."""
+    """Q3.1/Q3.2 — TCP handshake RTT vs TLS handshake vs full connection setup."""
     q3 = ran2.get("Q3") or {}
     items = [
         ("TCP handshake RTT", q3.get("tcp_rtt") or {}),
         ("TLS handshake", q3.get("tls_handshake") or {}),
-        ("HTTP setup RTT", q3.get("http_setup_rtt") or {}),
+        ("Connection setup\n(SYN to App-Data)", q3.get("connection_setup_ms") or {}),
     ]
     items = [(name, d) for name, d in items if d.get("n")]
     if not items:
         return None
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    x = range(len(items))
+    x = list(range(len(items)))
     width = 0.22
-    mins = [d.get("min") or 0 for _, d in items]
     p50s = [d.get("p50") or 0 for _, d in items]
     p95s = [d.get("p95") or 0 for _, d in items]
-    maxs = [d.get("max") or 0 for _, d in items]
-    ax.bar([i - 1.5*width for i in x], mins, width, label="min", color="#4daf4a")
-    ax.bar([i - 0.5*width for i in x], p50s, width, label="p50", color="#377eb8")
+    p99s = [d.get("p99") or 0 for _, d in items]
+    means = [d.get("mean") or 0 for _, d in items]
+    ax.bar([i - 1.5*width for i in x], p50s, width, label="p50", color="#377eb8")
+    ax.bar([i - 0.5*width for i in x], means, width, label="mean", color="#984ea3")
     ax.bar([i + 0.5*width for i in x], p95s, width, label="p95", color="#ff7f00")
-    ax.bar([i + 1.5*width for i in x], maxs, width, label="max", color="#e41a1c")
-    ax.set_xticks(list(x)); ax.set_xticklabels([n for n, _ in items])
-    ax.set_ylabel("Duration (ms)")
-    ax.set_title("Q3.1 / Q3.2 — RTT components")
-    ax.legend(); ax.grid(axis="y", alpha=0.3)
+    ax.bar([i + 1.5*width for i in x], p99s, width, label="p99", color="#e41a1c")
+    # Annotate each component group with min/max/n below the x-axis label
+    extras = [
+        f"min={d.get('min', 0):.2g} ms · max={d.get('max', 0):,.0f} ms · n={d.get('n', 0):,}"
+        for _, d in items
+    ]
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{n}\n{e}" for (n, _), e in zip(items, extras)], fontsize=9)
+    ax.set_yscale("log")
+    ax.set_ylabel("Duration (ms, log scale)")
+    ax.set_title("Q3.1 / Q3.2 — RTT components (p50 / mean / p95 / p99 on log axis)")
+    ax.legend(); ax.grid(axis="y", alpha=0.3, which="both")
     plt.tight_layout()
     out = output_dir / "ran2_q3_rtt_components.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
@@ -3100,20 +3312,53 @@ def generate_ran2_rtt_components_chart(ran2: dict, output_dir: Path) -> Optional
 
 
 def generate_ran2_e2e_latency_over_rtt_chart(ran2: dict, output_dir: Path) -> Optional[str]:
-    """Q3.4 — (E2E latency / TCP RTT) per scenario/profile."""
+    """Q3.4 — (E2E latency / TCP RTT) per scenario × profile, as a heatmap."""
     data = ran2.get("Q3", {}).get("e2e_latency_vs_rtt") or {}
     if not data:
         return None
+    import numpy as np
+    cells: dict[tuple[str, str], float] = {}
+    for key, v in data.items():
+        if "/" not in key:
+            continue
+        sc, pr = key.split("/", 1)
+        p50 = v.get("p50")
+        if p50 is None:
+            continue
+        cells[(sc, pr)] = float(p50)
+    if not cells:
+        return None
+    scenarios = sorted({sc for sc, _ in cells.keys()})
+    profiles = sorted({pr for _, pr in cells.keys()})
+    mat = np.full((len(scenarios), len(profiles)), np.nan)
+    for i, sc in enumerate(scenarios):
+        for j, pr in enumerate(profiles):
+            v = cells.get((sc, pr))
+            if v is not None:
+                mat[i, j] = v
 
-    labels = sorted(data.keys())
-    ratios = [(data[k].get("p50") or 0) for k in labels]
-    fig, ax = plt.subplots(figsize=(max(12, len(labels) * 0.55), 6))
-    ax.bar(range(len(labels)), ratios, color="#984ea3")
-    ax.set_xticks(range(len(labels))); ax.set_xticklabels(labels, rotation=75, ha="right", fontsize=8)
-    ax.set_ylabel("E2E latency / RTT p50 (x)")
-    ax.set_title("Q3.4 — End-to-end latency as a multiple of TCP RTT (non-streaming)")
-    ax.axhline(1.0, color="black", linestyle="--", alpha=0.4, label="1× RTT")
-    ax.legend(); ax.grid(axis="y", alpha=0.3)
+    fig, ax = plt.subplots(figsize=(max(8, 0.7 * len(profiles) + 2),
+                                      max(5, 0.36 * len(scenarios) + 1)))
+    finite = mat[np.isfinite(mat) & (mat > 0)]
+    vmin = max(float(np.min(finite)), 0.5) if finite.size else 1.0
+    vmax = float(np.percentile(finite, 99)) if finite.size else 100.0
+    from matplotlib.colors import LogNorm
+    im = ax.imshow(mat, aspect="auto", cmap="magma_r", norm=LogNorm(vmin=vmin, vmax=vmax))
+    ax.set_xticks(range(len(profiles))); ax.set_xticklabels(profiles, rotation=30, ha="right")
+    ax.set_yticks(range(len(scenarios)))
+    ax.set_yticklabels([_fmt_scenario(s) for s in scenarios], fontsize=9)
+    # Annotate each cell with its value; use white text on dark cells
+    threshold = vmin * (vmax / vmin) ** 0.5  # geometric midpoint on log scale
+    for i in range(len(scenarios)):
+        for j in range(len(profiles)):
+            v = mat[i, j]
+            if not np.isfinite(v):
+                continue
+            color = "white" if v > threshold else "black"
+            ax.text(j, i, f"{v:.0f}", ha="center", va="center", fontsize=7, color=color)
+    ax.set_title("Q3.4 — End-to-end latency / TCP RTT (p50, ratio = ms ÷ ms = ×)\n"
+                 "1× = transport-bound. Larger = inference / orchestration dominant.")
+    cbar = plt.colorbar(im, ax=ax, label="E2E / RTT (×, log scale)")
     plt.tight_layout()
     out = output_dir / "ran2_q3_e2e_latency_over_rtt.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
@@ -3138,14 +3383,28 @@ def generate_ran2_reliability_vs_loss_chart(ran2: dict, output_dir: Path) -> Opt
     if not xs:
         return None
 
+    # Color points by the nominal loss bucket; annotate only outliers (success < 95%)
     fig, ax = plt.subplots(figsize=(11, 7))
-    ax.scatter(xs, ys, s=60, alpha=0.7, edgecolors="black")
-    for lx, ly, ll in zip(xs, ys, labels):
-        ax.annotate(ll, (lx, ly), xytext=(4, 4), textcoords="offset points", fontsize=6)
+    healthy = [(lx, ly) for lx, ly, _ in zip(xs, ys, labels) if ly >= 95.0]
+    outliers = [(lx, ly, ll) for lx, ly, ll in zip(xs, ys, labels) if ly < 95.0]
+    if healthy:
+        ax.scatter([p[0] for p in healthy], [p[1] for p in healthy], s=42, alpha=0.55,
+                   edgecolors="black", linewidths=0.4, color="#4daf4a", label=f"≥ 95% success (n={len(healthy)})")
+    if outliers:
+        ax.scatter([p[0] for p in outliers], [p[1] for p in outliers], s=80, alpha=0.85,
+                   edgecolors="black", linewidths=0.6, color="#e41a1c", label=f"< 95% success (n={len(outliers)})")
+        for lx, ly, ll in outliers:
+            ax.annotate(ll, (lx, ly), xytext=(5, -3), textcoords="offset points", fontsize=8)
+    ax.axhline(95.0, color="gray", linestyle=":", alpha=0.5)
+    ax.text(0.99, 95.4, "95% threshold", transform=ax.get_yaxis_transform(),
+            ha="right", fontsize=8, color="gray")
     ax.set_xlabel("Nominal profile loss (%)")
     ax.set_ylabel("Observed success rate (%)")
     ax.set_xscale("symlog", linthresh=0.001)
-    ax.set_title("Q4.4 — Reliability of service vs netem loss rate")
+    ax.set_ylim(-2, 105)
+    ax.set_title("Q4.4 — Reliability of service vs netem loss rate\n"
+                 "Healthy combos shown as green dots; outliers (<95%) labelled in red")
+    ax.legend(loc="lower left")
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
     out = output_dir / "ran2_q4_reliability_vs_loss.png"
@@ -3160,35 +3419,32 @@ def generate_ran2_flow_duration_chart(ran2: dict, output_dir: Path) -> Optional[
     if not fd.get("n"):
         return None
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-    labels = ["min", "p50", "p95", "p99", "max"]
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+    # max is excluded: it is inflated by ephemeral src-port reuse aggregating
+    # multiple TCP connections into one flow record (netemu.pcap flow_key is
+    # the 4-tuple without FIN/RST close logic). p99 is the representative tail.
+    # p10 (rather than min) anchors the lower end so a single ultra-short flow
+    # does not collapse the bar to ~0 and skew the log axis.
+    labels = ["p10", "p50", "p95", "p99"]
     vals = [fd.get(k) or 0 for k in labels]
     ax1.bar(labels, vals, color="#2ca02c")
-    ax1.set_ylabel("Flow duration (s)")
+    ax1.set_ylabel("Flow duration (s, log scale)")
     ax1.set_yscale("log")
-    ax1.set_title("Q4.6 — TCP flow duration distribution")
-    ax1.grid(axis="y", alpha=0.3)
-    for l, v in zip(labels, vals):
-        ax1.text(l, v * 1.05, f"{v:.2f}", ha="center", fontsize=8)
-
     reuse = cd.get("connection_reuse_ratio")
+    reuse_s = f"{reuse*100:.1f}%" if reuse is not None else "—"
     flows_per = cd.get("flows_per_pcap") or {}
-    ax2.axis("off")
-    lines = [
-        f"Connection-reuse ratio: {reuse:.1%}" if reuse is not None else "Connection-reuse ratio: —",
-        "",
-        "Flows per pcap:",
-        f"  min = {flows_per.get('min') or 0:.0f}",
-        f"  p50 = {flows_per.get('p50') or 0:.0f}",
-        f"  p95 = {flows_per.get('p95') or 0:.0f}",
-        f"  max = {flows_per.get('max') or 0:.0f}",
-        "",
-        "High reuse = HTTP/2 or keep-alive.",
-        "Low reuse = new connection per turn.",
-    ]
-    ax2.text(0.02, 0.95, "\n".join(lines), transform=ax2.transAxes,
-             fontsize=11, va="top", family="monospace",
-             bbox=dict(boxstyle="round", facecolor="#f5f5f5"))
+    fpp = (f"flows/pcap p50={flows_per.get('p50') or 0:.0f} · "
+           f"p95={flows_per.get('p95') or 0:.0f} · "
+           f"max={flows_per.get('max') or 0:.0f}") if flows_per else ""
+    subtitle = (
+        f"Connection-reuse ratio: {reuse_s} (high → HTTP/2 / keep-alive · low → new connection per turn)"
+        + (f" · {fpp}" if fpp else "")
+    )
+    ax1.set_title(f"Q4.6 — TCP flow duration distribution\n{subtitle}", fontsize=11)
+    ax1.grid(axis="y", alpha=0.3, which="both")
+    for l, v in zip(labels, vals):
+        if v > 0:
+            ax1.text(l, v * 1.15, f"{v:.2f}s", ha="center", fontsize=9)
     plt.tight_layout()
     out = output_dir / "ran2_q4_flow_duration.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
@@ -3252,50 +3508,76 @@ def generate_ran2_inter_token_gap_chart(ran2: dict, output_dir: Path) -> Optiona
 
 
 def generate_ran2_tokens_to_bytes_regression_chart(ran2: dict, output_dir: Path) -> Optional[str]:
-    """Q5.5 — slope (bytes per token) per scenario, UL vs DL, with r²."""
+    """Q5.5 — slope (bytes per token) per scenario, UL vs DL, with r².
+
+    Slopes from low-r² fits are masked (a fit with r² < R2_GOOD on a degenerate
+    scenario gives a meaningless slope that distorts the axis); they remain in
+    the r² panel so the reader can see *why*."""
     data = ran2.get("Q5", {}).get("token_to_bytes_regression_by_scenario") or {}
     if not data:
         return None
+    R2_GOOD = 0.5
+
+    # Disambiguate aliases that collide (e.g. "Chat Basic" from chat_basic + chat_deepseek).
+    raw_ids: list[str] = list(data.keys())
+    aliases: list[str] = [_fmt_scenario(s) for s in raw_ids]
+    counts = Counter(aliases) if (Counter := __import__("collections").Counter) else None
+    def display(raw: str, alias: str) -> str:
+        if counts and counts[alias] > 1:
+            return f"{alias}  [{raw}]"
+        return alias
 
     scenarios: list[str] = []
     ul_slopes: list[float] = []
     dl_slopes: list[float] = []
     ul_r2s: list[float] = []
     dl_r2s: list[float] = []
-    for s, r in data.items():
+    ul_masked: list[bool] = []
+    dl_masked: list[bool] = []
+    for raw, alias in zip(raw_ids, aliases):
+        r = data[raw]
         ul = r.get("ul") or {}
         dl = r.get("dl") or {}
         if not ul and not dl:
             continue
-        scenarios.append(_fmt_scenario(s))
-        ul_slopes.append(ul.get("slope") or 0)
-        dl_slopes.append(dl.get("slope") or 0)
-        ul_r2s.append(ul.get("r2") or 0)
-        dl_r2s.append(dl.get("r2") or 0)
+        scenarios.append(display(raw, alias))
+        u_r2 = ul.get("r2") or 0
+        d_r2 = dl.get("r2") or 0
+        ul_r2s.append(u_r2)
+        dl_r2s.append(d_r2)
+        ul_slopes.append((ul.get("slope") or 0) if u_r2 >= R2_GOOD else 0.0)
+        dl_slopes.append((dl.get("slope") or 0) if d_r2 >= R2_GOOD else 0.0)
+        ul_masked.append(u_r2 < R2_GOOD)
+        dl_masked.append(d_r2 < R2_GOOD)
     if not scenarios:
         return None
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, max(5, len(scenarios) * 0.3)))
-    y = range(len(scenarios))
-    ax1.barh(y, ul_slopes, color="#1f77b4", label="UL slope (bytes/token_in)")
-    ax1.barh(y, dl_slopes, color="#ff7f0e", alpha=0.6, label="DL slope (bytes/token_out)")
-    ax1.set_yticks(list(y)); ax1.set_yticklabels(scenarios, fontsize=8)
-    ax1.invert_yaxis()
-    ax1.set_xlabel("Bytes per token (regression slope)")
-    ax1.set_title("Q5.5 — tokens→bytes regression slope per scenario")
-    ax1.legend(); ax1.grid(axis="x", alpha=0.3)
+    # Sort by UL slope (descending) to make patterns visible
+    order = sorted(range(len(scenarios)), key=lambda i: ul_slopes[i], reverse=False)
+    scenarios = [scenarios[i] for i in order]
+    ul_slopes = [ul_slopes[i] for i in order]
+    dl_slopes = [dl_slopes[i] for i in order]
+    ul_r2s = [ul_r2s[i] for i in order]
+    dl_r2s = [dl_r2s[i] for i in order]
+    ul_masked = [ul_masked[i] for i in order]
+    dl_masked = [dl_masked[i] for i in order]
 
-    # r² chart
-    width = 0.4
-    ax2.barh([i - width/2 for i in y], ul_r2s, width, label="UL r²", color="#1f77b4")
-    ax2.barh([i + width/2 for i in y], dl_r2s, width, label="DL r²", color="#ff7f0e")
-    ax2.set_yticks(list(y)); ax2.set_yticklabels(scenarios, fontsize=8)
+    fig, ax2 = plt.subplots(1, 1, figsize=(10, max(5, len(scenarios) * 0.32)))
+    y = list(range(len(scenarios)))
+    width = 0.38
+    # Slope panel removed: the per-scenario slope values were redundant with
+    # the aggregate token→byte mapping table and noisy for low-r² fits. The r²
+    # panel alone communicates whether the linear token→byte model is sound.
+    ax2.barh([i - width/2 for i in y], ul_r2s, width, color="#1f77b4", label="UL r²")
+    ax2.barh([i + width/2 for i in y], dl_r2s, width, color="#ff7f0e", label="DL r²")
+    ax2.set_yticks(y); ax2.set_yticklabels(scenarios, fontsize=8)
     ax2.invert_yaxis()
-    ax2.set_xlabel("Coefficient of determination r² (0 → 1)")
+    ax2.set_xlabel("Coefficient of determination r²")
     ax2.set_xlim(0, 1.05)
+    ax2.axvline(R2_GOOD, color="orange", linestyle=":", alpha=0.6, label=f"{R2_GOOD} (mask threshold)")
     ax2.axvline(0.8, color="green", linestyle="--", alpha=0.5, label="0.8 (good fit)")
     ax2.set_title("Q5.5 — Regression quality (r²)")
-    ax2.legend(); ax2.grid(axis="x", alpha=0.3)
+    ax2.legend(loc="lower right"); ax2.grid(axis="x", alpha=0.3)
     plt.tight_layout()
     out = output_dir / "ran2_q5_tokens_to_bytes_regression.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
@@ -3315,18 +3597,339 @@ def generate_ran2_token_vs_pkt_rate_chart(ran2: dict, output_dir: Path) -> Optio
     dl_med = dl_rate_dist.get("p50") or 0
 
     fig, ax = plt.subplots(figsize=(12, 6))
-    x = range(len(profiles))
+    x = list(range(len(profiles)))
     ax.bar(x, trates, label="Token arrival rate (Hz, per profile)", color="#1f77b4")
-    if dl_med > 0:
-        ax.axhline(dl_med, color="#d62728", linestyle="--",
-                   label=f"DL packet arrival rate p50 = {dl_med:.1f} Hz")
-    ax.set_xticks(list(x)); ax.set_xticklabels(profiles, rotation=30, ha="right")
-    ax.set_ylabel("Arrival rate (Hz)")
-    ax.set_title("Q5.3 — Token arrival rate vs DL packet arrival rate")
-    ax.legend(); ax.grid(axis="y", alpha=0.3)
+    # Show DL packet rate stats as a shaded band (p50 → p95) so it's visible alongside Hz-scale token rates
+    p50 = dl_rate_dist.get("p50") or 0
+    p95 = dl_rate_dist.get("p95") or 0
+    if p50 > 0:
+        ax.axhline(p50, color="#d62728", linestyle="--", linewidth=1.5,
+                   label=f"DL packet arrival p50 = {p50:.1f} Hz")
+    if p95 > 0:
+        ax.axhline(p95, color="#d62728", linestyle=":", linewidth=1.0, alpha=0.6,
+                   label=f"DL packet arrival p95 = {p95:.1f} Hz")
+    ax.set_xticks(x); ax.set_xticklabels(profiles, rotation=30, ha="right")
+    ax.set_yscale("log")
+    ax.set_ylabel("Arrival rate (Hz, log scale)")
+    ax.set_title("Q5.3 — Token arrival rate vs DL packet arrival rate\n"
+                 "Token rate ≫ packet rate ⇒ packets carry many tokens (streaming aggregation)")
+    ax.legend(); ax.grid(axis="y", alpha=0.3, which="both")
     plt.tight_layout()
     out = output_dir / "ran2_q5_token_vs_pkt_rate.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
+    return str(out)
+
+
+# ---------------------------------------------------------------------------
+# Q2 burstiness — additional per-scenario × direction charts.
+# Data source: ran2["Q2"]["per_scenario_profile_bursts"][<scenario>/<profile>]
+#   .by_gap["100ms"].{ul,dl}.{count, arrival_rate_per_sec, duty_cycle,
+#                              size_bytes, duration_sec, peak_rate_mbps}
+# ---------------------------------------------------------------------------
+
+_Q2_BURST_GAP_LABEL = "100ms"
+_Q2_BURST_REFERENCE_PROFILE = "5g_urban"
+
+# Disambiguate scenario aliases that collide once provider suffix is dropped.
+_Q2_BURST_PROVIDER_SUFFIX = {
+    "chat_basic": "A",
+    "chat_streaming": "A",
+    "chat_deepseek": "C",
+    "chat_deepseek_streaming": "C",
+    "chat_deepseek_coder": "C",
+    "chat_deepseek_reasoner": "C",
+    "chat_gemini": "B",
+    "chat_vllm": "F",
+    "direct_web_search": "A",
+    "direct_web_search_deepseek": "C",
+    "video_understanding_vllm": "F",
+    "multimodal_analysis": "B",
+}
+
+
+def _q2_burst_label(scenario_id: str) -> str:
+    base = _fmt_scenario(scenario_id)
+    suf = _Q2_BURST_PROVIDER_SUFFIX.get(scenario_id)
+    return f"{base} ({suf})" if suf else base
+
+
+def _q2_burst_aggregate_all_profiles(spb: dict, gap: str) -> dict:
+    """Sum burst counts and total burst duration per scenario across profiles."""
+    agg: dict[str, dict] = defaultdict(
+        lambda: {"capture_dur_total": 0.0,
+                 "ul": {"count": 0, "sum_dur": 0.0},
+                 "dl": {"count": 0, "sum_dur": 0.0}}
+    )
+    for key, sp in spb.items():
+        if "/" not in key:
+            continue
+        sc, _, _ = key.partition("/")
+        agg[sc]["capture_dur_total"] += sp.get("capture_duration_sec_total", 0.0) or 0.0
+        gap_data = (sp.get("by_gap") or {}).get(gap, {})
+        for direction in ("ul", "dl"):
+            d = gap_data.get(direction) or {}
+            agg[sc][direction]["count"] += d.get("count", 0) or 0
+            dur_dist = (d.get("duration_sec") or {})
+            agg[sc][direction]["sum_dur"] += dur_dist.get("sum", 0.0) or 0.0
+    return agg
+
+
+def _q2_burst_select_reference_profile(spb: dict, profile: str, gap: str) -> dict:
+    out: dict[str, dict] = {}
+    for key, sp in spb.items():
+        if "/" not in key:
+            continue
+        sc, _, pr = key.partition("/")
+        if pr != profile:
+            continue
+        gap_data = (sp.get("by_gap") or {}).get(gap, {})
+        out[sc] = {"ul": gap_data.get("ul") or {}, "dl": gap_data.get("dl") or {}}
+    return out
+
+
+def _q2_burst_sort_scenarios(agg: dict) -> list:
+    return sorted(
+        agg.keys(),
+        key=lambda s: (agg[s]["ul"]["count"] + agg[s]["dl"]["count"]),
+        reverse=True,
+    )
+
+
+def _q2_fmt_log_kbps(x, _):
+    if x <= 0:
+        return "0"
+    if x >= 1e6:
+        return f"{x/1e6:.0f}M"
+    if x >= 1e3:
+        return f"{x/1e3:.0f}k"
+    return f"{x:.0f}"
+
+
+def _q2_box_from_dist(d: dict):
+    if not d or not d.get("n"):
+        return None
+    return {
+        "med": d.get("p50"),
+        "q1": d.get("p25"),
+        "q3": d.get("p75"),
+        "whislo": d.get("p10"),
+        "whishi": d.get("p90"),
+        "fliers": [d.get("p99")] if d.get("p99") is not None else [],
+        "label": "",
+    }
+
+
+def generate_ran2_q2_burst_counts_chart(ran2: dict, output_dir: Path) -> Optional[str]:
+    """Q2 — Total burst count per scenario × direction (all profiles, 100 ms gap)."""
+    spb = (ran2.get("Q2") or {}).get("per_scenario_profile_bursts") or {}
+    if not spb:
+        return None
+    agg = _q2_burst_aggregate_all_profiles(spb, _Q2_BURST_GAP_LABEL)
+    scenarios = _q2_burst_sort_scenarios(agg)
+    if not scenarios:
+        return None
+    labels = [_q2_burst_label(s) for s in scenarios]
+    ul = [agg[s]["ul"]["count"] for s in scenarios]
+    dl = [agg[s]["dl"]["count"] for s in scenarios]
+    fig, ax = plt.subplots(figsize=(11, max(5, 0.32 * len(scenarios))))
+    y = np.arange(len(scenarios))
+    h = 0.4
+    ax.barh(y - h/2, ul, h, color="#d62728", label="UL bursts")
+    ax.barh(y + h/2, dl, h, color="#1f77b4", label="DL bursts")
+    ax.set_yticks(y); ax.set_yticklabels(labels, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xscale("log")
+    ax.set_xlabel("Burst count (log scale, all profiles aggregated, 100 ms idle-gap threshold)")
+    ax.set_title("Q2 — Total burst count per scenario × direction\n"
+                 f"(idle-gap threshold = {_Q2_BURST_GAP_LABEL}, all profiles aggregated)",
+                 fontsize=11)
+    ax.legend(loc="lower right", frameon=False)
+    ax.grid(True, axis="x", alpha=0.3, which="both")
+    fig.tight_layout()
+    out = output_dir / "ran2_q2_burst_counts.png"
+    fig.savefig(out, dpi=110); plt.close(fig)
+    return str(out)
+
+
+def _q2_burst_distribution_chart(
+    ran2: dict, output_dir: Path, *, metric: str, ylabel: str,
+    title: str, filename: str, log_y: bool = True, unit_factor: float = 1.0,
+) -> Optional[str]:
+    """Box-plot template for size/duration/peak-rate distributions (5g_urban only)."""
+    spb = (ran2.get("Q2") or {}).get("per_scenario_profile_bursts") or {}
+    if not spb:
+        return None
+    ref = _q2_burst_select_reference_profile(spb, _Q2_BURST_REFERENCE_PROFILE, _Q2_BURST_GAP_LABEL)
+    rows = []
+    for sc, sides in ref.items():
+        ul_d = sides["ul"].get(metric) or {}
+        dl_d = sides["dl"].get(metric) or {}
+        if not ul_d.get("n") and not dl_d.get("n"):
+            continue
+        med = ul_d.get("p50") or dl_d.get("p50") or 0
+        rows.append((med, sc, ul_d, dl_d))
+    rows.sort(key=lambda r: r[0], reverse=True)
+    if not rows:
+        return None
+    import matplotlib.patches as mpatches
+    fig, ax = plt.subplots(figsize=(11, max(5, 0.36 * len(rows))))
+    h = 0.36
+    y = np.arange(len(rows))
+    ul_boxes, dl_boxes = [], []
+    for i, (_, sc, ul_d, dl_d) in enumerate(rows):
+        ub = _q2_box_from_dist(ul_d)
+        db = _q2_box_from_dist(dl_d)
+        for b, pos in ((ub, i - h), (db, i + h)):
+            if not b:
+                continue
+            for k in ("med", "q1", "q3", "whislo", "whishi", "fliers"):
+                if k == "fliers":
+                    b[k] = [v * unit_factor for v in (b[k] or [])]
+                else:
+                    b[k] = (b[k] or 0) * unit_factor
+            b["pos"] = pos
+        if ub:
+            ul_boxes.append(ub)
+        if db:
+            dl_boxes.append(db)
+
+    def _draw(boxes, face, edge, med_color):
+        if not boxes:
+            return
+        ax.bxp(
+            [{k: v for k, v in b.items() if k != "pos"} for b in boxes],
+            positions=[b["pos"] for b in boxes],
+            widths=h * 0.9, vert=False,
+            patch_artist=True, manage_ticks=False,
+            boxprops=dict(facecolor=face, edgecolor=edge),
+            medianprops=dict(color=med_color),
+            whiskerprops=dict(color=edge),
+            capprops=dict(color=edge),
+            flierprops=dict(marker="x", markerfacecolor=edge,
+                            markeredgecolor=edge, markersize=4),
+        )
+
+    _draw(ul_boxes, "#f4b8b8", "#d62728", "#a30000")
+    _draw(dl_boxes, "#bcd9ef", "#1f77b4", "#003a73")
+    ax.set_yticks(y)
+    ax.set_yticklabels([_q2_burst_label(sc) for _, sc, *_ in rows], fontsize=8)
+    ax.invert_yaxis()
+    if log_y:
+        ax.set_xscale("log")
+        ax.xaxis.set_major_formatter(ticker.FuncFormatter(_q2_fmt_log_kbps))
+    ax.set_xlabel(f"{ylabel}  (boxes: p25–p75; whiskers: p10–p90; ×: p99)")
+    ax.set_title(f"{title}\n"
+                 f"(idle-gap threshold = {_Q2_BURST_GAP_LABEL}, "
+                 f"profile = {_Q2_BURST_REFERENCE_PROFILE})", fontsize=11)
+    ax.legend(
+        handles=[
+            mpatches.Patch(facecolor="#f4b8b8", edgecolor="#d62728", label="UL"),
+            mpatches.Patch(facecolor="#bcd9ef", edgecolor="#1f77b4", label="DL"),
+        ],
+        loc="lower right", frameon=False,
+    )
+    ax.grid(True, axis="x", alpha=0.3, which="both")
+    fig.tight_layout()
+    out = output_dir / filename
+    fig.savefig(out, dpi=110); plt.close(fig)
+    return str(out)
+
+
+def generate_ran2_q2_burst_size_distribution_chart(ran2: dict, output_dir: Path) -> Optional[str]:
+    return _q2_burst_distribution_chart(
+        ran2, output_dir,
+        metric="size_bytes",
+        ylabel="Burst size (bytes, log scale)",
+        title="Q2 — Burst size distribution per scenario × direction",
+        filename="ran2_q2_burst_size_distribution.png",
+    )
+
+
+def generate_ran2_q2_burst_duration_distribution_chart(ran2: dict, output_dir: Path) -> Optional[str]:
+    return _q2_burst_distribution_chart(
+        ran2, output_dir,
+        metric="duration_sec",
+        ylabel="Burst duration (ms, log scale)",
+        title="Q2 — Burst duration distribution per scenario × direction",
+        filename="ran2_q2_burst_duration_distribution.png",
+        unit_factor=1000.0,
+    )
+
+
+def generate_ran2_q2_burst_peak_rate_distribution_chart(ran2: dict, output_dir: Path) -> Optional[str]:
+    return _q2_burst_distribution_chart(
+        ran2, output_dir,
+        metric="peak_rate_mbps",
+        ylabel="Peak intra-burst rate (Mbps, log scale)",
+        title="Q2 — Peak intra-burst rate distribution per scenario × direction",
+        filename="ran2_q2_burst_peak_rate_distribution.png",
+    )
+
+
+def generate_ran2_q2_burst_arrival_rate_chart(ran2: dict, output_dir: Path) -> Optional[str]:
+    """Q2 — Burst arrival rate (bursts/sec) per scenario × direction."""
+    spb = (ran2.get("Q2") or {}).get("per_scenario_profile_bursts") or {}
+    if not spb:
+        return None
+    agg = _q2_burst_aggregate_all_profiles(spb, _Q2_BURST_GAP_LABEL)
+    scenarios = _q2_burst_sort_scenarios(agg)
+    if not scenarios:
+        return None
+    labels = [_q2_burst_label(s) for s in scenarios]
+    ul = [agg[s]["ul"]["count"] / agg[s]["capture_dur_total"]
+          if agg[s]["capture_dur_total"] > 0 else 0 for s in scenarios]
+    dl = [agg[s]["dl"]["count"] / agg[s]["capture_dur_total"]
+          if agg[s]["capture_dur_total"] > 0 else 0 for s in scenarios]
+    fig, ax = plt.subplots(figsize=(11, max(5, 0.32 * len(scenarios))))
+    y = np.arange(len(scenarios))
+    h = 0.4
+    ax.barh(y - h/2, ul, h, color="#d62728", label="UL bursts/sec")
+    ax.barh(y + h/2, dl, h, color="#1f77b4", label="DL bursts/sec")
+    ax.set_yticks(y); ax.set_yticklabels(labels, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xscale("log")
+    ax.set_xlabel("Burst arrival rate (bursts / second of capture, log scale)")
+    ax.set_title("Q2 — Burst arrival rate per scenario × direction\n"
+                 f"(idle-gap threshold = {_Q2_BURST_GAP_LABEL}, all profiles aggregated)",
+                 fontsize=11)
+    ax.legend(loc="lower right", frameon=False)
+    ax.grid(True, axis="x", alpha=0.3, which="both")
+    fig.tight_layout()
+    out = output_dir / "ran2_q2_burst_arrival_rate.png"
+    fig.savefig(out, dpi=110); plt.close(fig)
+    return str(out)
+
+
+def generate_ran2_q2_burst_duty_cycle_chart(ran2: dict, output_dir: Path) -> Optional[str]:
+    """Q2 — Σ(burst_duration) / capture_window per scenario × direction."""
+    spb = (ran2.get("Q2") or {}).get("per_scenario_profile_bursts") or {}
+    if not spb:
+        return None
+    agg = _q2_burst_aggregate_all_profiles(spb, _Q2_BURST_GAP_LABEL)
+    scenarios = _q2_burst_sort_scenarios(agg)
+    if not scenarios:
+        return None
+    labels = [_q2_burst_label(s) for s in scenarios]
+    ul = [100 * agg[s]["ul"]["sum_dur"] / agg[s]["capture_dur_total"]
+          if agg[s]["capture_dur_total"] > 0 else 0 for s in scenarios]
+    dl = [100 * agg[s]["dl"]["sum_dur"] / agg[s]["capture_dur_total"]
+          if agg[s]["capture_dur_total"] > 0 else 0 for s in scenarios]
+    fig, ax = plt.subplots(figsize=(11, max(5, 0.32 * len(scenarios))))
+    y = np.arange(len(scenarios))
+    h = 0.4
+    ax.barh(y - h/2, ul, h, color="#d62728", label="UL on-time fraction")
+    ax.barh(y + h/2, dl, h, color="#1f77b4", label="DL on-time fraction")
+    ax.set_yticks(y); ax.set_yticklabels(labels, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xlabel("Duty cycle: Σ(burst duration) / capture window  (%)")
+    ax.set_title("Q2 — Burst duty cycle per scenario × direction\n"
+                 f"(idle-gap threshold = {_Q2_BURST_GAP_LABEL}, all profiles aggregated)",
+                 fontsize=11)
+    ax.legend(loc="lower right", frameon=False)
+    ax.grid(True, axis="x", alpha=0.3)
+    fig.tight_layout()
+    out = output_dir / "ran2_q2_burst_duty_cycle.png"
+    fig.savefig(out, dpi=110); plt.close(fig)
     return str(out)
 
 
@@ -3337,6 +3940,12 @@ def _generate_all_ran2_charts(ran2: dict, output_dir: Path) -> dict:
         ("ran2_q1_multiwindow_throughput", generate_ran2_multiwindow_throughput_chart),
         ("ran2_q2_burstiness_by_window", generate_ran2_burstiness_by_window_chart),
         ("ran2_q2_interburst_idle_cdf", generate_ran2_interburst_idle_cdf_chart),
+        ("ran2_q2_burst_counts", generate_ran2_q2_burst_counts_chart),
+        ("ran2_q2_burst_size_distribution", generate_ran2_q2_burst_size_distribution_chart),
+        ("ran2_q2_burst_duration_distribution", generate_ran2_q2_burst_duration_distribution_chart),
+        ("ran2_q2_burst_peak_rate_distribution", generate_ran2_q2_burst_peak_rate_distribution_chart),
+        ("ran2_q2_burst_arrival_rate", generate_ran2_q2_burst_arrival_rate_chart),
+        ("ran2_q2_burst_duty_cycle", generate_ran2_q2_burst_duty_cycle_chart),
         ("ran2_q3_rtt_components", generate_ran2_rtt_components_chart),
         ("ran2_q3_e2e_latency_over_rtt", generate_ran2_e2e_latency_over_rtt_chart),
         ("ran2_q4_reliability_vs_loss", generate_ran2_reliability_vs_loss_chart),
@@ -3358,6 +3967,713 @@ def _generate_all_ran2_charts(ran2: dict, output_dir: Path) -> dict:
     return out
 
 
+# ---------------------------------------------------------------------------
+# Per-scenario pcap throughput charts (formerly generate_pcap_traces.py).
+# Reads pcap files, maps them to scenarios via DB metadata, emits per-second
+# UL/DL throughput small-multiples per scenario; optional RAN2 windowed +
+# burst-segmentation subcharts when netemu.pcap.PcapAnalyzer is
+# available.
+# ---------------------------------------------------------------------------
+
+_RAN2_WINDOW_ORDER = ["1ms", "10ms", "100ms", "1s", "10s"]
+
+try:
+    from netemu.pcap import PcapAnalyzer as _PcapAnalyzer
+    _HAS_PCAP_ANALYZER_CLASS = True
+except ImportError:
+    _PcapAnalyzer = None  # type: ignore
+    _HAS_PCAP_ANALYZER_CLASS = False
+
+
+def _pcap_extract_timeseries(pcap_path: str) -> list:
+    """Per-second UL/DL byte / packet counts from a pcap. Client = first SYN source."""
+    try:
+        import dpkt
+    except ImportError:
+        return []
+    buckets: dict = {}
+    first_ts = None
+    client_ips: set = set()
+    first_packet_src = None
+    try:
+        with open(pcap_path, "rb") as f:
+            try:
+                pcap = dpkt.pcap.Reader(f)
+            except ValueError:
+                f.seek(0)
+                pcap = dpkt.pcapng.Reader(f)
+            for ts, buf in pcap:
+                if first_ts is None:
+                    first_ts = ts
+                try:
+                    eth = dpkt.ethernet.Ethernet(buf)
+                    if not isinstance(eth.data, dpkt.ip.IP):
+                        continue
+                    ip = eth.data
+                except Exception:
+                    continue
+                src_ip = ip.src
+                pkt_len = len(buf)
+                if first_packet_src is None:
+                    first_packet_src = src_ip
+                if isinstance(ip.data, dpkt.tcp.TCP):
+                    tcp = ip.data
+                    if tcp.flags & dpkt.tcp.TH_SYN and not (tcp.flags & dpkt.tcp.TH_ACK):
+                        client_ips.add(src_ip)
+                if not client_ips and first_packet_src:
+                    client_ips.add(first_packet_src)
+                is_ul = src_ip in client_ips
+                sec = int(ts - first_ts)
+                entry = buckets.setdefault(sec, {"ul_bytes": 0, "dl_bytes": 0,
+                                                 "ul_packets": 0, "dl_packets": 0})
+                if is_ul:
+                    entry["ul_bytes"] += pkt_len; entry["ul_packets"] += 1
+                else:
+                    entry["dl_bytes"] += pkt_len; entry["dl_packets"] += 1
+    except Exception as e:
+        import sys
+        print(f"  Warning: failed to parse {pcap_path}: {e}", file=sys.stderr)
+        return []
+    if not buckets:
+        return []
+    max_sec = max(buckets.keys())
+    result = []
+    for sec in range(0, max_sec + 1):
+        entry = buckets.get(sec, {"ul_bytes": 0, "dl_bytes": 0,
+                                  "ul_packets": 0, "dl_packets": 0})
+        entry["offset"] = sec
+        result.append(entry)
+    return result
+
+
+def _load_pcap_scenario_map(db_path: str) -> dict:
+    """Map pcap file paths -> (scenario_id, network_profile) from DB metadata."""
+    conn = sqlite3.connect(db_path)
+    try:
+        rows = conn.execute(
+            "SELECT scenario_id, network_profile, metadata FROM traffic_logs "
+            "WHERE metadata LIKE '%pcap_file%'"
+        ).fetchall()
+    finally:
+        conn.close()
+    mapping: dict = {}
+    for scenario_id, profile, metadata_str in rows:
+        try:
+            meta = json.loads(metadata_str)
+            pf = meta.get("pcap_file", "")
+            if pf:
+                mapping[pf] = (scenario_id, profile)
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return mapping
+
+
+def _generate_per_scenario_pcap_chart(scenario_id: str, ts_list: list,
+                                       output_dir: Path) -> Optional[str]:
+    """Small-multiples UL/DL throughput chart, one subplot per profile."""
+    if not ts_list:
+        return None
+    profiles = sorted({ts["profile"] for ts in ts_list})
+    n_profiles = len(profiles)
+    if n_profiles <= 4:
+        fig, axes = plt.subplots(1, n_profiles, figsize=(5 * n_profiles, 4), squeeze=False)
+        axes = axes[0]
+    else:
+        ncols = 4
+        nrows = (n_profiles + ncols - 1) // ncols
+        fig, axes = plt.subplots(nrows, ncols, figsize=(20, 4 * nrows), squeeze=False)
+        axes = axes.flatten()
+    label = _fmt_scenario(scenario_id)
+    for idx, profile in enumerate(profiles):
+        ax = axes[idx]
+        ts_for = [t for t in ts_list if t["profile"] == profile]
+        if not ts_for:
+            ax.set_visible(False); continue
+        ts = ts_for[0]
+        seconds = ts["seconds"]
+        if not seconds:
+            ax.text(0.5, 0.5, "No data", ha="center", va="center", transform=ax.transAxes)
+            ax.set_title(profile, fontsize=10); continue
+        offsets = [s["offset"] for s in seconds]
+        ul_kbps = [s["ul_bytes"] * 8 / 1000 for s in seconds]
+        dl_kbps = [s["dl_bytes"] * 8 / 1000 for s in seconds]
+        ax.fill_between(offsets, ul_kbps, alpha=0.4, color="#3498db", label="UL")
+        ax.fill_between(offsets, dl_kbps, alpha=0.4, color="#e74c3c", label="DL")
+        ax.plot(offsets, ul_kbps, color="#2980b9", linewidth=0.8)
+        ax.plot(offsets, dl_kbps, color="#c0392b", linewidth=0.8)
+        ax.set_title(profile, fontsize=10)
+        ax.set_xlabel("Time (s)", fontsize=8); ax.set_ylabel("Kbps", fontsize=8)
+        ax.tick_params(labelsize=7); ax.grid(alpha=0.2)
+        if idx == 0:
+            ax.legend(fontsize=7, loc="upper right")
+        total_ul = sum(s["ul_bytes"] for s in seconds)
+        total_dl = sum(s["dl_bytes"] for s in seconds)
+        ax.text(
+            0.98, 0.95,
+            f"UL: {total_ul/1024:.0f}KB  DL: {total_dl/1024:.0f}KB\n{len(seconds)}s",
+            transform=ax.transAxes, fontsize=7, ha="right", va="top",
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
+        )
+    for idx in range(n_profiles, len(axes)):
+        axes[idx].set_visible(False)
+    fig.suptitle(f"Network-Layer Throughput: {label}", fontsize=13, fontweight="bold")
+    plt.tight_layout()
+    out = output_dir / f"pcap_throughput_{scenario_id}.png"
+    plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close()
+    return str(out)
+
+
+def _generate_per_scenario_ran2_subcharts(scenario_id: str,
+                                           entries: list,
+                                           output_dir: Path) -> dict:
+    """Per-direction multi-window throughput + burst-segmentation plots
+    (S4-260859 Annex D) when PcapAnalyzer is available."""
+    if not _HAS_PCAP_ANALYZER_CLASS or not entries:
+        return {}
+    label = _fmt_scenario(scenario_id)
+    analyzed: list = []
+    analyzer = _PcapAnalyzer()
+    for pcap_file, profile in entries:
+        try:
+            m = analyzer.analyze(pcap_file, bucket_sec=1.0)
+            if getattr(m, "packets", None):
+                analyzed.append((profile, m))
+        except Exception as exc:
+            print(f"    RAN2 analyze failed for {pcap_file}: {exc}")
+    if not analyzed:
+        return {}
+    out: dict = {}
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
+    x = list(range(len(_RAN2_WINDOW_ORDER)))
+    for profile, m in analyzed:
+        peaks = getattr(m, "peak_mbps_by_window", {}) or {}
+        y = [peaks.get(w, 0) for w in _RAN2_WINDOW_ORDER]
+        ax1.plot(x, y, marker="o", label=profile)
+        busty = getattr(m, "burstiness_by_window", {}) or {}
+        y2 = [busty.get(w) or 0 for w in _RAN2_WINDOW_ORDER]
+        ax2.plot(x, y2, marker="s", label=profile)
+    for ax, ylabel, title in (
+        (ax1, "Peak throughput (Mbps)", "Q1.4 — Peak throughput across windows"),
+        (ax2, "Burstiness (peak/mean)", "Q2.3 — Burstiness across windows"),
+    ):
+        ax.set_xticks(x); ax.set_xticklabels(_RAN2_WINDOW_ORDER)
+        ax.set_xlabel("Averaging window"); ax.set_ylabel(ylabel)
+        ax.set_yscale("log"); ax.set_title(title)
+        ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
+    fig.suptitle(f"RAN2 windowed throughput / burstiness: {label}",
+                 fontsize=12, fontweight="bold")
+    plt.tight_layout()
+    p = output_dir / f"pcap_ran2_windows_{scenario_id}.png"
+    plt.savefig(p, dpi=150, bbox_inches="tight"); plt.close()
+    out["ran2_windows"] = str(p)
+
+    fig, axes = plt.subplots(1, 2, figsize=(16, 5))
+    for gi, gap in enumerate(("10ms", "100ms")):
+        ax = axes[gi]
+        profiles = [p for p, _ in analyzed]
+        ul_counts, dl_counts, ul_p95, dl_p95 = [], [], [], []
+        for profile, m in analyzed:
+            per_dir = (getattr(m, "bursts_by_gap", {}) or {}).get(gap) or {}
+            ub = per_dir.get("ul") or []
+            db_ = per_dir.get("dl") or []
+            ul_counts.append(len(ub)); dl_counts.append(len(db_))
+            def _p95(bursts):
+                rates = sorted(b.get("peak_rate_bps", 0) / 1_000_000 for b in bursts)
+                if not rates:
+                    return 0.0
+                idx = max(0, int(len(rates) * 0.95) - 1)
+                return rates[idx]
+            ul_p95.append(_p95(ub)); dl_p95.append(_p95(db_))
+        pos = list(range(len(profiles))); width = 0.38
+        ax.bar([p - width/2 for p in pos], ul_counts, width,
+               label="UL bursts", color="#1f77b4")
+        ax.bar([p + width/2 for p in pos], dl_counts, width,
+               label="DL bursts", color="#ff7f0e")
+        ax.set_xticks(pos); ax.set_xticklabels(profiles, rotation=30,
+                                                ha="right", fontsize=8)
+        ax.set_ylabel("Burst count"); ax.set_title(f"Q2.1 — bursts @ >{gap} gap")
+        ax.legend(loc="upper left", fontsize=8); ax.grid(axis="y", alpha=0.3)
+        ax2 = ax.twinx()
+        ax2.plot(pos, ul_p95, marker="^", color="#1f77b4", alpha=0.8, label="UL peak p95")
+        ax2.plot(pos, dl_p95, marker="v", color="#ff7f0e", alpha=0.8, label="DL peak p95")
+        ax2.set_ylabel("Intra-burst peak rate p95 (Mbps)")
+        ax2.legend(loc="upper right", fontsize=7)
+    fig.suptitle(f"RAN2 per-direction bursts: {label}",
+                 fontsize=12, fontweight="bold")
+    plt.tight_layout()
+    p = output_dir / f"pcap_ran2_bursts_{scenario_id}.png"
+    plt.savefig(p, dpi=150, bbox_inches="tight"); plt.close()
+    out["ran2_bursts"] = str(p)
+    return out
+
+
+def generate_per_scenario_pcap_charts(
+    db_path: str,
+    output_dir: Path,
+    scenarios: Optional[list] = None,
+    include_ran2_subcharts: bool = True,
+    inject_traces_md: Optional[Path] = None,
+) -> dict:
+    """Produce per-scenario pcap throughput charts (and optional RAN2 subcharts).
+
+    Returns {<scenario_id>[__<subkey>]: chart_path}.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    pcap_map = _load_pcap_scenario_map(db_path)
+    print(f"  Found {len(pcap_map)} pcap records in database")
+    wanted = set(scenarios) if scenarios else {sc for sc, _ in pcap_map.values()}
+    by_scenario: dict = defaultdict(list)
+    for pcap_file, (sc, prof) in pcap_map.items():
+        if sc in wanted:
+            by_scenario[sc].append((pcap_file, prof))
+    print(f"  Processing {len(by_scenario)} scenarios")
+    generated: dict = {}
+    for sc in sorted(by_scenario.keys()):
+        entries = by_scenario[sc]
+        ts_list = []
+        for pcap_file, prof in entries:
+            p = Path(pcap_file)
+            if not p.exists():
+                continue
+            seconds = _pcap_extract_timeseries(str(p))
+            if not seconds:
+                continue
+            ts_list.append({
+                "scenario_id": sc, "profile": prof,
+                "pcap_file": pcap_file, "seconds": seconds,
+            })
+        path = _generate_per_scenario_pcap_chart(sc, ts_list, output_dir)
+        if path:
+            generated[sc] = path
+            print(f"  ✓ per-scenario pcap ({sc}): {path}")
+        if include_ran2_subcharts and _HAS_PCAP_ANALYZER_CLASS:
+            for k, p in _generate_per_scenario_ran2_subcharts(sc, entries, output_dir).items():
+                generated[f"{sc}__{k}"] = p
+                print(f"  ✓ per-scenario {k} ({sc}): {p}")
+    if inject_traces_md and generated:
+        try:
+            content = inject_traces_md.read_text()
+            lines = [
+                "\n## Network-Layer Throughput (from pcap)\n",
+                "Per-scenario throughput plots extracted from tcpdump packet captures.",
+                "Shows actual bytes on the wire (including TCP/TLS overhead) per second,",
+                "across all network profiles.\n",
+            ]
+            for sc_id, chart in sorted(generated.items()):
+                if "__" in sc_id:
+                    continue
+                label = _fmt_scenario(sc_id)
+                lines.append(f"### {label}\n")
+                lines.append(f"![{label} pcap throughput]({chart})\n")
+            inject_traces_md.write_text(content + "\n".join(lines))
+            print(f"  ✓ injected pcap charts into {inject_traces_md}")
+        except FileNotFoundError:
+            print(f"  ⚠ TRACES.md not found at {inject_traces_md}; skipping injection")
+    return generated
+
+
+# ---------------------------------------------------------------------------
+# Per-scenario session traces (formerly generate_session_trace_charts.py).
+# Builds the "Per-Scenario Session Traces" markdown section for RAN2_RESULTS.md:
+# picks one representative session per scenario under the chosen profile,
+# emits run metadata + prompts + payload sample + per-turn table + per-session
+# UL/DL throughput chart from the matching pcap.
+# ---------------------------------------------------------------------------
+
+_SESSION_TRACE_DEFAULT_SCENARIOS = [
+    "chat_basic", "chat_streaming", "chat_gemini",
+    "chat_deepseek", "chat_deepseek_streaming",
+    "chat_deepseek_coder", "chat_deepseek_reasoner",
+    "chat_vllm",
+    "direct_web_search", "direct_web_search_deepseek",
+    "image_generation", "multimodal_analysis",
+    "computer_control_agent",
+    "playwright_web_test", "trading_market_data",
+    "realtime_text", "realtime_text_webrtc",
+    "realtime_interactive", "realtime_multilingual",
+    "realtime_technical", "realtime_audio", "realtime_audio_webrtc",
+    "video_understanding_vllm",
+]
+
+_SESSION_TRACE_LOG_SCALE = {
+    "image_generation", "video_understanding_vllm", "trading_market_data",
+}
+_SESSION_TRACE_BUCKET_OVERRIDES = {
+    "realtime_audio": 0.01,
+}
+
+import re as _re
+_SESSION_PCAP_TS_RE = _re.compile(r"capture(?:_[a-z0-9]+)?_(\d{8})_(\d{6})\.pcap$")
+
+
+def _collect_capture_target_ports(
+    scenarios_yaml: str = "configs/scenarios.yaml",
+) -> list[int]:
+    """Server ports kept in pcap analysis: web egress (443/80) plus every
+    loopback agent/gateway port declared in the scenario config (OpenClaw
+    gateway, A2A agents, MCP servers). Hardcoding only 443/80 silently drops
+    all loopback traffic, zeroing per-direction metrics for lo captures."""
+    ports = {443, 80}
+    try:
+        import yaml
+        with open(scenarios_yaml) as f:
+            cfg = yaml.safe_load(f) or {}
+        for sc in (cfg.get("scenarios") or {}).values():
+            if not isinstance(sc, dict):
+                continue
+            for p in sc.get("loopback_ports") or []:
+                ports.add(int(p))
+            if sc.get("target_port"):
+                ports.add(int(sc["target_port"]))
+    except Exception:
+        ports.update({18789, 9001, 9002, 9003})
+    return sorted(ports)
+
+
+def _session_load(db_path: str, scenario_id: str, profile: str):
+    """Pick a representative session: at least one successful turn with a
+    non-trivial response (>=512 B); then prefer highest success rate, then
+    latest. Falls back to the latest session if nothing qualifies."""
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute("""
+          SELECT session_id, COUNT(*) as nrec, SUM(success) as nsucc,
+                 SUM(CASE WHEN success=1 AND response_bytes >= 512 THEN 1 ELSE 0 END) as nbig,
+                 MIN(timestamp) as t0, MAX(timestamp) as t1,
+                 SUM(COALESCE(response_bytes, 0)) as resp_total
+          FROM traffic_logs
+          WHERE scenario_id = ? AND network_profile = ?
+            AND session_id NOT LIKE 'pcap_%' AND session_id NOT LIKE 'timeout_%'
+          GROUP BY session_id
+          HAVING nrec >= 1
+          ORDER BY t0 DESC
+          LIMIT 50
+        """, (scenario_id, profile))
+        rows = [dict(r) for r in c.fetchall()]
+        if not rows:
+            return None, []
+        qualified = [r for r in rows if (r["nbig"] or 0) >= 1]
+        pool = qualified if qualified else rows
+        pool.sort(key=lambda r: (
+            -(r["nsucc"] or 0) / max(r["nrec"], 1),
+            -(r["resp_total"] or 0),
+            -r["t0"],
+        ))
+        sid = pool[0]["session_id"]
+        c.execute("SELECT * FROM traffic_logs WHERE session_id = ? ORDER BY timestamp", (sid,))
+        return sid, [dict(r) for r in c.fetchall()]
+    finally:
+        conn.close()
+
+
+def _session_find_pcap_pair(pcap_dir: Path, t0_session: float):
+    """Largest capture timestamp <= t0_session. Returns (main_pcap, lo_pcap)."""
+    by_ts: dict = {}
+    for p in pcap_dir.glob("*.pcap"):
+        m = _SESSION_PCAP_TS_RE.search(p.name)
+        if not m:
+            continue
+        try:
+            from datetime import datetime as _dt
+            dt = _dt.strptime(f"{m.group(1)}_{m.group(2)}", "%Y%m%d_%H%M%S")
+            ts = dt.timestamp()
+        except Exception:
+            continue
+        if ts > t0_session:
+            continue
+        kind = "lo" if "_lo_" in p.name else "main"
+        by_ts.setdefault(ts, {})[kind] = p
+    if not by_ts:
+        return None, None
+    latest_ts = max(by_ts.keys())
+    pair = by_ts[latest_ts]
+    return pair.get("main"), pair.get("lo")
+
+
+def _session_make_throughput_chart(pcap_paths, session_t0: float, session_t1: float,
+                                    out_path: Path, title: str,
+                                    bucket_sec: float = 0.1, log_scale: bool = False):
+    try:
+        from netemu.pcap import analyze_pcap
+    except ImportError:
+        return None, None
+    pkts = []
+    for pcap_path in pcap_paths:
+        if pcap_path is None:
+            continue
+        try:
+            metrics = analyze_pcap(str(pcap_path))
+        except Exception:
+            continue
+        pkts.extend(metrics.packets)
+    if not pkts:
+        return None, None
+    pkts.sort(key=lambda p: p.timestamp)
+    t_first = pkts[0].timestamp
+    span_min = max(session_t0 - 1.0, t_first)
+    span_max = session_t1 + 1.0
+    buckets = defaultdict(lambda: {"ul": 0, "dl": 0})
+    for p in pkts:
+        if p.timestamp < span_min or p.timestamp > span_max:
+            continue
+        bkt = int((p.timestamp - span_min) / bucket_sec)
+        if p.direction in ("ul", "dl"):
+            buckets[bkt][p.direction] += p.size
+    if not buckets:
+        return None, None
+    xs = sorted(buckets.keys())
+    times = [b * bucket_sec for b in xs]
+    ul_kbps = [(buckets[b]["ul"] * 8) / bucket_sec / 1000 for b in xs]
+    dl_kbps = [(buckets[b]["dl"] * 8) / bucket_sec / 1000 for b in xs]
+    fig, ax = plt.subplots(figsize=(9, 3.0))
+    ax.fill_between(times, 0, dl_kbps, alpha=0.6, color="#1f77b4",
+                    label=f"DL (peak {max(dl_kbps):.0f} Kbps)")
+    ax.fill_between(times, 0, [-v for v in ul_kbps], alpha=0.6, color="#d62728",
+                    label=f"UL (peak {max(ul_kbps):.0f} Kbps)")
+    ax.axhline(0, color="black", linewidth=0.5)
+    ax.set_xlabel("Time since session start (s)")
+    if log_scale:
+        ax.set_yscale("symlog", linthresh=1)
+        ax.set_ylabel("Throughput (Kbps, symlog)\n← UL  |  DL →")
+    else:
+        ax.set_ylabel("Throughput (Kbps)\n← UL  |  DL →")
+    ax.set_title(title, fontsize=10)
+    ax.legend(loc="upper right", fontsize=8, frameon=False)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=110); plt.close(fig)
+    return out_path, {
+        "duration_sec": (times[-1] - times[0]) if times else 0,
+        "ul_peak_kbps": max(ul_kbps) if ul_kbps else 0,
+        "dl_peak_kbps": max(dl_kbps) if dl_kbps else 0,
+        "ul_total_kb": sum(b["ul"] for b in buckets.values()) / 1024,
+        "dl_total_kb": sum(b["dl"] for b in buckets.values()) / 1024,
+    }
+
+
+def _session_truncate(s: str, n: int = 600) -> str:
+    if len(s) <= n:
+        return s
+    return s[:n] + f"… [truncated, {len(s)-n} more chars]"
+
+
+def _session_fmt(v, digits=3):
+    if v is None:
+        return "—"
+    if isinstance(v, int):
+        return str(v)
+    try:
+        return f"{float(v):.{digits}f}"
+    except Exception:
+        return str(v)
+
+
+def _session_load_trace_payload(metadata_str):
+    if not metadata_str:
+        return None
+    try:
+        meta = json.loads(metadata_str)
+    except Exception:
+        return None
+    p = meta.get("trace_path") or meta.get("trace_file")
+    if not p:
+        return None
+    fp = Path(p)
+    if not fp.exists():
+        for alt in (Path("logs/traces") / fp.name, Path("logs") / fp.name):
+            if alt.exists():
+                fp = alt
+                break
+        else:
+            return None
+    try:
+        return json.loads(fp.read_text())
+    except Exception:
+        return None
+
+
+def _session_render_scenario(db_path: str, pcap_dir: Path, fig_dir: Path,
+                              scenarios_cfg: dict, scenario_id: str,
+                              profile: str) -> list:
+    sid, recs = _session_load(db_path, scenario_id, profile)
+    label = _fmt_scenario(scenario_id)
+    provider = recs[0].get("provider") if recs else None
+    model = recs[0].get("model") if recs else None
+    p_alias = ANONYMIZER.provider_alias(provider) if provider else ""
+    m_alias = ANONYMIZER.model_alias(model) if model else ""
+    title = f"{label}" + (f" — {p_alias}" if p_alias else "")
+    out = [f"### {title}", ""]
+    if not recs:
+        out.append(f"_No session found for `{scenario_id}` under profile `{profile}`._")
+        out.append("")
+        return out
+    t0 = min((r.get("t_request_start") or r.get("timestamp") or 0) for r in recs)
+    t1 = max(
+        max(
+            (r.get("t_request_start") or 0) + (r.get("latency_sec") or 0),
+            r.get("timestamp") or 0,
+        ) for r in recs
+    )
+    n_succ = sum(1 for r in recs if r.get("success"))
+    pcap_main, pcap_lo = _session_find_pcap_pair(pcap_dir, t0)
+    chart = fig_dir / f"throughput_{scenario_id}.png"
+    log_scale = scenario_id in _SESSION_TRACE_LOG_SCALE
+    bucket_sec = _SESSION_TRACE_BUCKET_OVERRIDES.get(scenario_id, 0.1)
+    bucket_label = f"{int(bucket_sec*1000)} ms"
+    title_suffix = " — symlog y-axis" if log_scale else ""
+    _, chart_meta = _session_make_throughput_chart(
+        [pcap_main, pcap_lo], t0, t1, chart,
+        title=f"{title} / {profile}: UL/DL throughput, {bucket_label} buckets "
+              f"(main + loopback){title_suffix}",
+        bucket_sec=bucket_sec, log_scale=log_scale,
+    )
+
+    out.append("**Run metadata**"); out.append("")
+    out.append("| Field | Value |"); out.append("|---|---|")
+    out.append(f"| Scenario ID | `{scenario_id}` |")
+    out.append(f"| Session ID | `{sid}` |")
+    out.append(f"| Provider | {p_alias or provider or '—'} |")
+    out.append(f"| Model (anon) | {m_alias or model or '—'} |")
+    out.append(f"| Network Profile | `{profile}` |")
+    cap_cell = " + ".join(f"`{p.name}`" for p in (pcap_main, pcap_lo) if p) or "—"
+    out.append(f"| Capture (pcap) | {cap_cell} |")
+    out.append(f"| Turns | {len(recs)} |")
+    out.append(f"| Success | {n_succ}/{len(recs)} |")
+    out.append(f"| Streaming | {'yes' if recs[0].get('is_streaming') else 'no'} |")
+    if chart_meta:
+        out.append(f"| pcap window | {chart_meta['duration_sec']:.1f} s |")
+        out.append(f"| UL total | {chart_meta['ul_total_kb']:.1f} KB (peak {chart_meta['ul_peak_kbps']:.0f} Kbps) |")
+        out.append(f"| DL total | {chart_meta['dl_total_kb']:.1f} KB (peak {chart_meta['dl_peak_kbps']:.0f} Kbps) |")
+    out.append("")
+
+    cfg = scenarios_cfg.get(scenario_id) or {}
+    sys_prompt = cfg.get("system_prompt")
+    prompts = cfg.get("prompts") or []
+    if sys_prompt or prompts:
+        out.append("**Prompts (from `configs/scenarios.yaml`)**"); out.append("")
+        if sys_prompt:
+            out.append(f"- _System:_ {_session_truncate(str(sys_prompt), 200)}")
+        for i, p in enumerate(prompts[:5], 1):
+            out.append(f"- _Turn {i}:_ {_session_truncate(str(p), 200)}")
+        if len(prompts) > 5:
+            out.append(f"- _… {len(prompts)-5} more prompts in config._")
+        out.append("")
+
+    sample = min(recs, key=lambda r: r.get("turn_index") or 0)
+    trace = _session_load_trace_payload(sample.get("metadata"))
+    if trace:
+        req = trace.get("request") or {}
+        resp = trace.get("response") or {}
+        out.append("**Sample request payload (turn 0)**"); out.append("")
+        out.append("```json")
+        out.append(_session_truncate(json.dumps(req, indent=2, default=str), 1400))
+        out.append("```"); out.append("")
+        out.append("**Sample response payload (turn 0)**"); out.append("")
+        out.append("```json")
+        out.append(_session_truncate(json.dumps(resp, indent=2, default=str), 1400))
+        out.append("```"); out.append("")
+        events = trace.get("response_events") or []
+        if events:
+            out.append(f"**Streaming events:** {len(events)} chunks. First 3:"); out.append("")
+            out.append("```json")
+            out.append(_session_truncate(json.dumps(events[:3], indent=2, default=str), 800))
+            out.append("```"); out.append("")
+    else:
+        out.append("_No JSON trace payload recorded for this session (TRACE_PAYLOADS=1 was not set during the run)._")
+        out.append("")
+
+    out.append("**Per-turn trace**"); out.append("")
+    out.append("| Turn | OK | Latency (s) | TTFT (s) | Tokens In | Tokens Out | Req Bytes | Resp Bytes | Chunks |")
+    out.append("|---|---|---|---|---|---|---|---|---|")
+    for r in recs[:15]:
+        tt = r.get("t_first_token")
+        tr = r.get("t_request_start")
+        ttft = (tt - tr) if (tt and tr) else None
+        out.append(
+            f"| {r.get('turn_index') or 0} | {'✓' if r.get('success') else '✗'} | "
+            f"{_session_fmt(r.get('latency_sec'))} | {_session_fmt(ttft)} | "
+            f"{r.get('tokens_in') or '—'} | {r.get('tokens_out') or '—'} | "
+            f"{r.get('request_bytes') or 0} | {r.get('response_bytes') or 0} | "
+            f"{r.get('chunk_count') or '—'} |"
+        )
+    if len(recs) > 15:
+        out.append("| … | … | … | … | … | … | … | … | … |")
+        out.append(f"| _{len(recs)-15} more turns_ | | | | | | | | |")
+    out.append("")
+
+    if chart_meta:
+        rel = fig_dir.relative_to(Path.cwd()) if fig_dir.is_absolute() else fig_dir
+        rel_chart = rel / f"throughput_{scenario_id}.png"
+        cap_label = " + ".join(p.name for p in (pcap_main, pcap_lo) if p)
+        out.append(f"**UL/DL throughput at {bucket_label} buckets, from pcap (`{cap_label}`)**")
+        out.append("")
+        out.append(f"![{title} session throughput]({rel_chart})")
+        out.append("")
+    return out
+
+
+def generate_session_traces(
+    db_path: str,
+    pcap_dir: Path,
+    output_dir: Path,
+    profile: str = "5g_urban",
+    scenarios: Optional[list] = None,
+    scenarios_yaml: str = "configs/scenarios.yaml",
+    traces_md_out: Optional[Path] = None,
+) -> Optional[Path]:
+    """Build the 'Per-Scenario Session Traces' markdown section.
+
+    Writes per-session throughput PNGs to <output_dir>/session_traces/ and the
+    markdown to <traces_md_out> (defaults to <output_dir>/session_traces_section.md).
+    Returns the markdown path or None when no scenarios produced output.
+    """
+    try:
+        import yaml
+    except ImportError:
+        print("  ⚠ pyyaml not installed; session_traces requires it")
+        return None
+    try:
+        scenarios_cfg = yaml.safe_load(Path(scenarios_yaml).read_text()).get("scenarios", {})
+    except FileNotFoundError:
+        print(f"  ⚠ scenarios config not found: {scenarios_yaml}")
+        scenarios_cfg = {}
+    fig_dir = output_dir / "session_traces"
+    fig_dir.mkdir(parents=True, exist_ok=True)
+    scenarios = scenarios or _SESSION_TRACE_DEFAULT_SCENARIOS
+
+    out = ["---", "", "## Per-Scenario Session Traces", ""]
+    out.append(
+        "This section illustrates one real captured session per test scenario "
+        "to give the reader a concrete sense of the application-layer exchange "
+        "and the resulting on-the-wire traffic. For each scenario we pick the "
+        f"latest successful session under the **`{profile}`** profile and:"
+    )
+    out.append("")
+    out.append("- show the run metadata, prompts, and the sample request/response payload;")
+    out.append("- list the per-turn trace (success, latency, TTFT, tokens, bytes, chunk count);")
+    out.append("- attach the UL/DL throughput chart at 100 ms bucket resolution computed from the matching pcap capture.")
+    out.append("")
+    out.append(
+        "Payloads are truncated to ~1400 chars when displayed inline; full traces are "
+        "available under `logs/traces/` when runs were executed with `TRACE_PAYLOADS=1`."
+    )
+    out.append("")
+
+    for sc in scenarios:
+        block = _session_render_scenario(db_path, pcap_dir, fig_dir,
+                                          scenarios_cfg, sc, profile)
+        out.extend(block)
+
+    traces_md_out = traces_md_out or (output_dir / "session_traces_section.md")
+    traces_md_out.parent.mkdir(parents=True, exist_ok=True)
+    traces_md_out.write_text("\n".join(out))
+    print(f"  ✓ session traces: {traces_md_out} (charts in {fig_dir})")
+    return traces_md_out
+
+
 def main():
     """Generate all charts and print results."""
     parser = argparse.ArgumentParser(description="Generate visualization charts from traffic test data")
@@ -3369,6 +4685,28 @@ def main():
     parser.add_argument("--run-gap-sec", type=float, default=300.0, help="Gap in seconds to split runs per scenario")
     parser.add_argument("--output-dir", default="results/reports/figures", help="Output directory for charts")
     parser.add_argument("--pcap-dir", default=None, help="Directory containing pcap files for network-layer analysis")
+    parser.add_argument("--per-scenario-pcap", action="store_true",
+                        help="Generate per-scenario pcap throughput charts (formerly generate_pcap_traces.py)")
+    parser.add_argument("--per-scenario-pcap-dir", default="results/captures",
+                        help="Pcap directory used for --per-scenario-pcap (defaults to results/captures)")
+    parser.add_argument("--per-scenario-pcap-output", default=None,
+                        help="Where per-scenario pcap charts are written (default: <output-dir>/pcap)")
+    parser.add_argument("--per-scenario-scenarios", default=None,
+                        help="Comma-separated scenario ids to restrict per-scenario pcap charts to (default: all with pcaps)")
+    parser.add_argument("--per-scenario-skip-ran2", action="store_true",
+                        help="Skip RAN2 windowed/burst subcharts when running per-scenario pcap charts")
+    parser.add_argument("--inject-traces-md", default=None,
+                        help="Append per-scenario pcap chart section to this TRACES.md path")
+    parser.add_argument("--session-traces", action="store_true",
+                        help="Generate the Per-Scenario Session Traces markdown section + per-session charts")
+    parser.add_argument("--session-traces-profile", default="5g_urban",
+                        help="Profile to draw session traces from (default: 5g_urban)")
+    parser.add_argument("--session-traces-scenarios", default=None,
+                        help="Comma-separated scenario ids for --session-traces (default: built-in list)")
+    parser.add_argument("--session-traces-output", default=None,
+                        help="Where the session-traces markdown is written (default: <output-dir>/session_traces_section.md)")
+    parser.add_argument("--session-traces-pcap-dir", default="results/captures",
+                        help="Pcap directory for matching session pcaps (default: results/captures)")
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
@@ -3602,8 +4940,8 @@ def main():
                 pcap_metrics = analyze_multiple_pcaps(
                     args.pcap_dir,
                     pattern="*.pcap",
-                    target_ports=[443, 80]  # HTTPS and HTTP
-                )
+                    target_ports=_collect_capture_target_ports(),
+                    unfiltered_name_patterns=LOOPBACK_PCAP_NAME_PATTERNS)
                 print(f"  Analyzed {len(pcap_metrics)} pcap files")
 
                 if pcap_metrics:
@@ -3658,6 +4996,46 @@ def main():
             generated.update(ran2_charts)
         except Exception as e:
             print(f"  ⚠ RAN2 metrics computation failed: {e}")
+
+    # Per-scenario pcap throughput charts (formerly generate_pcap_traces.py)
+    if args.per_scenario_pcap:
+        ps_out = Path(args.per_scenario_pcap_output) if args.per_scenario_pcap_output \
+                 else output_dir / "pcap"
+        print(f"\nGenerating per-scenario pcap throughput charts into {ps_out}/...")
+        try:
+            scs = [s.strip() for s in args.per_scenario_scenarios.split(",")] \
+                if args.per_scenario_scenarios else None
+            inj = Path(args.inject_traces_md) if args.inject_traces_md else None
+            ps_generated = generate_per_scenario_pcap_charts(
+                db_path=args.db,
+                output_dir=ps_out,
+                scenarios=scs,
+                include_ran2_subcharts=not args.per_scenario_skip_ran2,
+                inject_traces_md=inj,
+            )
+            generated.update({f"per_scenario_{k}": v for k, v in ps_generated.items()})
+        except Exception as e:
+            print(f"  ⚠ per-scenario pcap charts failed: {e}")
+
+    # Per-Scenario Session Traces (formerly generate_session_trace_charts.py)
+    if args.session_traces:
+        print("\nGenerating per-scenario session traces...")
+        try:
+            scs = [s.strip() for s in args.session_traces_scenarios.split(",")] \
+                if args.session_traces_scenarios else None
+            md_out = Path(args.session_traces_output) if args.session_traces_output else None
+            md_path = generate_session_traces(
+                db_path=args.db,
+                pcap_dir=Path(args.session_traces_pcap_dir),
+                output_dir=output_dir,
+                profile=args.session_traces_profile,
+                scenarios=scs,
+                traces_md_out=md_out,
+            )
+            if md_path:
+                generated["session_traces_md"] = str(md_path)
+        except Exception as e:
+            print(f"  ⚠ session traces failed: {e}")
 
     print(f"\n✓ Generated {len(generated)} charts in {output_dir}/")
 

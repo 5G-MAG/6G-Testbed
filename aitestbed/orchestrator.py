@@ -23,8 +23,12 @@ load_dotenv()  # Loads from .env in current directory
 load_dotenv(Path(__file__).parent / ".env")  # Also try aitestbed/.env
 load_dotenv(Path(__file__).parent.parent / ".env")  # Also try repo root .env
 
-from clients import OpenAIClient, GeminiClient, DeepSeekClient, VLLMClient, AzureOpenAIClient, AzureInferenceClient, RealtimeWebRTCVLMClient, OpenAITokenClient
+from clients import (
+    OpenAIClient, GeminiClient, DeepSeekClient, VLLMClient, AzureOpenAIClient,
+    AzureInferenceClient, AnthropicClient, RealtimeWebRTCVLMClient, OpenAITokenClient,
+)
 from analysis import TrafficLogger, MetricsCalculator, LogRecord
+from configs import DEFAULT_CAPTURE_FILTER
 from netemu import NetworkEmulator
 from scenarios import (
     ChatScenario,
@@ -46,29 +50,20 @@ from scenarios import (
     MusicResearchAgentScenario,
     PlaywrightAgentScenario,
     TradingAgentScenario,
+    WeatherAgentScenario,
+    NavigationWeatherAgentScenario,
+    MapsAgentScenario,
+    ExaSearchAgentScenario,
+    TwilioCommunicationAgentScenario,
+    SmartHomeAgentScenario,
+    OpenClawScenario,
+    A2ASingleTaskScenario,
+    A2AStreamingScenario,
+    A2AMultiAgentScenario,
     RealtimeVideoUnderstandingScenario,
-    ChatTokenScenario
+    ChatTokenScenario,
 )
 
-# Configure logging
-# Configure logging
-handler = colorlog.StreamHandler()
-handler.setFormatter(colorlog.ColoredFormatter(
-    "%(asctime)s - %(name)s - %(log_color)s%(levelname)-8s%(reset)s - %(message)s",
-    log_colors={
-        'DEBUG':    'cyan',
-        'INFO':     'green',
-        'WARNING':  'yellow',
-        'ERROR':    'red',
-        'CRITICAL': 'red,bg_white',
-    }
-))
-logger = colorlog.getLogger("orchestrator")
-logger.addHandler(handler)
-# File log
-Path('logs').mkdir(parents=True, exist_ok=True)
-# Configure logging. scenarios/*, clients/*, analysis/* all log via
-# logging.getLogger(__name__), which propagates to the root logger, not to
 # Configure logging. scenarios/*, clients/*, analysis/* all log via
 # logging.getLogger(__name__), which propagates to the root logger, not to
 # a logger named "orchestrator" -- so the root logger still needs its own
@@ -102,16 +97,7 @@ logger.setLevel(logging.INFO)
 # Don't also feed the root handler installed above -- it would double-print
 # every message this logger already sends to its own console+file handlers.
 logger.propagate = False
-# Don't also feed the root handler installed above -- it would double-print
-# every message this logger already sends to its own console+file handlers.
-logger.propagate = False
-file_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)-8s - %(message)s"
-)
-file_handler.setFormatter(file_formatter)
-logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
-
+APP_DIR = Path(__file__).resolve().parent
 
 
 class RunFailedError(Exception):
@@ -131,8 +117,7 @@ class TestbedOrchestrator:
         db_path: str = "logs/traffic_logs.db",
         network_interface: str = "auto",
         egress_only: bool = False,
-        mcp_transport: str = "http",
-    ):
+        mcp_transport: str = "http"):
         """
         Initialize the orchestrator.
 
@@ -191,6 +176,24 @@ class TestbedOrchestrator:
             "playwright_agent": PlaywrightAgentScenario,
             # Trading / market data agent (Alpaca MCP)
             "trading_agent": TradingAgentScenario,
+            # Weather / environment agent (Open-Meteo, no API key)
+            "weather_agent": WeatherAgentScenario,
+            # Combined navigation + weather agent (Google Maps + Open-Meteo)
+            "navigation_weather_agent": NavigationWeatherAgentScenario,
+            # Maps / navigation agent (Google Maps)
+            "maps_agent": MapsAgentScenario,
+            # Exa.ai search agent
+            "exa_search_agent": ExaSearchAgentScenario,
+            # Twilio communications agent (SMS / WhatsApp)
+            "twilio_agent": TwilioCommunicationAgentScenario,
+            # Smart home agent (Home Assistant)
+            "smart_home_agent": SmartHomeAgentScenario,
+            # OpenClaw local personal-assistant agent (gateway on lo:18789)
+            "openclaw_agent": OpenClawScenario,
+            # A2A (Agent2Agent protocol) scenarios
+            "a2a_single_task": A2ASingleTaskScenario,
+            "a2a_streaming": A2AStreamingScenario,
+            "a2a_multi_agent": A2AMultiAgentScenario,
             # Direct search scenarios (no MCP)
             "direct_search": DirectWebSearchScenario,
             "direct_web_search": DirectWebSearchScenario,
@@ -231,7 +234,7 @@ class TestbedOrchestrator:
         """Reject malformed `uplink:` blocks at startup.
 
         Catches: non-dict uplink, nested uplink, unknown fields. Empty
-        uplink (`uplink: {}`) is allowed and logged — treated as symmetric.
+        uplink (`uplink: {}`) is allowed and logged, treated as symmetric.
         """
         profiles = (self.profiles_config or {}).get("profiles", {}) or {}
         for name, raw in profiles.items():
@@ -247,7 +250,7 @@ class TestbedOrchestrator:
                 )
             if not ul:
                 logger.warning(
-                    f"profile '{name}': empty uplink: block — treating as symmetric"
+                    f"profile '{name}': empty uplink: block, treating as symmetric"
                 )
                 continue
             if "uplink" in ul:
@@ -268,7 +271,7 @@ class TestbedOrchestrator:
 
         Symmetric profiles fall through to ``emulator.apply_profile`` (existing
         behavior). Asymmetric profiles are applied via ``apply_settings``,
-        which already supports an ``ingress_settings`` dict — no synthetic
+        which already supports an ``ingress_settings`` dict, no synthetic
         netemu profiles are registered.
 
         CLI ``--ingress-profile Y`` wins over a built-in ``uplink:`` block:
@@ -296,7 +299,7 @@ class TestbedOrchestrator:
                 profile_name, ingress_profile=ingress_profile
             )
 
-        # Asymmetric — split base + uplink overrides into egress/ingress dicts
+        # Asymmetric, split base + uplink overrides into egress/ingress dicts
         base = {
             k: v for k, v in raw.items()
             if k in self._PROFILE_IMPAIRMENT_FIELDS
@@ -329,7 +332,7 @@ class TestbedOrchestrator:
         if not self.emulator.bidirectional:
             logger.warning(
                 f"Profile {profile_name} has an uplink: block but --egress-only "
-                f"is set — downlink (base) side will not be applied."
+                f"is set, downlink (base) side will not be applied."
             )
         logger.debug(f"  egress (UL):  {egress}")
         logger.debug(
@@ -341,8 +344,7 @@ class TestbedOrchestrator:
             **egress,
             profile_name=profile_name,
             ingress_settings=ingress_dict,
-            disable_ingress=disable_ingress,
-        )
+            disable_ingress=disable_ingress)
 
     def get_client(self, provider: str):
         """Get or create an LLM client for the given provider."""
@@ -359,13 +361,43 @@ class TestbedOrchestrator:
                 self._clients[provider] = AzureOpenAIClient()
             elif provider == "azure_inference":
                 self._clients[provider] = AzureInferenceClient()
+            elif provider == "anthropic":
+                self._clients[provider] = AnthropicClient()
             elif provider == "vlm-local":
                 self._clients[provider] = RealtimeWebRTCVLMClient()
             elif provider == "openai_token":
                 self._clients[provider] = OpenAITokenClient()
+            elif provider in ("none", "null", "a2a", "openclaw"):
+                # Scenarios that do not call an LLM through the testbed layer
+                # (A2A agent-to-agent, OpenClaw's own model loop). Use a stub
+                # so construction never requires an API key.
+                from clients.base import NullLLMClient
+                self._clients[provider] = NullLLMClient(provider)
             else:
                 raise ValueError(f"Unknown provider: {provider}")
         return self._clients[provider]
+
+    def scenarios_use_loopback(self, scenario_arg: Optional[str]) -> bool:
+        """True if the selected scenario(s) declare ``loopback_ports`` (or
+        ``uses_loopback``) in their config.
+
+        Such scenarios (OpenClaw, local A2A agents) talk to a server bound on
+        the loopback interface that must be captured and shaped exactly like
+        MCP-over-HTTP. For the test matrix (``--scenario all``) this returns
+        True if *any* matrix scenario needs loopback handling.
+        """
+        scenarios = self.scenarios_config.get("scenarios", {}) or {}
+
+        def _needs(name: Optional[str]) -> bool:
+            cfg = scenarios.get(name) or {}
+            return bool(cfg.get("loopback_ports")) or bool(cfg.get("uses_loopback"))
+
+        if scenario_arg == "all":
+            matrix = self.scenarios_config.get("test_matrix", []) or []
+            return any(_needs(e.get("scenario")) for e in matrix)
+        if scenario_arg:
+            return _needs(scenario_arg)
+        return False
 
     def get_completed_runs(self, scenario_name: str, profile_name: str) -> int:
         """Query the DB for the number of completed runs (successful or timed out).
@@ -409,8 +441,7 @@ class TestbedOrchestrator:
         ingress_profile: Optional[str] = None,
         run_timeout: Optional[float] = None,
         stop_on_error: bool = False,
-        resume: bool = False,
-    ) -> list[ScenarioResult]:
+        resume: bool = False) -> list[ScenarioResult]:
         """
         Run a single experiment (scenario + profile combination).
 
@@ -509,8 +540,7 @@ class TestbedOrchestrator:
                     if run_timeout is not None:
                         result = self._run_with_timeout(
                             scenario, profile_name, run_index, run_timeout,
-                            scenario_name,
-                        )
+                            scenario_name)
                     else:
                         result = scenario.run(network_profile=profile_name, run_index=run_index)
 
@@ -547,8 +577,7 @@ class TestbedOrchestrator:
                         network_profile=profile_name,
                         latency_sec=result.total_latency_sec,
                         success=False,
-                        error_type="timeout",
-                    )
+                        error_type="timeout")
                     self.logger.log(timeout_record)
 
                 logger.info(
@@ -574,7 +603,7 @@ class TestbedOrchestrator:
         # stop-on-error: only raise if every run failed on a baseline profile
         # (no_emulation), indicating a real infrastructure problem. Failures on
         # degraded profiles (satellite, congested, cell_edge, etc.) are expected
-        # data points — the network conditions *are* the cause.
+        # data points, the network conditions *are* the cause.
         baseline_profiles = {"no_emulation", "ideal_6g"}
         if (
             stop_on_error
@@ -595,26 +624,29 @@ class TestbedOrchestrator:
         profile_name: str,
         run_index: int,
         timeout_sec: float,
-        scenario_name: str,
-    ) -> ScenarioResult:
-        """Run a single scenario with a per-run timeout.
+        scenario_name: str) -> ScenarioResult:
+        """Run one scenario in a killable process group.
 
-        Uses a *daemon* thread + queue so that (a) the main thread can
-        enforce the deadline and (b) if the run blocks in uninterruptible
-        I/O, the zombie worker cannot keep the Python interpreter alive
-        after the main process decides to exit. ThreadPoolExecutor is
-        intentionally not used here because its workers are non-daemon —
-        on a timeout they would outlive both the run and any subsequent
-        RunFailedError, polluting later metrics and preventing clean
-        shutdown.
+        A timed-out thread cannot be cancelled and used to continue issuing API
+        calls and DB writes during later runs. On POSIX the forked worker starts
+        a new process group; timeout cleanup terminates that whole group,
+        including MCP/browser children spawned by the scenario.
         """
-        import queue as _queue
-        import threading
+        import multiprocessing
+        import os
+        import traceback
 
-        result_q: "_queue.Queue[tuple[str, object]]" = _queue.Queue(maxsize=1)
+        if os.name != "posix":
+            raise RuntimeError("Per-run timeout isolation currently requires POSIX")
+        ctx = multiprocessing.get_context("fork")
+        recv_conn, send_conn = ctx.Pipe(duplex=False)
 
-        def _run_in_thread():
+        def _run_in_process():
             import asyncio
+            try:
+                os.setsid()
+            except OSError:
+                pass
             try:
                 asyncio.get_event_loop()
             except RuntimeError:
@@ -623,27 +655,50 @@ class TestbedOrchestrator:
                 r = scenario.run(
                     network_profile=profile_name, run_index=run_index
                 )
-                result_q.put(("ok", r))
-            except BaseException as exc:  # noqa: BLE001 — forward everything
-                result_q.put(("err", exc))
+                send_conn.send(("ok", r))
+            except BaseException as exc:  # noqa: BLE001, forward everything
+                send_conn.send((
+                    "err",
+                    {
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                        "traceback": traceback.format_exc(),
+                    },
+                ))
+            finally:
+                send_conn.close()
 
-        worker = threading.Thread(
-            target=_run_in_thread,
+        worker = ctx.Process(
+            target=_run_in_process,
             name=f"scenario-{scenario_name}-run{run_index}",
-            daemon=True,
+            daemon=False,
         )
         worker.start()
+        send_conn.close()
 
-        try:
-            kind, payload = result_q.get(timeout=timeout_sec)
-        except _queue.Empty:
+        if not recv_conn.poll(timeout_sec):
             logger.warning(
                 f"  Run {run_index + 1} of {scenario_name} timed out "
-                f"after {timeout_sec:.0f}s (worker thread abandoned as daemon)"
+                f"after {timeout_sec:.0f}s; terminating worker process group"
             )
-            # Don't join the worker: if the scenario is blocked in a
-            # no-timeout HTTP call on a high-latency profile, join would
-            # hang the suite. daemon=True ensures it dies with the process.
+            try:
+                if os.getpgid(worker.pid) == worker.pid:
+                    os.killpg(worker.pid, signal.SIGTERM)
+                else:
+                    worker.terminate()
+            except (ProcessLookupError, OSError):
+                worker.terminate()
+            worker.join(timeout=5)
+            if worker.is_alive():
+                try:
+                    if os.getpgid(worker.pid) == worker.pid:
+                        os.killpg(worker.pid, signal.SIGKILL)
+                    else:
+                        worker.kill()
+                except (ProcessLookupError, OSError):
+                    worker.kill()
+                worker.join(timeout=5)
+            recv_conn.close()
             return ScenarioResult(
                 scenario_id=scenario_name,
                 session_id=f"timeout_{int(time.time())}",
@@ -651,23 +706,31 @@ class TestbedOrchestrator:
                 run_index=run_index,
                 success=False,
                 total_latency_sec=timeout_sec,
-                error_message=f"Run timed out after {timeout_sec:.0f}s",
-            )
+                error_message=f"Run timed out after {timeout_sec:.0f}s")
 
+        try:
+            kind, payload = recv_conn.recv()
+        except EOFError as exc:
+            worker.join(timeout=5)
+            raise RuntimeError(
+                f"Scenario worker exited with code {worker.exitcode} without a result"
+            ) from exc
+        finally:
+            recv_conn.close()
+        worker.join(timeout=5)
         if kind == "err":
-            # Re-raise so the normal run_experiment error path handles it
-            raise payload  # type: ignore[misc]
+            raise RuntimeError(
+                f"Scenario worker failed ({payload['type']}): {payload['message']}\n"
+                f"{payload['traceback']}"
+            )
         return payload  # type: ignore[return-value]
 
     def _get_retry_reason(self, result: ScenarioResult) -> Optional[str]:
         """Return a retry reason for transient failures.
 
-        Note: run-level timeouts (enforced by _run_with_timeout) are NOT
-        retried. On slow network profiles (satellite, congested) a timeout
-        almost always means the scenario/profile combination legitimately
-        exceeds the budget — retrying just stacks zombie threads from the
-        previous run and guarantees more timeouts. Per-request HTTP timeouts
-        surfaced as LogRecord error_type are also treated as terminal here.
+        Run-level timeouts are not retried: on degraded profiles they are a
+        legitimate outcome. Per-request HTTP timeouts surfaced as LogRecord
+        error_type are also terminal here.
         """
         if not result.log_records:
             error_text = (result.error_message or "").lower()
@@ -704,8 +767,7 @@ class TestbedOrchestrator:
         runs_per_experiment: int = 10,
         run_timeout: Optional[float] = None,
         stop_on_error: bool = False,
-        resume: bool = False,
-    ) -> dict:
+        resume: bool = False) -> dict:
         """
         Run a full test matrix.
 
@@ -750,8 +812,7 @@ class TestbedOrchestrator:
                         runs=runs,
                         run_timeout=run_timeout,
                         stop_on_error=stop_on_error,
-                        resume=resume,
-                    )
+                        resume=resume)
 
                     all_results[experiment_key] = results
 
@@ -786,8 +847,7 @@ class TestbedOrchestrator:
                         scenario_name,
                         profile_name,
                         stall_gap_sec=metrics_defaults.get("stall_gap_sec"),
-                        burst_gap_sec=metrics_defaults.get("burst_gap_sec"),
-                    )
+                        burst_gap_sec=metrics_defaults.get("burst_gap_sec"))
                     all_metrics.append(metrics)
 
                     # check if task accuracy be calculated
@@ -876,7 +936,7 @@ def main():
     )
     parser.add_argument(
         "--profile", "-p",
-        default="ideal_6g",
+        default="no_emulation",
         help="Network profile to use"
     )
     parser.add_argument(
@@ -887,12 +947,12 @@ def main():
     )
     parser.add_argument(
         "--config",
-        default="configs/scenarios.yaml",
+        default=str(APP_DIR / "configs" / "scenarios.yaml"),
         help="Path to scenarios config"
     )
     parser.add_argument(
         "--profiles",
-        default="configs/profiles.yaml",
+        default=str(APP_DIR / "configs" / "profiles.yaml"),
         help="Path to network profiles config"
     )
     parser.add_argument(
@@ -937,8 +997,10 @@ def main():
     )
     parser.add_argument(
         "--capture-filter",
-        default=None,
-        help="Optional tcpdump filter expression (e.g., 'port 443')"
+        default=DEFAULT_CAPTURE_FILTER,
+        help="tcpdump filter expression. The default captures HTTP(S) plus "
+             "WebRTC ICE/SRTP/RTP UDP traffic. Pass an empty string to capture "
+             "all traffic."
     )
     parser.add_argument(
         "--capture-dir",
@@ -963,7 +1025,7 @@ def main():
         "--capture-loopback-filter",
         default=None,
         help="BPF filter for the loopback capture. Defaults to "
-             "'tcp and not port 22 and not port 53'."
+             "'not port 22 and not port 53'."
     )
     parser.add_argument(
         "--capture-l7",
@@ -1025,8 +1087,7 @@ def main():
         db_path=args.db,
         network_interface=args.interface,
         egress_only=args.egress_only,
-        mcp_transport=args.mcp_transport,
-    )
+        mcp_transport=args.mcp_transport)
 
     if args.list_scenarios:
         print("\nAvailable scenarios:")
@@ -1053,6 +1114,14 @@ def main():
     run_id = f"run_{int(time.time())}_{abs(hash(repr(vars(args)))) % 100000:05d}"
     try:
         if args.capture_pcap:
+            capture_meta = {
+                "run_id": run_id,
+                "scenario_id": args.scenario or "unknown",
+                "network_profile": (
+                    args.profile if args.scenario and args.scenario != "all"
+                    else "multiple"
+                ),
+            }
             try:
                 from capture import CaptureController
                 pcap_controller = CaptureController(
@@ -1060,7 +1129,9 @@ def main():
                     capture_dir=args.capture_dir
                 )
                 pcap_start_time = time.time()
-                pcap_file = pcap_controller.start(filter_expr=args.capture_filter)
+                pcap_file = pcap_controller.start(
+                    filter_expr=args.capture_filter, metadata=capture_meta
+                )
                 if not pcap_file:
                     logger.warning("Failed to start tcpdump capture")
                     pcap_start_time = None
@@ -1075,29 +1146,37 @@ def main():
             # is invisible to the primary capture when the primary interface
             # is anything other than `lo` itself.
             primary_iface = orchestrator.network_interface or ""
+            # Loopback traffic appears for MCP-over-HTTP and for any scenario
+            # that drives a local server on lo (OpenClaw gateway, local A2A
+            # agents), those declare loopback_ports/uses_loopback in config.
+            needs_loopback = (
+                orchestrator.mcp_transport == "http"
+                or orchestrator.scenarios_use_loopback(args.scenario)
+            )
             if (
                 args.capture_pcap
                 and args.capture_loopback
                 and primary_iface != "lo"
-                and orchestrator.mcp_transport == "http"
+                and needs_loopback
             ):
                 try:
                     from capture import CaptureController
                     pcap_lo_controller = CaptureController(
                         interface="lo",
-                        capture_dir=args.capture_dir,
-                    )
+                        capture_dir=args.capture_dir)
                     # Filter out SSH/DNS noise; keep everything else on lo
                     # (MCP HTTP servers use ephemeral ports we cannot enumerate
                     # ahead of time, so a port-range filter is not possible).
                     lo_filter = args.capture_loopback_filter or (
-                        "tcp and not port 22 and not port 53"
+                        "not port 22 and not port 53"
                     )
                     lo_filename = (
                         f"capture_lo_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pcap"
                     )
                     pcap_lo_file = pcap_lo_controller.start(
-                        filename=lo_filename, filter_expr=lo_filter
+                        filename=lo_filename,
+                        filter_expr=lo_filter,
+                        metadata={**capture_meta, "interface": "lo"},
                     )
                     if not pcap_lo_file:
                         logger.warning("Failed to start loopback tcpdump capture")
@@ -1119,8 +1198,16 @@ def main():
                     filter_hosts = [
                         h.strip() for h in args.capture_l7_hosts.split(",") if h.strip()
                     ]
-                l7_controller.start(filter_hosts=filter_hosts)
+                if l7_controller.start(filter_hosts=filter_hosts) is None:
+                    logger.error(
+                        "L7 capture failed to start; aborting run so the "
+                        "client doesn't try to use a non-listening proxy."
+                    )
+                    l7_controller = None
+                    raise SystemExit(2)
                 configure_client_proxy(f"http://localhost:{args.capture_l7_proxy_port}")
+            except SystemExit:
+                raise
             except Exception as e:
                 logger.warning(f"Failed to start L7 capture: {e}")
                 l7_controller = None
@@ -1131,8 +1218,7 @@ def main():
                 runs_per_experiment=args.runs,
                 run_timeout=args.run_timeout,
                 stop_on_error=args.stop_on_error,
-                resume=args.resume,
-            )
+                resume=args.resume)
             orchestrator.generate_report(results["metrics"], args.report)
         elif args.scenario:
             # Run single scenario
@@ -1143,8 +1229,7 @@ def main():
                 ingress_profile=args.ingress_profile,
                 run_timeout=args.run_timeout,
                 stop_on_error=args.stop_on_error,
-                resume=args.resume,
-            )
+                resume=args.resume)
 
             # Compute and display metrics
             records = [
@@ -1176,8 +1261,7 @@ def main():
                 args.scenario,
                 args.profile,
                 stall_gap_sec=metrics_defaults.get("stall_gap_sec"),
-                burst_gap_sec=metrics_defaults.get("burst_gap_sec"),
-            )
+                burst_gap_sec=metrics_defaults.get("burst_gap_sec"))
 
             # check if task accuracy be calculated
             scenario_config = orchestrator.scenarios_config["scenarios"].get(args.scenario)
@@ -1301,13 +1385,14 @@ def main():
                         model="",
                         request_bytes=0,
                         response_bytes=pcap_size,
+                        request_bytes_source="pcap_wire",
+                        response_bytes_source="pcap_wire",
                         t_request_start=pcap_start_time or 0.0,
                         latency_sec=capture_duration or 0.0,
                         network_profile=network_profile,
                         http_status=200,
                         success=True,
-                        metadata=json.dumps(capture_metadata),
-                    )
+                        metadata=json.dumps(capture_metadata))
                     orchestrator.logger.log(capture_record)
             except Exception as e:
                 logger.warning(f"Failed to stop tcpdump capture cleanly: {e}")
@@ -1340,7 +1425,7 @@ def main():
                         "type": "pcap_capture",
                         "pcap_file": str(pcap_lo_path),
                         "capture_dir": args.capture_dir,
-                        "capture_filter": args.capture_loopback_filter or "tcp and not port 22 and not port 53",
+                        "capture_filter": args.capture_loopback_filter or "not port 22 and not port 53",
                         "capture_duration_sec": lo_duration,
                         "capture_stats": lo_stats,
                         "interface": "lo",
@@ -1357,13 +1442,14 @@ def main():
                         model="",
                         request_bytes=0,
                         response_bytes=pcap_lo_size,
+                        request_bytes_source="pcap_wire",
+                        response_bytes_source="pcap_wire",
                         t_request_start=pcap_start_time or 0.0,
                         latency_sec=lo_duration or 0.0,
                         network_profile=network_profile_lo,
                         http_status=200,
                         success=True,
-                        metadata=json.dumps(lo_metadata),
-                    )
+                        metadata=json.dumps(lo_metadata))
                     orchestrator.logger.log(lo_record)
             except Exception as e:
                 logger.warning(f"Failed to stop loopback tcpdump capture cleanly: {e}")

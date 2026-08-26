@@ -49,7 +49,7 @@ help:
 
 test:
 	@echo "Running quick test (chat scenario, 2 runs)..."
-	python orchestrator.py --scenario chat_basic --profile ideal_6g --runs 2
+	python orchestrator.py --scenario chat_basic --profile no_emulation --runs 2
 
 # =============================================================================
 # Scenario Commands
@@ -68,7 +68,7 @@ search:
 	python orchestrator.py --scenario web_search_agent --profile 5g_urban --runs 10
 
 image:
-	python orchestrator.py --scenario image_generation --profile ideal_6g --runs 5
+	python orchestrator.py --scenario image_generation --profile 6g_itu_hrllc --runs 5
 
 all:
 	python orchestrator.py --scenario all --runs 10
@@ -78,10 +78,10 @@ direct-search:
 	python orchestrator.py --scenario direct_web_search --profile 5g_urban --runs 10
 
 direct-search-burst:
-	python orchestrator.py --scenario direct_web_search_burst --profile ideal_6g --runs 5
+	python orchestrator.py --scenario direct_web_search_burst --profile 6g_itu_hrllc --runs 5
 
 search-benchmark:
-	python orchestrator.py --scenario parallel_search_benchmark --profile ideal_6g --runs 3
+	python orchestrator.py --scenario parallel_search_benchmark --profile 6g_itu_hrllc --runs 3
 
 # Real-time conversational AI scenarios
 realtime:
@@ -94,23 +94,23 @@ realtime-technical:
 	python orchestrator.py --scenario realtime_technical --profile 5g_urban --runs 5
 
 realtime-audio:
-	python orchestrator.py --scenario realtime_audio --profile ideal_6g --runs 5
+	python orchestrator.py --scenario realtime_audio --profile 6g_itu_hrllc --runs 5
 
 # MCP scenario runner
 mcp:
-	bash run_mcp.sh --quick
+	bash run_full_tests.sh --quick --enable trading,playwright
 
 mcp-full:
-	bash run_mcp.sh --full
+	bash run_full_tests.sh --runs 10 --enable trading,playwright
 
 mcp-music:
-	bash run_mcp.sh --group music --quick
+	python orchestrator.py --scenario music_search --profile 5g_urban --runs 3
 
 mcp-trading:
-	bash run_mcp.sh --group trading --quick
+	python orchestrator.py --scenario trading_market_data --profile 5g_urban --runs 3
 
 mcp-playwright:
-	bash run_mcp.sh --group playwright --quick
+	python orchestrator.py --scenario playwright_web_test --profile 5g_urban --runs 3
 
 # Individual MCP scenarios
 trading:
@@ -131,7 +131,7 @@ chat-netem:
 	python orchestrator.py --scenario chat_basic --profile cell_edge --runs 10
 
 agent-netem:
-	python orchestrator.py --scenario shopping_agent --profile satellite --runs 10
+	python orchestrator.py --scenario shopping_agent --profile satellite_leo --runs 10
 
 direct-search-netem:
 	python orchestrator.py --scenario direct_web_search --profile cell_edge --runs 10
