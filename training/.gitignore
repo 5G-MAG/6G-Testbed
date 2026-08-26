@@ -1,0 +1,10 @@
+data/
+models/
+results/
+synthetic/
+data_pre_capture_group_fix/
+models_pre_capture_group_fix/
+results_pre_capture_group_fix/
+__pycache__/
+*.pyc
+.venv/
