@@ -75,12 +75,35 @@ external metric taxonomy.
 
 ## Installation
 
+netemu lives inside the [5G-MAG/6G-Testbed](https://github.com/5G-MAG/6G-Testbed)
+repository but is a self-contained package: it has its own `pyproject.toml`,
+license, and tests, and imports nothing from the rest of the testbed.
+
+From a local checkout:
+
 ```bash
 # Emulation + capture only
 pip install -e /path/to/netemu
 
 # Including pcap analysis (pulls in dpkt)
 pip install -e "/path/to/netemu[pcap]"
+```
+
+To install netemu without cloning the testbed, pip can install straight from
+the repository subdirectory:
+
+```bash
+pip install "netemu[pcap] @ git+https://github.com/5G-MAG/6G-Testbed.git#subdirectory=netemu"
+```
+
+To work on the netemu source without checking out the rest of the testbed,
+use a sparse checkout, which materializes only this directory:
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/5G-MAG/6G-Testbed.git
+cd 6G-Testbed
+git sparse-checkout set netemu
+pip install -e "netemu[pcap]"
 ```
 
 Importing `netemu` without `dpkt` succeeds. `netemu.HAS_DPKT` is then `False`,

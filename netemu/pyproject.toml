@@ -59,9 +59,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/3gpp/netemu"
-Documentation = "https://github.com/3gpp/netemu#readme"
-Repository = "https://github.com/3gpp/netemu"
+Homepage = "https://github.com/5G-MAG/6G-Testbed/tree/main/netemu"
+Documentation = "https://github.com/5G-MAG/6G-Testbed/tree/main/netemu#readme"
+Repository = "https://github.com/5G-MAG/6G-Testbed"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/netemu"]
