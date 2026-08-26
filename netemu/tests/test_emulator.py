@@ -1,5 +1,7 @@
 """Tests for NetworkEmulator class."""
 
+from unittest.mock import patch
+
 import pytest
 
 from netemu import NetworkEmulator, NetworkProfile
@@ -54,9 +56,16 @@ class TestProfileLoading:
 
         assert len(emu.profiles) == 2
 
-    def test_load_profiles_sets_interface(self, sample_profiles_yaml):
-        """Test that default_interface from YAML is applied."""
+    def test_load_profiles_keeps_explicit_interface(self, sample_profiles_yaml):
+        """An explicitly passed interface wins over the YAML default."""
         emu = NetworkEmulator(interface="original")
+        emu.load_profiles(sample_profiles_yaml)
+
+        assert emu.interface == "original"
+
+    def test_load_profiles_sets_interface_when_auto(self, sample_profiles_yaml):
+        """default_interface from YAML is applied when interface is 'auto'."""
+        emu = NetworkEmulator(interface="auto")
         emu.load_profiles(sample_profiles_yaml)
 
         assert emu.interface == "eth0"
@@ -238,12 +247,12 @@ class TestContextManager:
         with emu as ctx:
             assert ctx is emu
 
-    def test_context_manager_clears_on_exit(self, mocker):
+    def test_context_manager_clears_on_exit(self):
         """Test that clear() is called on context exit."""
         emu = NetworkEmulator()
-        mock_clear = mocker.patch.object(emu, 'clear')
 
-        with emu:
-            pass
+        with patch.object(emu, "clear") as mock_clear:
+            with emu:
+                pass
 
         mock_clear.assert_called_once()
