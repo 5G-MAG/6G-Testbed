@@ -1212,7 +1212,7 @@ test_matrix:
     runner_enabled_by_default: true
     prereqs:
       - "examples/assets/network_diagram.png"
-      - "../../Math_olympiad.pdf"
+      - "examples/assets/Math_olympiad.pdf"
 
   - scenario: "direct_web_search_google"
     phase: "google_search"
