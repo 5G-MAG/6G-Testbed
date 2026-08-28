@@ -1,26 +1,42 @@
 """
-PCAP Analyzer for the 6G AI Traffic Testbed.
+PCAP parsing and network-layer metric extraction.
 
-Extracts network-layer metrics from pcap files for accurate throughput,
-latency, and packet statistics that complement application-layer metrics.
+Reads a libpcap or pcapng capture, reassembles TCP/UDP flows over IPv4 and
+IPv6, and derives packet-, flow-, and window-level metrics: throughput,
+handshake RTT, retransmissions, TLS setup duration, per-direction volumes,
+multi-window burstiness, and burst segmentation.
+
+This is the read side of :mod:`netemu.capture`: capture writes the pcap,
+this module turns it into numbers. It is deliberately independent of any
+particular measurement harness, the only inputs are a file path and an
+optional port filter.
+
+Requires the optional ``dpkt`` dependency::
+
+    pip install "netemu[pcap]"
 """
 
-import logging
-import struct
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Iterator
-from collections import defaultdict
+from typing import Optional, Sequence
+
+import logging
+
+from .exceptions import DpktNotAvailableError
 
 logger = logging.getLogger(__name__)
 
-# Try to import dpkt for pcap parsing
+# dpkt is an optional dependency; importing netemu.pcap without it is allowed
+# so that callers can probe HAS_DPKT and degrade gracefully. Only constructing
+# a PcapAnalyzer actually requires it.
 try:
     import dpkt
     HAS_DPKT = True
 except ImportError:
     HAS_DPKT = False
-    logger.warning("dpkt not installed. Install with: pip install dpkt")
+    logger.debug("dpkt not installed; pcap analysis unavailable. "
+                 'Install with: pip install "netemu[pcap]"')
 
 
 @dataclass
@@ -66,8 +82,18 @@ class TCPFlow:
     rst_time: Optional[float] = None
     retransmissions: int = 0
 
-    # Sequence tracking for retransmission detection
-    seen_seqs: set = field(default_factory=set)
+    # TLS handshake markers (record-type sniffing on the unencrypted bytes
+    # at the start of each TCP payload). ClientHello → first ApplicationData
+    # bounds the full TLS 1.2 / 1.3 handshake.
+    tls_client_hello_time: Optional[float] = None
+    tls_first_app_data_time: Optional[float] = None
+
+    # Payload byte intervals already observed in each TCP sequence space.
+    # TCP sequence numbers are independent in the two directions; tracking a
+    # single set makes a pure ACK or an equal client/server sequence number look
+    # like a retransmission.
+    sent_seq_ranges: list[tuple[int, int]] = field(default_factory=list)
+    recv_seq_ranges: list[tuple[int, int]] = field(default_factory=list)
 
     @property
     def duration(self) -> float:
@@ -134,6 +160,16 @@ class TCPFlow:
         return None
 
     @property
+    def tls_handshake_duration(self) -> Optional[float]:
+        """TLS handshake duration in seconds: first ClientHello (TLS record
+        type 0x16) → first ApplicationData record (0x17). Covers TLS 1.2
+        and TLS 1.3, including 0-RTT-less full handshake setup."""
+        if self.tls_client_hello_time and self.tls_first_app_data_time:
+            d = self.tls_first_app_data_time - self.tls_client_hello_time
+            return d if d > 0 else None
+        return None
+
+    @property
     def data_transfer_duration(self) -> Optional[float]:
         """First data byte → connection close (FIN/RST/last packet)."""
         start = self.first_data_time
@@ -195,7 +231,7 @@ class PcapMetrics:
     flows: list[TCPFlow] = field(default_factory=list)
 
     # ---------------------------------------------------------------------
-    # Per-direction / multi-window metrics (S4-260859 Q1.3, Q1.4, Q2.1..2.3)
+    # Per-direction, multi-window, and burst-segmentation metrics.
     # Populated by _compute_per_direction_and_multi_window() after parsing.
     # ---------------------------------------------------------------------
 
@@ -213,7 +249,7 @@ class PcapMetrics:
     throughput_by_window: dict = field(default_factory=dict)
     peak_mbps_by_window: dict = field(default_factory=dict)
 
-    # Burstiness = peak / mean of (UL+DL) across buckets, per window (Q2.3).
+    # Burstiness = peak / mean of (UL+DL) across buckets, per window.
     burstiness_by_window: dict = field(default_factory=dict)
 
     # Per-direction bursts, keyed by gap-threshold label ("10ms", "100ms"):
@@ -222,7 +258,7 @@ class PcapMetrics:
     bursts_by_gap: dict = field(default_factory=dict)
 
     # Inter-burst idle-gap durations per direction, keyed same as bursts_by_gap.
-    # { "10ms": { "ul": [gap_sec, ...], "dl": [gap_sec, ...] } }  (Q2.2, Q4.5)
+    # { "10ms": { "ul": [gap_sec, ...], "dl": [gap_sec, ...] } }
     interburst_idle_by_gap: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
@@ -251,18 +287,38 @@ class PcapAnalyzer:
     Analyzer for extracting network-layer metrics from pcap files.
     """
 
-    def __init__(self, target_ports: Optional[list[int]] = None):
+    def __init__(
+        self,
+        target_ports: Optional[list[int]] = None,
+        *,
+        unfiltered_name_patterns: Sequence[str] = (),
+    ):
         """
         Initialize the analyzer.
 
         Args:
             target_ports: List of ports to filter (e.g., [443, 80]).
                          If None, all ports are analyzed.
+            unfiltered_name_patterns: File-name substrings that exempt a
+                         capture from ``target_ports``. A port filter is
+                         useful on a busy egress interface but wrong for
+                         loopback captures, where local servers bind ports
+                         that are not known when the filter is configured.
+                         Pass e.g. ``("capture_lo_",)`` to analyze every
+                         port in captures whose name marks them as loopback.
+
+        Raises:
+            DpktNotAvailableError: dpkt is not installed. It also subclasses
+                         ImportError, so existing ``except ImportError``
+                         handlers keep working.
         """
         if not HAS_DPKT:
-            raise ImportError("dpkt is required for pcap analysis. Install with: pip install dpkt")
+            raise DpktNotAvailableError(
+                'dpkt is required for pcap analysis. Install with: pip install "netemu[pcap]"'
+            )
 
         self.target_ports = set(target_ports) if target_ports else None
+        self.unfiltered_name_patterns = tuple(unfiltered_name_patterns)
 
     def analyze(self, pcap_path: str, bucket_sec: float = 1.0) -> PcapMetrics:
         """
@@ -281,6 +337,11 @@ class PcapAnalyzer:
 
         metrics = PcapMetrics(pcap_file=str(pcap_path))
         flows: dict[str, TCPFlow] = {}
+        # Locally bound ports are often allocated dynamically. A configured
+        # target-port filter is useful on a noisy WAN interface but must never
+        # discard traffic from a capture the caller flagged as exempt.
+        exempt = any(p in pcap_path.name for p in self.unfiltered_name_patterns)
+        filter_ports = None if exempt else self.target_ports
 
         # Time series tracking
         throughput_buckets: dict[int, dict] = defaultdict(
@@ -321,13 +382,12 @@ class PcapAnalyzer:
 
                         if isinstance(ip.data, dpkt.tcp.TCP):
                             tcp = ip.data
+                            # Filter by port if specified
+                            if filter_ports:
+                                if tcp.sport not in filter_ports and tcp.dport not in filter_ports:
+                                    continue
                             metrics.tcp_packets += 1
                             metrics.tcp_bytes += len(buf)
-
-                            # Filter by port if specified
-                            if self.target_ports:
-                                if tcp.sport not in self.target_ports and tcp.dport not in self.target_ports:
-                                    continue
 
                             # Process TCP flow
                             flow, flags, tcp_payload_len = self._process_tcp_packet(
@@ -336,13 +396,22 @@ class PcapAnalyzer:
 
                             # Track throughput by time bucket
                             bucket = int(ts / bucket_sec)
-                            # Determine direction (simple heuristic: lower port is server)
-                            if tcp.sport < tcp.dport:
+                            # Determine direction: prefer known server ports
+                            # (target_ports); a packet towards a server port is
+                            # UL, from a server port is DL. Fall back to the
+                            # lower-port-is-server heuristic when ambiguous.
+                            if filter_ports and (
+                                (tcp.dport in filter_ports)
+                                != (tcp.sport in filter_ports)
+                            ):
+                                direction = (
+                                    "ul" if tcp.dport in filter_ports else "dl"
+                                )
+                            elif tcp.sport < tcp.dport:
                                 direction = "dl"
-                                throughput_buckets[bucket]["dl_bytes"] += len(ip.data)
                             else:
                                 direction = "ul"
-                                throughput_buckets[bucket]["ul_bytes"] += len(ip.data)
+                            throughput_buckets[bucket][f"{direction}_bytes"] += len(ip.data)
 
                             # Record per-packet data
                             metrics.packets.append(PacketRecord(
@@ -358,29 +427,68 @@ class PcapAnalyzer:
                             ))
 
                         elif isinstance(ip.data, dpkt.udp.UDP):
-                            metrics.udp_packets += 1
-                            metrics.udp_bytes += len(buf)
-
                             udp = ip.data
                             # Track UDP throughput
-                            if self.target_ports is None or udp.sport in self.target_ports or udp.dport in self.target_ports:
+                            if filter_ports is None or udp.sport in filter_ports or udp.dport in filter_ports:
+                                metrics.udp_packets += 1
+                                metrics.udp_bytes += len(buf)
                                 bucket = int(ts / bucket_sec)
-                                if udp.sport < udp.dport:
-                                    throughput_buckets[bucket]["dl_bytes"] += len(ip.data)
-                                else:
-                                    throughput_buckets[bucket]["ul_bytes"] += len(ip.data)
+                                direction = self._packet_direction(udp.sport, udp.dport, filter_ports)
+                                throughput_buckets[bucket][f"{direction}_bytes"] += len(ip.data)
+                                metrics.packets.append(PacketRecord(
+                                    timestamp=ts,
+                                    size=len(ip.data),
+                                    direction=direction,
+                                    payload_len=len(udp.data),
+                                    flow_key=(
+                                        f"udp:{src_ip}:{udp.sport}-"
+                                        f"{dst_ip}:{udp.dport}"
+                                    ),
+                                ))
                         else:
                             metrics.other_packets += 1
 
                     elif isinstance(eth.data, dpkt.ip6.IP6):
-                        # IPv6 support
+                        # IPv6 uses the same flow, direction, and packet-level
+                        # accounting as IPv4 (the previous implementation only
+                        # incremented two counters and silently omitted it from
+                        # every downstream metric).
                         ip6 = eth.data
+                        src_ip = self._ip_to_str(ip6.src)
+                        dst_ip = self._ip_to_str(ip6.dst)
                         if isinstance(ip6.data, dpkt.tcp.TCP):
+                            tcp = ip6.data
+                            if filter_ports and tcp.sport not in filter_ports and tcp.dport not in filter_ports:
+                                continue
                             metrics.tcp_packets += 1
                             metrics.tcp_bytes += len(buf)
+                            flow, flags, tcp_payload_len = self._process_tcp_packet(
+                                flows, ts, src_ip, dst_ip, tcp, len(ip6.data)
+                            )
+                            direction = self._packet_direction(tcp.sport, tcp.dport, filter_ports)
+                            bucket = int(ts / bucket_sec)
+                            throughput_buckets[bucket][f"{direction}_bytes"] += len(ip6.data)
+                            metrics.packets.append(PacketRecord(
+                                timestamp=ts, size=len(ip6.data), direction=direction,
+                                tcp_flags=flags, seq=tcp.seq, ack=tcp.ack,
+                                window=tcp.win, payload_len=tcp_payload_len,
+                                flow_key=flow.flow_key,
+                            ))
                         elif isinstance(ip6.data, dpkt.udp.UDP):
-                            metrics.udp_packets += 1
-                            metrics.udp_bytes += len(buf)
+                            udp = ip6.data
+                            if filter_ports is None or udp.sport in filter_ports or udp.dport in filter_ports:
+                                metrics.udp_packets += 1
+                                metrics.udp_bytes += len(buf)
+                                direction = self._packet_direction(udp.sport, udp.dport, filter_ports)
+                                bucket = int(ts / bucket_sec)
+                                throughput_buckets[bucket][f"{direction}_bytes"] += len(ip6.data)
+                                metrics.packets.append(PacketRecord(
+                                    timestamp=ts, size=len(ip6.data), direction=direction,
+                                    payload_len=len(udp.data),
+                                    flow_key=f"udp:{src_ip}:{udp.sport}-{dst_ip}:{udp.dport}",
+                                ))
+                        else:
+                            metrics.other_packets += 1
 
         except Exception as e:
             logger.error(f"Error parsing pcap file {pcap_path}: {e}")
@@ -434,7 +542,7 @@ class PcapAnalyzer:
 
             metrics.peak_throughput_mbps = peak_throughput / 1000
 
-        # Per-direction + multi-window + burst metrics (S4-260859 Q1.3, Q1.4, Q2.1..2.3)
+        # Per-direction, multi-window, and burst-segmentation metrics
         self._compute_per_direction_and_multi_window(
             metrics, first_ts=first_ts
         )
@@ -457,7 +565,7 @@ class PcapAnalyzer:
         if not pkts:
             return
 
-        # ---- Per-direction totals (Q1.3) ----
+        # ---- Per-direction totals ----
         ul_count = dl_count = 0
         ul_bytes = dl_bytes = 0
         for p in pkts:
@@ -477,7 +585,7 @@ class PcapAnalyzer:
         # Reference start for relative timing
         t0 = first_ts if first_ts is not None else pkts[0].timestamp
 
-        # ---- Multi-window per-direction throughput + burstiness (Q1.4, Q2.3) ----
+        # ---- Multi-window per-direction throughput + burstiness ----
         label_for = {
             0.001: "1ms", 0.01: "10ms", 0.1: "100ms", 1.0: "1s", 10.0: "10s",
         }
@@ -507,7 +615,7 @@ class PcapAnalyzer:
                 metrics.peak_mbps_by_window[label] = peak / 1_000_000
                 metrics.burstiness_by_window[label] = (peak / mean) if mean > 0 else 0.0
 
-        # ---- Per-direction burst segmentation + inter-burst idle gaps (Q2.1, Q2.2, Q4.5) ----
+        # ---- Per-direction burst segmentation + inter-burst idle gaps ----
         # Split packets by direction, sort, then segment on idle gaps.
         by_dir: dict[str, list] = {"ul": [], "dl": []}
         for p in pkts:
@@ -589,7 +697,7 @@ class PcapAnalyzer:
         dst_ip: str,
         tcp: 'dpkt.tcp.TCP',
         payload_len: int
-    ) -> TCPFlow:
+    ) -> tuple[TCPFlow, int, int]:
         """Process a TCP packet and update flow state."""
         # Create canonical flow key (sorted by IP:port to handle bidirectional)
         forward_key = f"{src_ip}:{tcp.sport}-{dst_ip}:{tcp.dport}"
@@ -655,13 +763,71 @@ class PcapAnalyzer:
         if tcp_payload_len > 0 and flow.first_data_time is None:
             flow.first_data_time = ts
 
-        # Detect retransmissions (simplified: same seq number seen before)
-        seq = tcp.seq
-        if seq in flow.seen_seqs and payload_len > 0:
-            flow.retransmissions += 1
-        flow.seen_seqs.add(seq)
+        # TLS handshake boundary detection. The TCP payload of a packet that
+        # begins a TLS record carries: byte[0] = record type, bytes[1:3] =
+        # TLS protocol version (0x0301..0x0304 for TLS 1.0..1.3). Record types:
+        #   0x16 = Handshake (ClientHello/ServerHello/etc.)
+        #   0x17 = ApplicationData (handshake complete)
+        # We capture the first 0x16 (which is ClientHello — sent first by the
+        # client) and the first 0x17 (handshake done) to bound the duration.
+        if tcp_payload_len > 0:
+            try:
+                tcp_payload = bytes(tcp.data)
+            except Exception:
+                tcp_payload = b""
+            if len(tcp_payload) >= 3 and tcp_payload[1] == 0x03 and tcp_payload[2] in (0x01, 0x02, 0x03, 0x04):
+                rec_type = tcp_payload[0]
+                if rec_type == 0x16 and flow.tls_client_hello_time is None:
+                    flow.tls_client_hello_time = ts
+                elif rec_type == 0x17 and flow.tls_first_app_data_time is None:
+                    flow.tls_first_app_data_time = ts
+
+        # Detect retransmitted payload bytes in the correct directional
+        # sequence space. Pure ACKs have no data and are intentionally ignored.
+        if tcp_payload_len > 0:
+            ranges = flow.sent_seq_ranges if is_forward else flow.recv_seq_ranges
+            if self._record_sequence_interval(
+                ranges, tcp.seq, tcp.seq + tcp_payload_len
+            ):
+                flow.retransmissions += 1
 
         return flow, flags, tcp_payload_len
+
+    @staticmethod
+    def _record_sequence_interval(
+        ranges: list[tuple[int, int]], start: int, end: int
+    ) -> bool:
+        """Merge a TCP payload interval and report whether it overlaps old data."""
+        if end <= start:
+            return False
+        retransmitted = any(start < old_end and end > old_start for old_start, old_end in ranges)
+        merged_start, merged_end = start, end
+        merged: list[tuple[int, int]] = []
+        inserted = False
+        for old_start, old_end in ranges:
+            if old_end < merged_start:
+                merged.append((old_start, old_end))
+            elif merged_end < old_start:
+                if not inserted:
+                    merged.append((merged_start, merged_end))
+                    inserted = True
+                merged.append((old_start, old_end))
+            else:
+                merged_start = min(merged_start, old_start)
+                merged_end = max(merged_end, old_end)
+        if not inserted:
+            merged.append((merged_start, merged_end))
+        ranges[:] = merged
+        return retransmitted
+
+    @staticmethod
+    def _packet_direction(
+        src_port: int, dst_port: int, target_ports: Optional[set[int]]
+    ) -> str:
+        """Classify client-to-server as UL and server-to-client as DL."""
+        if target_ports and ((dst_port in target_ports) != (src_port in target_ports)):
+            return "ul" if dst_port in target_ports else "dl"
+        return "dl" if src_port < dst_port else "ul"
 
     @staticmethod
     def _ip_to_str(ip_bytes: bytes) -> str:
@@ -674,33 +840,48 @@ class PcapAnalyzer:
         return str(ip_bytes)
 
 
-def analyze_pcap(pcap_path: str, target_ports: Optional[list[int]] = None) -> PcapMetrics:
+def analyze_pcap(
+    pcap_path: str,
+    target_ports: Optional[list[int]] = None,
+    *,
+    unfiltered_name_patterns: Sequence[str] = (),
+) -> PcapMetrics:
     """
     Convenience function to analyze a pcap file.
 
     Args:
         pcap_path: Path to pcap file.
         target_ports: Optional list of ports to filter.
+        unfiltered_name_patterns: See :class:`PcapAnalyzer`.
 
     Returns:
         PcapMetrics with network-layer statistics.
     """
-    analyzer = PcapAnalyzer(target_ports=target_ports)
+    analyzer = PcapAnalyzer(
+        target_ports=target_ports,
+        unfiltered_name_patterns=unfiltered_name_patterns,
+    )
     return analyzer.analyze(pcap_path)
 
 
 def analyze_multiple_pcaps(
     pcap_dir: str,
     pattern: str = "*.pcap",
-    target_ports: Optional[list[int]] = None
+    target_ports: Optional[list[int]] = None,
+    *,
+    unfiltered_name_patterns: Sequence[str] = (),
 ) -> list[PcapMetrics]:
     """
     Analyze multiple pcap files in a directory.
+
+    Files that fail to parse are logged and skipped, so one truncated capture
+    does not abort a batch.
 
     Args:
         pcap_dir: Directory containing pcap files.
         pattern: Glob pattern for pcap files.
         target_ports: Optional list of ports to filter.
+        unfiltered_name_patterns: See :class:`PcapAnalyzer`.
 
     Returns:
         List of PcapMetrics for each file.
@@ -710,7 +891,11 @@ def analyze_multiple_pcaps(
 
     for pcap_file in pcap_dir.glob(pattern):
         try:
-            metrics = analyze_pcap(str(pcap_file), target_ports)
+            metrics = analyze_pcap(
+                str(pcap_file),
+                target_ports,
+                unfiltered_name_patterns=unfiltered_name_patterns,
+            )
             results.append(metrics)
             logger.info(f"Analyzed {pcap_file.name}: {metrics.total_packets} packets, "
                        f"{metrics.tcp_flows} TCP flows")

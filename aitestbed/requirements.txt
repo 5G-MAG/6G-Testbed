@@ -1,14 +1,17 @@
 # 6G AI Traffic Testbed Dependencies
 
-# Network Emulation (local sibling package — install separately)
-# netemu is a standalone package in the sibling netemu/ directory.
-# Install it before installing these dependencies:
+# Network Emulation + Capture + PCAP analysis (local sibling package).
+# netemu is a standalone package in the sibling netemu/ directory. It provides
+# tc/netem shaping (netemu.emulator), tcpdump capture (netemu.capture), and
+# pcap metric extraction (netemu.pcap). Install it with the [pcap] extra
+# before installing these dependencies:
 #   cd <repo-root>
-#   pip install -e netemu
+#   pip install -e "netemu[pcap]"
 #   pip install -r aitestbed/requirements.txt
 
 # LLM Clients
 openai>=1.0.0
+anthropic>=0.40.0
 azure-ai-inference>=1.0.0b1
 google-genai>=1.0.0
 websockets>=12.0  # For OpenAI Realtime API
@@ -37,7 +40,9 @@ tiktoken>=0.5.0
 # L7 Capture (HTTP/HTTPS interception)
 mitmproxy>=10.0.0
 
-# L3/L4 Capture (pcap analysis)
+# L3/L4 capture + pcap analysis are provided by netemu[pcap] (see above).
+# dpkt is pulled in by that extra; listed here only as a direct-use reminder
+# for generate_charts.py, which parses pcaps with dpkt directly.
 dpkt>=1.9.8
 
 # Optional: WebRTC transport for realtime scenarios
@@ -58,6 +63,19 @@ mcp-server-fetch>=2025.0.0
 # Install via: uvx alpaca-mcp-server init
 # Or: pip install alpaca-mcp-server
 alpaca-mcp-server>=0.1.0
+
+# A2A (Agent2Agent protocol) scenarios
+# Provides the a2a.client + a2a.server APIs used by clients/a2a_client.py and
+# the local agents in a2a_agents/. Pin to the 1.x line the code targets.
+a2a-sdk>=1.1.0,<2.0.0
+
+# httpx — used directly by the A2A client/launcher and OpenClaw scenario.
+# (Also pulled in transitively by openai/a2a-sdk; pinned here as a direct dep.)
+httpx>=0.28.0
+
+# uvicorn + starlette — serve the local A2A agents (a2a_agents/common.py)
+uvicorn>=0.27.0
+starlette>=0.40.0
 
 # Async support (included in Python 3.7+, but useful for type hints)
 # asyncio is part of stdlib

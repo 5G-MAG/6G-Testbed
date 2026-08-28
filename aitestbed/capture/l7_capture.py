@@ -6,6 +6,7 @@ including headers, bodies, and timing metrics.
 """
 
 import json
+import os
 import time
 import subprocess
 import signal
@@ -15,8 +16,38 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional, Callable
 from datetime import datetime
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 logger = logging.getLogger(__name__)
+
+SENSITIVE_HEADERS = {
+    "authorization", "proxy-authorization", "cookie", "set-cookie",
+    "x-api-key", "api-key", "x-auth-token",
+}
+SENSITIVE_QUERY_PARTS = ("key", "token", "secret", "password", "signature", "auth")
+
+
+def _redact_headers(headers) -> dict:
+    return {
+        str(key): "[REDACTED]" if str(key).lower() in SENSITIVE_HEADERS else str(value)
+        for key, value in headers.items()
+    }
+
+
+def _redact_url(url: str) -> str:
+    try:
+        parts = urlsplit(url)
+        query = urlencode([
+            (
+                key,
+                "[REDACTED]" if any(part in key.lower() for part in SENSITIVE_QUERY_PARTS)
+                else value,
+            )
+            for key, value in parse_qsl(parts.query, keep_blank_values=True)
+        ])
+        return urlunsplit((parts.scheme, parts.netloc, parts.path, query, ""))
+    except Exception:
+        return "[UNPARSEABLE URL]"
 
 
 @dataclass
@@ -88,14 +119,14 @@ class MitmproxyAddon:
             "timestamp": t_response_end,
             "flow_id": flow.id,
             "request_method": flow.request.method,
-            "request_url": flow.request.url,
+            "request_url": _redact_url(flow.request.url),
             "request_host": flow.request.host,
-            "request_path": flow.request.path,
-            "request_headers": dict(flow.request.headers),
+            "request_path": urlsplit(_redact_url(flow.request.url)).path,
+            "request_headers": _redact_headers(flow.request.headers),
             "request_body_size": len(flow.request.content) if flow.request.content else 0,
             "request_content_type": flow.request.headers.get("content-type", ""),
             "response_status": flow.response.status_code,
-            "response_headers": dict(flow.response.headers),
+            "response_headers": _redact_headers(flow.response.headers),
             "response_body_size": len(flow.response.content) if flow.response.content else 0,
             "response_content_type": flow.response.headers.get("content-type", ""),
             "t_request_start": t_request_start,
@@ -120,8 +151,19 @@ ADDON_SCRIPT_TEMPLATE = '''
 """Auto-generated mitmproxy addon script."""
 import json
 import time
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 OUTPUT_FILE = "{output_file}"
+SENSITIVE_HEADERS = {{"authorization", "proxy-authorization", "cookie", "set-cookie", "x-api-key", "api-key", "x-auth-token"}}
+SENSITIVE_QUERY_PARTS = ("key", "token", "secret", "password", "signature", "auth")
+
+def redact_headers(headers):
+    return {{str(k): "[REDACTED]" if str(k).lower() in SENSITIVE_HEADERS else str(v) for k, v in headers.items()}}
+
+def redact_url(url):
+    parts = urlsplit(url)
+    query = urlencode([(k, "[REDACTED]" if any(p in k.lower() for p in SENSITIVE_QUERY_PARTS) else v) for k, v in parse_qsl(parts.query, keep_blank_values=True)])
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, query, ""))
 
 class L7CaptureAddon:
     def request(self, flow):
@@ -135,14 +177,14 @@ class L7CaptureAddon:
             "timestamp": t_end,
             "flow_id": flow.id,
             "request_method": flow.request.method,
-            "request_url": flow.request.url,
+            "request_url": redact_url(flow.request.url),
             "request_host": flow.request.host,
-            "request_path": flow.request.path,
-            "request_headers": dict(flow.request.headers),
+            "request_path": urlsplit(redact_url(flow.request.url)).path,
+            "request_headers": redact_headers(flow.request.headers),
             "request_body_size": len(flow.request.content) if flow.request.content else 0,
             "request_content_type": flow.request.headers.get("content-type", ""),
             "response_status": flow.response.status_code,
-            "response_headers": dict(flow.response.headers),
+            "response_headers": redact_headers(flow.response.headers),
             "response_body_size": len(flow.response.content) if flow.response.content else 0,
             "response_content_type": flow.response.headers.get("content-type", ""),
             "t_request_start": t_start,
@@ -209,9 +251,9 @@ class L7CaptureController:
             logger.warning("L7 capture already running")
             return self._current_file
 
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         # Generate filename
         if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"l7_capture_{timestamp}.jsonl"
 
         self._current_file = self.capture_dir / filename
@@ -222,6 +264,7 @@ class L7CaptureController:
             output_file=str(self._current_file.absolute())
         )
         self._addon_script.write_text(addon_content)
+        os.chmod(self._addon_script, 0o600)
 
         # Build mitmproxy command
         cmd = [
@@ -231,20 +274,22 @@ class L7CaptureController:
             "-s", str(self._addon_script),
         ]
 
-        # Add host filter if specified
-        if filter_hosts:
-            filter_expr = " | ".join(f"~d {host}" for host in filter_hosts)
-            cmd.extend(["--filter", filter_expr])
-
         # Add web interface if enabled
         if self.web_port > 0:
             cmd.extend(["--web-port", str(self.web_port)])
+
+        # Host filter (trailing positional argument — mitmdump does not
+        # accept --filter; the filter expression is taken from argv tail).
+        if filter_hosts:
+            filter_expr = " | ".join(f"~d {host}" for host in filter_hosts)
+            cmd.append(filter_expr)
 
         try:
             logger.info(f"Starting mitmproxy: {' '.join(cmd)}")
 
             # Clear output file
             self._current_file.write_text("")
+            os.chmod(self._current_file, 0o600)
 
             self._process = subprocess.Popen(
                 cmd,

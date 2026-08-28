@@ -1,5 +1,7 @@
 """Tests for NetworkEmulator class."""
 
+from unittest.mock import patch
+
 import pytest
 
 from netemu import NetworkEmulator, NetworkProfile
@@ -54,9 +56,16 @@ class TestProfileLoading:
 
         assert len(emu.profiles) == 2
 
-    def test_load_profiles_sets_interface(self, sample_profiles_yaml):
-        """Test that default_interface from YAML is applied."""
+    def test_load_profiles_keeps_explicit_interface(self, sample_profiles_yaml):
+        """An explicitly passed interface wins over the YAML default."""
         emu = NetworkEmulator(interface="original")
+        emu.load_profiles(sample_profiles_yaml)
+
+        assert emu.interface == "original"
+
+    def test_load_profiles_sets_interface_when_auto(self, sample_profiles_yaml):
+        """default_interface from YAML is applied when interface is 'auto'."""
+        emu = NetworkEmulator(interface="auto")
         emu.load_profiles(sample_profiles_yaml)
 
         assert emu.interface == "eth0"
@@ -238,12 +247,39 @@ class TestContextManager:
         with emu as ctx:
             assert ctx is emu
 
-    def test_context_manager_clears_on_exit(self, mocker):
+    def test_context_manager_clears_on_exit(self):
         """Test that clear() is called on context exit."""
         emu = NetworkEmulator()
-        mock_clear = mocker.patch.object(emu, 'clear')
 
-        with emu:
-            pass
+        with patch.object(emu, "clear") as mock_clear:
+            with emu:
+                pass
 
         mock_clear.assert_called_once()
+
+
+def test_check_sudo_falls_back_to_scoped_tc_probe(monkeypatch):
+    """Hosts with command-scoped NOPASSWD rules (tc/ip/tcpdump only) must
+    report passwordless sudo even though ``sudo -n true`` is denied."""
+    import subprocess as sp
+    from netemu.emulator import NetworkEmulator
+
+    def fake_run(cmd, **kwargs):
+        class R:
+            returncode = 0 if "tc" in cmd else 1
+        return R()
+
+    monkeypatch.setattr(sp, "run", fake_run)
+    emu = NetworkEmulator.__new__(NetworkEmulator)
+    emu._sudo_available = None
+    assert emu.check_sudo() is True
+
+    def fake_run_all_denied(cmd, **kwargs):
+        class R:
+            returncode = 1
+        return R()
+
+    monkeypatch.setattr(sp, "run", fake_run_all_denied)
+    emu = NetworkEmulator.__new__(NetworkEmulator)
+    emu._sudo_available = None
+    assert emu.check_sudo() is False

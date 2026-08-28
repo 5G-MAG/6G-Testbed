@@ -276,6 +276,56 @@ class RealtimeClient:
     def provider(self) -> str:
         return "openai_realtime"
 
+    def _connection_headers(self) -> dict:
+        """GA WebSocket handshake headers.
+
+        The retired Beta protocol required "OpenAI-Beta: realtime=v1"; the GA
+        endpoint rejects sessions opened with it. Authorization only.
+        """
+        return {"Authorization": f"Bearer {self.api_key}"}
+
+    def _build_session_update(
+        self,
+        modalities: list[str],
+        voice: str,
+        instructions,
+        turn_detection,
+        input_audio_transcription,
+        max_response_output_tokens,
+    ) -> dict:
+        """Translate the legacy scenario knobs to a GA session.update event.
+
+        Mirrors RealtimeWebRTCClient._build_session_config: GA sessions carry
+        type "realtime", a single output modality, and nest voice, turn
+        detection, and transcription under the audio block. The Beta fields
+        (modalities, voice, temperature, *_audio_format) are rejected by GA.
+        """
+        output_modality = "audio" if "audio" in modalities else "text"
+        session: dict = {
+            "type": "realtime",
+            "model": self.model,
+            "output_modalities": [output_modality],
+        }
+        if instructions:
+            session["instructions"] = instructions
+        if max_response_output_tokens:
+            session["max_output_tokens"] = max_response_output_tokens
+
+        if output_modality == "audio" or turn_detection is not None or input_audio_transcription:
+            audio: dict = {}
+            audio_input: dict = {}
+            if turn_detection is not None:
+                audio_input["turn_detection"] = turn_detection
+            if input_audio_transcription:
+                audio_input["transcription"] = input_audio_transcription
+            if audio_input:
+                audio["input"] = audio_input
+            if output_modality == "audio":
+                audio["output"] = {"voice": voice}
+            session["audio"] = audio
+
+        return {"type": "session.update", "session": session}
+
     async def connect(
         self,
         modalities: list[str] = None,
@@ -320,10 +370,7 @@ class RealtimeClient:
         # Build WebSocket URL with model
         url = f"{self.REALTIME_API_URL}?model={self.model}"
 
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "OpenAI-Beta": "realtime=v1"
-        }
+        headers = self._connection_headers()
 
         try:
             self._ws = await ws_connect(url, additional_headers=headers)
@@ -340,29 +387,15 @@ class RealtimeClient:
             self._current_session_metrics.session_id = event.get("session", {}).get("id", "")
             self._current_session_metrics.total_response_bytes += len(response.encode() if isinstance(response, str) else response)
 
-            # Configure session
-            session_config = {
-                "type": "session.update",
-                "session": {
-                    "modalities": modalities,
-                    "voice": voice,
-                    "input_audio_format": input_audio_format,
-                    "output_audio_format": output_audio_format,
-                    "temperature": temperature,
-                }
-            }
-
-            if instructions:
-                session_config["session"]["instructions"] = instructions
-
-            if turn_detection is not None:
-                session_config["session"]["turn_detection"] = turn_detection
-
-            if input_audio_transcription:
-                session_config["session"]["input_audio_transcription"] = input_audio_transcription
-
-            if max_response_output_tokens:
-                session_config["session"]["max_response_output_tokens"] = max_response_output_tokens
+            # Configure session (GA schema; see _build_session_update)
+            session_config = self._build_session_update(
+                modalities=modalities,
+                voice=voice,
+                instructions=instructions,
+                turn_detection=turn_detection,
+                input_audio_transcription=input_audio_transcription,
+                max_response_output_tokens=max_response_output_tokens,
+            )
 
             config_json = json.dumps(session_config)
             self._current_session_metrics.total_request_bytes += len(config_json.encode())
@@ -701,11 +734,14 @@ class RealtimeClient:
                 # Track first response time
                 if self._current_turn_metrics.t_first_response is None:
                     if event_type in ["response.text.delta", "response.audio.delta",
-                                     "response.audio_transcript.delta"]:
+                                     "response.audio_transcript.delta",
+                                     "response.output_text.delta",
+                                     "response.output_audio.delta",
+                                     "response.output_audio_transcript.delta"]:
                         self._current_turn_metrics.t_first_response = t_recv
 
                 # Handle different event types
-                if event_type == "response.text.delta":
+                if event_type in ("response.text.delta", "response.output_text.delta"):
                     delta = event.get("delta", "")
                     self._current_turn_metrics.output_text += delta
                     self._current_turn_metrics.text_bytes_received += len(delta.encode())
@@ -720,7 +756,7 @@ class RealtimeClient:
                     self._current_turn_metrics.text_chunks.append(chunk)
                     self._current_turn_metrics.t_last_response = t_recv
 
-                elif event_type == "response.audio.delta":
+                elif event_type in ("response.audio.delta", "response.output_audio.delta"):
                     audio_b64 = event.get("delta", "")
                     audio_bytes = base64.b64decode(audio_b64) if audio_b64 else b""
                     self._current_turn_metrics.audio_bytes_received += len(audio_bytes)
@@ -735,7 +771,8 @@ class RealtimeClient:
                     self._current_turn_metrics.audio_chunks.append(chunk)
                     self._current_turn_metrics.t_last_response = t_recv
 
-                elif event_type == "response.audio_transcript.delta":
+                elif event_type in ("response.audio_transcript.delta",
+                                    "response.output_audio_transcript.delta"):
                     delta = event.get("delta", "")
                     self._current_turn_metrics.output_transcript += delta
 

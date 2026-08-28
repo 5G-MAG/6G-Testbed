@@ -29,14 +29,20 @@ def load_scenario_config(path: Path) -> dict:
     return config.get("scenarios", {})
 
 
-def load_records(db_path: Path, scenario_id: str) -> list[dict]:
+def load_records(db_path: Path, scenario_id: str, since_timestamp: float = 0.0) -> list[dict]:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    cur.execute(
-        "SELECT * FROM traffic_logs WHERE scenario_id = ? ORDER BY timestamp",
-        (scenario_id,),
-    )
+    if since_timestamp:
+        cur.execute(
+            "SELECT * FROM traffic_logs WHERE scenario_id = ? AND timestamp > ? ORDER BY timestamp",
+            (scenario_id, since_timestamp),
+        )
+    else:
+        cur.execute(
+            "SELECT * FROM traffic_logs WHERE scenario_id = ? ORDER BY timestamp",
+            (scenario_id,),
+        )
     rows = [dict(r) for r in cur.fetchall()]
     conn.close()
     return rows
@@ -318,6 +324,12 @@ def main() -> None:
         default=20,
         help="Max streaming events to include per sample (0 to skip)",
     )
+    parser.add_argument(
+        "--since-timestamp",
+        type=float,
+        default=0.0,
+        help="Only include records after this Unix timestamp (cycle-aware reporting)",
+    )
     args = parser.parse_args()
 
     db_path = Path(args.db)
@@ -352,7 +364,7 @@ def main() -> None:
     scenario_sdp_found = False
 
     if sdp_dir.exists():
-        scenario_records = load_records(db_path, preferred_scenario)
+        scenario_records = load_records(db_path, preferred_scenario, args.since_timestamp)
         scenario_hash = latest_sdp_hash_for_scenario(scenario_records)
         if scenario_hash:
             latest_offer, latest_answer = find_sdp_pair_by_hash(sdp_dir, scenario_hash[:8])
@@ -421,7 +433,7 @@ def main() -> None:
     lines.append("")
 
     for scenario_id in scenarios:
-        records = load_records(db_path, scenario_id)
+        records = load_records(db_path, scenario_id, args.since_timestamp)
         session_id, session_records = pick_session(records)
 
         scenario_label = anonymizer.scenario_alias(scenario_id) or scenario_id

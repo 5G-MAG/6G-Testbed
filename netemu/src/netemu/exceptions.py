@@ -65,3 +65,22 @@ class ProfileLoadError(NetEmuError):
         if reason:
             message += f" ({reason})"
         super().__init__(message)
+
+
+class DpktNotAvailableError(NetEmuError, ImportError):
+    """
+    Raised when pcap analysis is attempted without the optional dpkt
+    dependency installed.
+
+    Install with: ``pip install "netemu[pcap]"``.
+
+    Subclasses ImportError as well as NetEmuError so that callers which
+    guard optional pcap support with ``except ImportError`` keep working.
+    """
+
+    def __init__(
+        self,
+        message: str = 'dpkt is required for pcap analysis. '
+                       'Install with: pip install "netemu[pcap]"',
+    ):
+        super().__init__(message)

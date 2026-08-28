@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "netemu"
-version = "0.1.0"
-description = "Linux tc/netem network emulation wrapper for Python"
+version = "0.3.0"
+description = "Linux tc/netem network emulation, packet capture, and packet-level metric measurement"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
@@ -21,6 +21,10 @@ keywords = [
     "latency",
     "bandwidth",
     "packet-loss",
+    "pcap",
+    "tcpdump",
+    "packet-capture",
+    "traffic-analysis",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -33,6 +37,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: System :: Networking",
+    "Topic :: System :: Networking :: Monitoring",
     "Topic :: Software Development :: Testing",
 ]
 dependencies = [
@@ -40,17 +45,23 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Pcap parsing and metric extraction (netemu.pcap). Emulation and capture
+# work without it; only PcapAnalyzer requires dpkt.
+pcap = [
+    "dpkt>=1.9.8",
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "mypy>=1.0",
     "ruff>=0.1.0",
+    "dpkt>=1.9.8",
 ]
 
 [project.urls]
-Homepage = "https://github.com/3gpp/netemu"
-Documentation = "https://github.com/3gpp/netemu#readme"
-Repository = "https://github.com/3gpp/netemu"
+Homepage = "https://github.com/5G-MAG/6G-Testbed/tree/main/netemu"
+Documentation = "https://github.com/5G-MAG/6G-Testbed/tree/main/netemu#readme"
+Repository = "https://github.com/5G-MAG/6G-Testbed"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/netemu"]
