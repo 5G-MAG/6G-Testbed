@@ -9,13 +9,17 @@ Known issues:
 import time
 import json
 import os
-import torch
-from typing import Optional, List, Dict, Any
-from transformers import AutoTokenizer
+from typing import TYPE_CHECKING, Optional, List, Dict, Any
 from .base import BaseScenario, ScenarioResult
 from clients.base import ChatMessage, MessageRole, ChatResponse, StreamingResponse
 from analysis.logger import LogRecord
 from clients.base import estimate_payload_bytes
+
+if TYPE_CHECKING:
+    # Only needed for the type hint below; the real import is deferred to
+    # _init_tokenizer() so scenarios other than chat_token don't pay the
+    # transformers import cost (or need it installed at all).
+    from transformers import AutoTokenizer
 
 
 class ChatTokenScenario(BaseScenario):
