@@ -400,7 +400,7 @@ class TestbedOrchestrator:
         scenario_name: str,
         profile_name: str,
         runs: int = 10,
-        inter_run_delay: float = 20.0,
+        inter_run_delay: float = 1.0,
         ingress_profile: Optional[str] = None,
         run_timeout: Optional[float] = None,
         stop_on_error: bool = False,
