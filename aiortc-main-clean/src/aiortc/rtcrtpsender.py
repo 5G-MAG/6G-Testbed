@@ -345,14 +345,10 @@ class RTCRtpSender:
                     ssrc=self._rtx_ssrc,
                 )
                 self.__rtx_sequence_number = uint16_add(self.__rtx_sequence_number, 1)
-            #=============== enable rtx
-            # self.__log_debug("> %s", packet)
-            # packet_bytes = packet.serialize(self.__rtp_header_extensions_map)
-            # await self.transport._send_rtp(packet_bytes)
-                #=============== disable rtx
-                self.__log_debug("> %s", packet)
-                packet_bytes = packet.serialize(self.__rtp_header_extensions_map)
-                await self.transport._send_rtp(packet_bytes)
+
+            self.__log_debug("> %s", packet)
+            packet_bytes = packet.serialize(self.__rtp_header_extensions_map)
+            await self.transport._send_rtp(packet_bytes)
 
     def _send_keyframe(self) -> None:
         """
