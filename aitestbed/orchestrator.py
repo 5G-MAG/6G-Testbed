@@ -69,6 +69,8 @@ logger.addHandler(handler)
 Path('logs').mkdir(parents=True, exist_ok=True)
 # Configure logging. scenarios/*, clients/*, analysis/* all log via
 # logging.getLogger(__name__), which propagates to the root logger, not to
+# Configure logging. scenarios/*, clients/*, analysis/* all log via
+# logging.getLogger(__name__), which propagates to the root logger, not to
 # a logger named "orchestrator" -- so the root logger still needs its own
 # level+handler or every non-orchestrator INFO/DEBUG message is silently
 # dropped (only WARNING+ survives, via Python's last-resort handler, and it
@@ -97,6 +99,9 @@ file_formatter = logging.Formatter(
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
+# Don't also feed the root handler installed above -- it would double-print
+# every message this logger already sends to its own console+file handlers.
+logger.propagate = False
 # Don't also feed the root handler installed above -- it would double-print
 # every message this logger already sends to its own console+file handlers.
 logger.propagate = False
