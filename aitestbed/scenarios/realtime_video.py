@@ -219,7 +219,12 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
             except Exception as e:
                 logger.warning(f"Failed to save session report: {e}")
 
-            result.success = True
+            except Exception as e:
+                logger.warning(f"Failed to save session report: {e}")
+
+            # Do not touch result.success here: ScenarioResult defaults to True
+            # (scenarios/base.py), and a failed turn already set it False above
+            # (with a break). Unconditionally setting it True here erased that.
 
         except Exception as e:
             logger.error(f"Scenario error: {type(e).__name__}: {e}")
