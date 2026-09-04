@@ -46,6 +46,13 @@ class ChatTokenScenario(BaseScenario):
         """Initialize tokenizer from config."""
         if self._tokenizer_initialized:
             return
+        try:
+            from transformers import AutoTokenizer
+        except ImportError as e:
+            raise RuntimeError(
+                "chat_token scenario requires the 'transformers' package: "
+                "pip install transformers"
+            ) from e
         model_path = self.config.get("tok_path", os.environ.get("TOK_PATH"))
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(
