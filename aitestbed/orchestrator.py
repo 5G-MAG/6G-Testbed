@@ -67,7 +67,39 @@ logger = colorlog.getLogger("orchestrator")
 logger.addHandler(handler)
 # File log
 Path('logs').mkdir(parents=True, exist_ok=True)
+# Configure logging. scenarios/*, clients/*, analysis/* all log via
+# logging.getLogger(__name__), which propagates to the root logger, not to
+# a logger named "orchestrator" -- so the root logger still needs its own
+# level+handler or every non-orchestrator INFO/DEBUG message is silently
+# dropped (only WARNING+ survives, via Python's last-resort handler, and it
+# never reaches logs/orchestrator.log either).
+logging.basicConfig(level=logging.INFO)
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(colorlog.ColoredFormatter(
+    "%(asctime)s - %(name)s - %(log_color)s%(levelname)-8s%(reset)s - %(message)s",
+    log_colors={
+        'DEBUG':    'cyan',
+        'INFO':     'green',
+        'WARNING':  'yellow',
+        'ERROR':    'red',
+        'CRITICAL': 'red,bg_white',
+    }
+))
+logger = colorlog.getLogger("orchestrator")
+logger.addHandler(handler)
+# File log
+Path('logs').mkdir(parents=True, exist_ok=True)
 file_handler = logging.FileHandler('logs/orchestrator.log', mode='w', encoding='utf-8')
+file_formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)-8s - %(message)s"
+)
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
+# Don't also feed the root handler installed above -- it would double-print
+# every message this logger already sends to its own console+file handlers.
+logger.propagate = False
 file_formatter = logging.Formatter(
     "%(asctime)s - %(name)s - %(levelname)-8s - %(message)s"
 )
