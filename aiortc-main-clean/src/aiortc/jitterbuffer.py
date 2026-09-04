@@ -27,8 +27,9 @@ class JitterBuffer:
     def capacity(self) -> int:
         return self._capacity
 
-    # def add(self, packet: RtpPacket) -> tuple[bool, Optional[JitterFrame]]:
-    def add(self, packet: RtpPacket, codecName) -> tuple[bool, Optional[JitterFrame]]:
+    def add(
+        self, packet: RtpPacket, codecName: Optional[str] = None
+    ) -> tuple[bool, Optional[JitterFrame]]:
         pli_flag = False
         if self._origin is None:
             self._origin = packet.sequence_number
