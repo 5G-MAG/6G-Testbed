@@ -454,6 +454,13 @@ For **Realtime Video Analysis** and **Chat with Token ID** scenarios, additional
     prompts:
       - "What is in the video? Answer directly!"
 
+**Design notes for `realtime_video_understanding`:**
+
+- **Frame selection.** Each inference call uses only the most recently received video frame, not an accumulated window of frames. This is deliberate: the scenario measures the traffic pattern of a continuous WebRTC uplink video stream against the resulting downlink inference-response pattern over time — it is not a benchmark of the model's multi-frame video-understanding accuracy. A scenario that reasons over multiple frames would need a different design, not a configuration change to this one.
+- **Question timing.** The prompt questions are sent as part of the client's request structure and are not re-sent at timestamps aligned to video playback position. The scenario characterizes AI traffic patterns under a fixed question set, not a real-world interaction-timing model — it does not attempt to reproduce when a live user would actually ask each question relative to what's on screen.
+
+Both choices affect how to read results from this scenario: it measures traffic shape and volume for a single-frame, fixed-question workload, not end-to-end video-understanding quality or realistic interaction pacing. A future scenario variant covering multi-frame reasoning or timestamp-aligned questions would be a separate addition, not a change to this one.
+
 **2. Chat with Token ID (`chat_token`)**
 
 - Set up an OpenAI-compatible server with an open-source LLM.
