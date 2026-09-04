@@ -35,7 +35,7 @@ class ChatTokenScenario(BaseScenario):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tokenizer: Optional[AutoTokenizer] = None
+        self.tokenizer: Optional["AutoTokenizer"] = None
         self._tokenizer_initialized = False
 
     @property
