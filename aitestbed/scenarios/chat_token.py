@@ -108,13 +108,17 @@ class ChatTokenScenario(BaseScenario):
             else:
                 chunk_bytes = estimate_payload_bytes(chunk_response['payload'])
             response_bytes += chunk_bytes
-        total_content = raw_response.total_content
-        total_token_ids = self.tokenizer.encode(total_content)
-        raw_response.total_content = ", ".join(map(str, total_token_ids))
+        # Keep the token-ID string for the trace/log payload only. total_content
+        # must stay the real decoded assistant text: _run_streaming_turn returns
+        # it verbatim and run() stores it in conversation_history, so overwriting
+        # it here would feed a token-ID string back into the model as the next
+        # turn's chat history instead of what the assistant actually said.
+        total_token_ids = self.tokenizer.encode(raw_response.total_content)
+        token_id_repr = ", ".join(map(str, total_token_ids))
         raw_response.response_payload = {
             "format": "openai.completions.response_summary",
             "payload": {
-                "content": raw_response.total_content,
+                "content": token_id_repr,
                 "tokens_in": raw_response.tokens_in,
                 "tokens_out": raw_response.tokens_out,
             },
