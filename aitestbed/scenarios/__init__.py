@@ -6,6 +6,7 @@ Each scenario represents a distinct AI service interaction pattern.
 
 from .base import BaseScenario, ScenarioResult
 from .chat import ChatScenario
+from .chat_token import ChatTokenScenario
 from .agent import (
     BaseAgentScenario,
     MCPToolExecutor,
@@ -35,6 +36,7 @@ from .realtime import (
     RealtimeAudioScenario,
     RealtimeAudioWebRTCScenario,
 )
+from .realtime_video import RealtimeVideoUnderstandingScenario
 
 __all__ = [
     "BaseScenario",
@@ -69,4 +71,8 @@ __all__ = [
     "RealtimeWebRTCConversationScenario",
     "RealtimeAudioScenario",
     "RealtimeAudioWebRTCScenario",
+    # Real-time video unstanding
+    "RealtimeVideoUnderstandingScenario",
+    # chat with token ID
+    "ChatTokenScenario"
 ]

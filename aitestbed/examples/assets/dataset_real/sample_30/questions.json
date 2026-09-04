@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:01]: The video begins with a view of a brightly lit room from a first-person perspective. A person standing in the room, dressed in dark clothing, is smiling and looking towards the camera. In the background, there is a large window that lets in ample daylight, casting light across the room. [0:03:01 - 0:03:02]: The camera pans right to reveal a spacious kitchen area. A large marble countertop occupies the foreground, with various kitchen items scattered on its surface, including bottles, a cutting board, and some utensils. To the left, part of a stovetop is visible. [0:03:02 - 0:03:03]: The camera continues to pan, showing a person standing behind the countertop, wearing a dark shirt. The person seems engaged in preparing something, as utensils and ingredients are placed on the counter nearby. [0:03:03 - 0:03:04]: The view is now centered on the person behind the counter. The person appears to be preparing food as they hold a utensil. The background includes white-painted walls and shelves filled with kitchen items. [0:03:04 - 0:03:05]: The frame now reveals a better view of the kitchen. Ample light illuminates the space, coming from a light fixture above. The person behind the counter is busy with the preparations and occasionally looks towards the camera. [0:03:05 - 0:03:06]: A closer view of the person behind the counter is shown. The person is focused on the task, holding a kitchen towel in one hand while standing near the stove with various kitchen objects around them, such as bottles and containers. [0:03:06 - 0:03:07]: The camera remains focused on the person behind the counter, who appears to be explaining or talking about something, holding the kitchen towel. Surrounding the person, the kitchen shelves are visible with various items neatly arranged. [0:03:07 - 0:03:08]: The person in the frame continues speaking, while the camera angle gives a clear view of the countertop, which has kitchen ingredients, utensils, and a mixer. The cabinets behind have glass doors revealing neatly arranged dishes and glasses. [0:03:08 - 0:03:09]: The person gestures with their hands while continuing to speak. The neat and tidy kitchen showcases more items, including a mixer, a coffee maker, and several containers, all placed on the countertop while cabinets with glass panels stand in the background. [0:03:09 - 0:03:10]: The person in the frame continues to talk with an expressive gesture, and the kitchen setup remains clearly visible in the background. [0:03:10 - 0:03:11]: The person becomes more animated, gesturing with both hands slightly raised. Cabinets with glass doors display a collection of glassware and dishes in the background. [0:03:11 - 0:03:12]: The camera view shifts slightly, but the focus remains on the person behind the counter who seems to be passionate about the topic they are discussing. The backdrop remains the same with organized kitchen shelves. [0:03:12 - 0:03:13]: The person continues to speak with a serious expression, possibly emphasizing a point. The frame continues to show the aesthetically pleasing kitchen layout, with its organized shelves and cabinets. [0:03:13 - 0:03:14]: The person has a more intense expression and brings their hands together as they continue talking. Books and other items stored in the cabinets to the right are now more visible. [0:03:14 - 0:03:15]: The camera zooms in slightly, capturing the person leaning towards the countertop, still talking. The background remains consistent with the white-tiled walls and shelves filled with various kitchen utilities. [0:03:15 - 0:03:16]: The person remains leaning forward, with their hands on the countertop, continuing to speak. The camera maintains a stable view of the kitchen backdrop, with items on the shelf and countertop clearly visible. [0:03:16 - 0:03:17]: Now the camera is slightly out of focus but still captures the person leaning forward. The marble countertop and kitchen appliances like the mixer and containers are partially visible. [0:03:17 - 0:03:18]: The person in the frame carries on the conversation, smiling slightly, with a more relaxed posture. Surrounding them, the kitchen continues to appear organized and clean, with various items neatly arranged. [0:03:18 - 0:03:19]: The person seems to be finishing their point, with a lighter expression and the kitchen once again appearing organized and well-lit in the background",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the main activity occurring in the kitchen during the whole video?",
+                "time_stamp": "00:03:10",
+                "answer": "A",
+                "options": [
+                    "A. Cooking demonstration.",
+                    "B. Kitchen cleaning.",
+                    "C. Family dinner.",
+                    "D. Food tasting."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_30_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:01]: The video begins with a view of a brightly lit room from a first-person perspective. A person standing in the room, dressed in dark clothing, is smiling and looking towards the camera. In the background, there is a large window that lets in ample daylight, casting light across the room. [0:03:01 - 0:03:02]: The camera pans right to reveal a spacious kitchen area. A large marble countertop occupies the foreground, with various kitchen items scattered on its surface, including bottles, a cutting board, and some utensils. To the left, part of a stovetop is visible. [0:03:02 - 0:03:03]: The camera continues to pan, showing a person standing behind the countertop, wearing a dark shirt. The person seems engaged in preparing something, as utensils and ingredients are placed on the counter nearby. [0:03:03 - 0:03:04]: The view is now centered on the person behind the counter. The person appears to be preparing food as they hold a utensil. The background includes white-painted walls and shelves filled with kitchen items. [0:03:04 - 0:03:05]: The frame now reveals a better view of the kitchen. Ample light illuminates the space, coming from a light fixture above. The person behind the counter is busy with the preparations and occasionally looks towards the camera. [0:03:05 - 0:03:06]: A closer view of the person behind the counter is shown. The person is focused on the task, holding a kitchen towel in one hand while standing near the stove with various kitchen objects around them, such as bottles and containers. [0:03:06 - 0:03:07]: The camera remains focused on the person behind the counter, who appears to be explaining or talking about something, holding the kitchen towel. Surrounding the person, the kitchen shelves are visible with various items neatly arranged. [0:03:07 - 0:03:08]: The person in the frame continues speaking, while the camera angle gives a clear view of the countertop, which has kitchen ingredients, utensils, and a mixer. The cabinets behind have glass doors revealing neatly arranged dishes and glasses. [0:03:08 - 0:03:09]: The person gestures with their hands while continuing to speak. The neat and tidy kitchen showcases more items, including a mixer, a coffee maker, and several containers, all placed on the countertop while cabinets with glass panels stand in the background. [0:03:09 - 0:03:10]: The person in the frame continues to talk with an expressive gesture, and the kitchen setup remains clearly visible in the background. [0:03:10 - 0:03:11]: The person becomes more animated, gesturing with both hands slightly raised. Cabinets with glass doors display a collection of glassware and dishes in the background. [0:03:11 - 0:03:12]: The camera view shifts slightly, but the focus remains on the person behind the counter who seems to be passionate about the topic they are discussing. The backdrop remains the same with organized kitchen shelves. [0:03:12 - 0:03:13]: The person continues to speak with a serious expression, possibly emphasizing a point. The frame continues to show the aesthetically pleasing kitchen layout, with its organized shelves and cabinets. [0:03:13 - 0:03:14]: The person has a more intense expression and brings their hands together as they continue talking. Books and other items stored in the cabinets to the right are now more visible. [0:03:14 - 0:03:15]: The camera zooms in slightly, capturing the person leaning towards the countertop, still talking. The background remains consistent with the white-tiled walls and shelves filled with various kitchen utilities. [0:03:15 - 0:03:16]: The person remains leaning forward, with their hands on the countertop, continuing to speak. The camera maintains a stable view of the kitchen backdrop, with items on the shelf and countertop clearly visible. [0:03:16 - 0:03:17]: Now the camera is slightly out of focus but still captures the person leaning forward. The marble countertop and kitchen appliances like the mixer and containers are partially visible. [0:03:17 - 0:03:18]: The person in the frame carries on the conversation, smiling slightly, with a more relaxed posture. Surrounding them, the kitchen continues to appear organized and clean, with various items neatly arranged. [0:03:18 - 0:03:19]: The person seems to be finishing their point, with a lighter expression and the kitchen once again appearing organized and well-lit in the background",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the person behind the counter doing?",
+                "time_stamp": "00:04:36",
+                "answer": "B",
+                "options": [
+                    "A. Cleaning the countertop.",
+                    "B. Preparing food.",
+                    "C. Washing dishes.",
+                    "D. Reading a recipe."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_30_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:02]: The scene opens with a view of a kitchen. A person is seen frying sausages in a pan that’s placed on a gas stove. There are two frying pans, one with sausages and the other empty. The kitchen counter in the background has various objects like a mixer, containers, and a paper towel roll. The stove is built into a kitchen island;  [0:06:03]: The person is gesturing with their hands in a conversational manner and seems to be speaking. Their attention is towards the camera; [0:06:04]: The person leans slightly to their right but continues talking, indicating ongoing communication; [0:06:05 - 0:06:16]: The person begins chopping a red onion on a cutting board. The kitchen setup remains consistent, with hints of other ingredients and cooking tools nearby. The person continues to slice the onion with deliberate motions, paying careful attention to the task. They make steady cuts through the onion, resulting in multiple uniform slices. As the chopping continues, the pot on the stovetop next to them is visible, with some steam rising from it, suggesting something is cooking inside. The counter has different items, including a bottle of oil, and a bowl containing yellow chunks, possibly other ingredients for the recipe. The person periodically looks down at the onion, ensuring precise cuts; [0:06:17]: The person momentarily stops chopping, brings their left hand closer to the cuts, and starts adjusting the slices of the red onion, lining them up while having their right hand on the knife; [0:06:18]: The individual reaches to the left, possibly to grab something, as their hand extends away from the cutting area. The knife remains on the chopping board, indicating they're pausing momentarily from the chopping task; [0:06:19]: They move back to the gas stove with the lid-covered pot prominently placed on one of the active burners. The counter next to the stove is cluttered with various cooking items, including a pink spatula, which the person seems to focus on, possibly to use it next.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the person do after finishing chopping the onion?",
+                "time_stamp": "00:06:32",
+                "answer": "A",
+                "options": [
+                    "A. Put the chopped onions into the frying pan.",
+                    "B. Starts frying sausages.",
+                    "C. Begins chopping another vegetable.",
+                    "D. Adds the onion to the pot."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_30_real.mp4"
+    },
+    {
+        "time": "[0:12:00 - 0:13:00]",
+        "captions": "[0:12:00 - 0:12:20] [0:12:00 - 0:12:04]: A pair of hands is seen vigorously stirring a pot of yellow mixture on a stovetop. The person is using a pink spatula and a metal spoon. The person is wearing a dark blue shirt and a black watch on the left wrist. The stove has silver burners and is set against a background of dark-colored kitchen drawers with silver handles.  [0:12:04 - 0:12:11]: The person continues to stir the mixture. At one point, they pour a green liquid from a bottle into the pot. The mixture appears to be thickening as it is heated. The blue flame beneath the pot can be seen. The spatula and stirring motion remain consistent, ensuring that the mixture is well combined.  [0:12:11 - 0:12:19]: The person continues to work with the mixture in the pot. The stirring is thorough, and the mixture becomes smoother and more uniform in color. The pot is occasionally tilted, and the spatula is used to scrape the sides of the pot. The nearby countertop remains visible with a spoon resting on it. The person's movements are steady and deliberate.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person using to stir the pot of yellow mixture?",
+                "time_stamp": "00:12:12",
+                "answer": "C",
+                "options": [
+                    "A. A wooden spoon.",
+                    "B. A metal fork.",
+                    "C. A pink spatula.",
+                    "D. A blue spatula and a plastic spoon."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "How does the mixture change as the person continues to stir it?",
+                "time_stamp": "00:12:19",
+                "answer": "C",
+                "options": [
+                    "A. It becomes chunkier.",
+                    "B. It separates into layers.",
+                    "C. It becomes smoother and more uniform in color.",
+                    "D. It loses its color."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_30_real.mp4"
+    }
+]

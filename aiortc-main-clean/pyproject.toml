@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aiortc"
+description = "An implementation of WebRTC and ORTC"
+readme = "README.rst"
+requires-python = ">=3.10"
+license = "BSD-3-Clause"
+authors = [
+    { name = "Jeremy Lainé", email = "jeremy.laine@m4x.org" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "aioice>=0.10.2,<1.0.0",
+    "av>=14.0.0,<17.0.0",
+    "cryptography>=44.0.0",
+    "google-crc32c>=1.1",
+    "pyee>=13.0.0",
+    "pylibsrtp>=0.10.0",
+    "pyopenssl>=25.0.0",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "aiohttp>=3.7.0",
+    "coverage[toml]>=7.2.2",
+    "numpy>=1.19.0",
+]
+
+[project.urls]
+homepage = "https://github.com/aiortc/aiortc"
+changelog = "https://aiortc.readthedocs.io/en/stable/changelog.html"
+documentation = "https://aiortc.readthedocs.io/"
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover"]
+
+[tool.coverage.run]
+source = ["aiortc"]
+
+[tool.mypy]
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+strict_optional = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle
+    "F",  # Pyflakes
+    "W",  # pycodestyle
+    "I",  # isort
+]
+
+[tool.ruff.lint.isort]
+known-third-party = ["aiortc"]
+
+[tool.setuptools.dynamic]
+version = {attr = "aiortc.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

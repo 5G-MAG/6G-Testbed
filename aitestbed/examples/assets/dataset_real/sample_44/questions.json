@@ -1,0 +1,91 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00]: The video begins with an image of a clock, the hands consisting of a knife and fork against a plain, white background. It is set at an angle, with the clock positioned centrally and a bold '10' partially visible, predominantly white in color, with a faint grey bordering. [0:00:01 - 0:00:04]: The 'RAMSAY in 10' logo appears, superimposed over the clock image. 'RAMSAY' is written in large, bold blue letters, occupying the top half of the frame. 'in' is in smaller blue letters positioned slightly lower and to the left. The '10' retains the same shape and color as the previous frame. A person is standing on the right side of the frame, wearing a dark blue shirt, visible from the chest upwards. [0:00:05]: The scene transitions to a kitchen setting with the person standing in front of a backdrop of white subway tiles and wooden shelves holding various kitchen items such as glass jars, bottles, utensils, and plates. The word 'COOK' appears prominently on the top left shelf in red, large letters. [0:00:06 - 0:00:08]: The person continues speaking, gesturing occasionally, and slightly adjusting their position. The shelves behind them are filled with various kitchen items including plates, bowls, jars, knives, and other utensils. The word 'HOT' is displayed in white letters on the lower shelf to the left. [0:00:09 - 0:00:15]: The focus shifts to a closer view of the person, with more emphasis on their facial expressions. The background remains the same, featuring the well-organized kitchen setup with a consistent arrangement of jars, knives, and utensils. The individual appears to be explaining something, moving as they talk. [0:00:16]: The view zooms out to a wider shot of the kitchen again, showing the person using both hands to emphasize their point. The arrangement of kitchen items remains unchanged, and the overall bright and organized setting is maintained. [0:00:17 - 0:00:19]: The person stands still, facing the camera directly, with the kitchen backdrop clearly visible. They appear to be wrapping up their explanation, maintaining a neutral posture, and occasionally using hand gestures for emphasis.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What objects make up the hands of the clock shown at the beginning of the video?",
+                "time_stamp": "00:00:20",
+                "answer": "C",
+                "options": [
+                    "A. Fork and spoon.",
+                    "B. Knife and spoon.",
+                    "C. Knife and fork.",
+                    "D. Spoon and chopstick."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_44_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:00:00 - 0:00:06]: The video begins with an overhead view of a stove with two pans positioned on it. The left pan is empty, while the right pan contains a mixture of food, including chunks that appear to be vegetables and meat. The person wearing the recording device is holding a striped towel in their right hand, adjusting the pan on the right with food in it. The background shows a countertop surface made of a speckled material. [0:00:06 - 0:00:12]: The scene transitions to a wider view of a kitchen, displaying a man facing away from the camera, appearing to be preparing something at the counter. The kitchen setup includes shelves holding various plates, cups, and kitchen tools. The man swiftly moves from the left side of the counter to the right, still holding the striped towel, occasionally glancing back at the stove. [0:00:12 - 0:00:14]: The man's right hand reaches into a small bowl, taking a pinch of seasoning. He then walks back towards the stove, where the food in the right pan is sizzling. He sprinkles the seasoning into the pan, using a steady hand to ensure even distribution.  [0:00:14 - 0:00:17]: The scene shifts to a close-up of the right pan on the stove, where the food inside is visibly cooking with steam rising. The person's hand is sprinkling seasoning into the pan with a yellow kitchen tool visible in the background along with various other items. The food is beginning to caramelize, indicating it is being sautéed. [0:00:17 - 0:00:19]: The perspective moves back to the overhead view. The person's left hand places two pieces of fried bread on a wooden cutting board beside the stove. The shot captures additional kitchen items like butter, green apples, and a bowl of ingredients, contrasting with the stainless steel countertop and stove setup. [0:00:19 - 0:00:21]: The hands are spreading butter onto one piece of the fried bread, using a knife to cover the surface evenly. Various kitchen items and the empty left pan are still visible, providing context to the cooking process taking place. [0:00:21 - 0:00:23]: The video returns to a close-up of the pan with the cooked food. The person's hand is seen adding another ingredient to the mixture, this time focusing on enhancing the food's flavor and possibly adjusting the heat, ensuring the food cooks perfectly. [0:00:23 - 0:00:25]: The camera captures an overhead view once more, where the identical action of adding ingredients to the sizzling food in the pan repeats. Furthermore, adjusting the heat settings on the stove is also indicated as part of the ongoing cooking process. [0:00:25 - 0:00:27]: A close-up view of the pan follows again. Here, the detailed cooking process is highlighted, showing the mixture of vegetables and meat caramelizing more deeply as they cook. The person's hand continues to adjust seasoning and heat, ensuring the food is perfect. [0:00:27 - 0:00:29]: The scene continues in the kitchen, showing the man standing at the stove from a side view. He holds the pan’s handle with a cloth and appears to be shaking or stirring the contents to ensure even cooking. The kitchen's background displays shelves with neatly arranged dishes and kitchen tools. [0:00:29 - 0:00:31]: The man continues to move the pan, his gaze fixed on the cooking food, demonstrating his focus on achieving thorough and even cooking. Various kitchen elements, such as the stove controls, spice jars, and utensils, are visible, creating a well-organized cooking environment. [0:00:31 - 0:00:33]: The man tilts the pan slightly while continuing to cook, indicating a smooth transition and focused cooking technique. The stove and other kitchen equipment provide a consistent backdrop, emphasizing a structured cooking process.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is in the left pan?",
+                "time_stamp": "0:04:03",
+                "answer": "B",
+                "options": [
+                    "A. Pasta and sauce.",
+                    "B. Pear slices sprinkled with cinnamon powder.",
+                    "C. Only vegetables.",
+                    "D. Only meat."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding in their right hand at the beginning?",
+                "time_stamp": "0:04:21",
+                "answer": "B",
+                "options": [
+                    "A. A spatula.",
+                    "B. A striped towel.",
+                    "C. A fork.",
+                    "D. A knife."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_44_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:20 - 0:05:40] [0:05:20 - 0:05:25]: The video begins with an overhead shot of a kitchen counter and stove. On the counter to the left, there are two croissants on a white plate, a bowl containing butter, an empty bowl, and a green apple. On the stove, there are two frying pans, the first pan contains a piece of fried food, while the second pan contains a mixture with visible chunks of vegetables or fruit. The video appears to be filmed from a first-person perspective. A pair of hands is seen in the foreground, dipping what appears to be sliced bread into a mixing bowl containing a yellow liquid, likely eggs for a French toast recipe.  [0:05:26 - 0:05:29]: The camera angle shifts slightly, providing a closer view of the frying pans and the person’s hands continuing to dip the sliced bread into the yellow liquid. The bread is then lifted from the bowl, dripping slightly, and moved toward the frying pans on the stove. [0:05:30 - 0:05:36]: The scene cuts to a side view of the kitchen, framing the stove and the counter. The person is shown placing the soaked bread into one of the frying pans. The kitchen in the background features white brick walls and wooden shelves lined with colorful dishes and utensils. The person then uses a towel to wipe their hands while monitoring the cooking process. [0:05:37 - 0:05:39]: The camera angle returns to a close-up of the frying pans. The contents of the second frying pan continue to simmer while the bread in the first frying pan starts to brown. The person then adds an ingredient, possibly honey or syrup, to the second frying pan with the mixture of chunks. The action in the video is methodical and focused on the cooking process, with the diligent preparation of food items and careful attention to the stove.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is the color of the liquid in the mixing bowl that the bread is dipped into?",
+                "time_stamp": "00:05:25",
+                "answer": "B",
+                "options": [
+                    "A. Red.",
+                    "B. Yellow.",
+                    "C. Blue.",
+                    "D. Green."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Causal Reasoning",
+                "question": "Why does the person use a towel?",
+                "time_stamp": "00:05:36",
+                "answer": "B",
+                "options": [
+                    "A. To clean the stove.",
+                    "B. To avoid burning his hand.",
+                    "C. To cover the bread.",
+                    "D. To wipe the counter."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_44_real.mp4"
+    }
+]

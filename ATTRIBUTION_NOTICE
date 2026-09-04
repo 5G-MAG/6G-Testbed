@@ -1,0 +1,13 @@
+This software contains dependencies with the following open-source projects:
+
+- aiortc - library for WebRTC and ORTC in Python
+  available at https://github.com/aiortc/aiortc
+  Licensed under BSD 3-Clause "New" or "Revised" License (https://github.com/aiortc/aiortc/blob/main/LICENSE)
+
+- Liquid model
+  available at https://github.com/FoundationVision/Liquid
+  Licensed under MIT License (https://github.com/FoundationVision/Liquid/blob/main/LICENSE)
+
+- StreamingBench
+  available at https://github.com/THUNLP-MT/StreamingBench/
+  Licensed under MIT License (https://github.com/THUNLP-MT/StreamingBench/blob/main/LICENSE)

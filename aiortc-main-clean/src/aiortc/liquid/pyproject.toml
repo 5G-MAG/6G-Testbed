@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "liquid"
+version = "1.0.0"
+description = "Liquid: Language Models are Scalable and Unified Multi-modal Generators"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+    "torch==2.1.0", "torchvision==0.16.0",
+    "transformers==4.39.2", "tokenizers==0.15.1", "sentencepiece==0.1.99", "shortuuid",
+    "accelerate==0.27.2", "peft==0.4.0", "bitsandbytes==0.41.0",
+    "pydantic<2,>=1", "markdown2[all]", "numpy==1.26.4", "scikit-learn==1.2.2",
+    "requests", "httpx==0.24.0", "uvicorn", "fastapi",
+    "einops==0.6.1", "einops-exts==0.0.4",
+]
+
+[project.optional-dependencies]
+train = ["deepspeed==0.13.0", "ninja" ]
+build = ["build", "twine"]
+
+[project.urls]
+"Homepage" = "https://foundationvision.github.io/Liquid/"
+"Bug Tracker" = "https://github.com/FoundationVision/Liquid/issues"
+
+[tool.setuptools.packages.find]
+exclude = ["assets*", "benchmark*", "docs", "dist*", "playground*", "scripts*", "tests*", "data*", "model_zoo*", "work_dirs*", "project*"]
+
+[tool.wheel]
+exclude = ["assets*", "benchmark*", "docs", "dist*", "playground*", "scripts*", "tests*", "data*", "model_zoo*", "work_dirs*", "project*"]
+

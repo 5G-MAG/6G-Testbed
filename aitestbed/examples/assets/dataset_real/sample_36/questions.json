@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:20 - 0:03:40] [0:03:20 - 0:03:22]: In a well-lit kitchen with tiled walls and light blue cupboards, a person is seen wearing a dark blue shirt. The person is using a box grater to grate a yellow ingredient, likely cheese, over a white plate on a wooden cutting board. To the left, there's a frying pan on the stove, and to the right are some kitchen utensils like a pair of forks and possibly a bottle or jar. [0:03:23 - 0:03:27]: The grating continues methodically, with the person applying pressure and moving the yellow ingredient downward against the grater. More of the ingredient accumulates on the plate. The actions remain consistent with grating the yellow substance. [0:03:28 - 0:03:31]: The kitchen settings including the surrounding shelves with glassware come into clearer focus. The person's focused expression is visible as they continue grating the yellow ingredient vigorously. [0:03:32 - 0:03:35]: A small timer appears in the bottom right corner, counting down from 10:00 minutes. Meanwhile, the grating continues with consistent motion. The left arm holds the grater steady while the right arm moves the yellow ingredient across its surface. [0:03:36 - 0:03:39]: The grating process continues steadily, with the person looking focused on the task. The kitchen background features a sink area with various kitchen items orderly placed. The grated yellow ingredient is now significantly piling up on the plate, indicating considerable progress in the grating task.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color are the kitchen cupboards?",
+                "time_stamp": "00:03:22",
+                "answer": "B",
+                "options": [
+                    "A. Dark blue.",
+                    "B. Light green.",
+                    "C. White.",
+                    "D. Yellow."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the person doing with the box grater?",
+                "time_stamp": "00:03:27",
+                "answer": "D",
+                "options": [
+                    "A. Slicing bread.",
+                    "B. Chopping vegetables.",
+                    "C. Peeling potatoes.",
+                    "D. Grating a yellow ingredient."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_36_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:40 - 0:07:00] [0:06:40 - 0:06:44]: A person in a blue shirt is seen chopping red bell pepper on a wooden cutting board. The chopping action is quick and precise, with the knife moving smoothly and consistently. The person's arms are positioned to stabilize the pepper while slicing it into thin strips. The kitchen background is clearly visible, with various kitchen utensils, a sink, and some cooking ingredients placed on a countertop;  [0:06:45 - 0:06:48]: The chopping continues as the person focuses intently on the task. Here, the sliced pieces of bell pepper start to accumulate on the board. On the left side of the frame, part of the stove with a pan visible. The person maintains a steady rhythm, ensuring each slice is uniform;  [0:06:49 - 0:06:51]: After chopping the bell pepper, the person shifts slightly to the side, looking down, presumably to inspect the slices. More kitchen tools and ingredients come into view in the background, neatly arranged on shelves or the countertop;  [0:06:52 - 0:06:55]: The person gathers the chopped bell pepper with the knife, transferring the pieces into a pan on the stove. The other pan on the stove has some ingredients in it, likely already cooking. The person moves with efficiency and purpose;  [0:06:56 - 0:06:59]: The person starts stirring the contents of the pan with a wooden spoon, ensuring even cooking and mixing of ingredients. Visible on the countertop is a microwave and additional cooking supplies, with the person's focus now entirely on the stove. The food in the pan looks vibrant and colorful, indicating a mix of ingredients. The entire kitchen setup portrays a well-organized and functional cooking space.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person in a blue shirt chopping on the wooden cutting board?",
+                "time_stamp": "0:06:42",
+                "answer": "A",
+                "options": [
+                    "A. Red bell pepper.",
+                    "B. Carrots.",
+                    "C. Green bell pepper.",
+                    "D. Onions."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_36_real.mp4"
+    },
+    {
+        "time": "[0:10:00 - 0:11:00]",
+        "captions": "[0:10:00 - 0:10:20] [0:10:00 - 0:10:02]: A person is standing in a modern kitchen, holding a wooden spoon and stirring food in a black frying pan on the stove. The kitchen features dark blue cabinets with glass doors showcasing dishware. Behind the person, there is a white tile backsplash and various kitchen utensils on the countertop. To the person's left, there is a stand mixer and a kettle. The person is wearing a navy blue shirt and green pants and a checkered cloth is tucked into the waistband. [0:10:02 - 0:10:06]: The person continues to stir the food in the frying pan, now using both the wooden spoon and another utensil to mix the ingredients. Their attention is focused on the pan. They briefly gesture with their free hand while still stirring. [0:10:06 - 0:10:09]: The video angle changes slightly, revealing a closer view of the pan. The food in the pan appears to be a mixture of vegetables and possibly some protein, with vibrant colors including yellow, red, and green. The person continues to mix the ingredients, lifting the pan slightly off the stove at one point. [0:10:09 - 0:10:11]: The person places the pan back on the stove, and the camera focuses closely on the pan, capturing detailed view of the ingredients being stirred. [0:10:11 - 0:10:13]: The person picks up a small bowl filled with a red liquid, possibly a sauce, and begins to pour it into the frying pan. They use the wooden spoon to ensure all the sauce is added. [0:10:13 - 0:10:16]: The person continues to empty the bowl into the pan, using the spoon to scrape out any remaining sauce. They then discard the empty bowl and resume mixing the contents of the frying pan. [0:10:16 - 0:10:19]: The camera returns to focus on the person’s face, who briefly looks up and then continues to stir the food meticulously, ensuring it is well-mixed with the sauce.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding right now?",
+                "time_stamp": "0:10:02",
+                "answer": "A",
+                "options": [
+                    "A. A wooden spoon.",
+                    "B. A metal spatula.",
+                    "C. A whisk.",
+                    "D. A ladle."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_36_real.mp4"
+    },
+    {
+        "time": "[0:13:00 - 0:14:00]",
+        "captions": "[0:13:20 - 0:13:40] [0:13:20 - 0:13:21]: The scene shows an individual in a kitchen, holding a spatula in their right hand while standing in front of a stovetop. There are two frying pans on the stovetop; one is empty, and the other contains a yellowish dish cooking. The background features cabinets with glass doors, some utensils on the countertop, and a microwave. [0:13:21 - 0:13:23]: The person turns slightly to their left, moving an item away from the stovetop. The lower part of the kitchen, including drawers and cabinets, is visible. [0:13:23 - 0:13:24]: The individual is seen working on the countertop on their right while facing the stovetop on the left. There is a bowl of green leaves, a glass, and a ladle on the countertop. [0:13:24 - 0:13:25]: They are seen handling some dough on the wooden cutting board, which is lightly floured. The individual’s hands are covered in flour, and they are using a wooden rolling pin. [0:13:25 - 0:13:26]: The person continues to roll out the dough, flattening it into a circular shape. The countertop now shows additional items: a bottle of oil, a stack of plates, and some jars. [0:13:26 - 0:13:27]: The individual places the flattened dough onto the wooden cutting board and continues rolling another piece of dough. The stovetop and cooking pan with the yellowish contents are still active, with steam visible. [0:13:27 - 0:13:28]: Moving the rolling pin back and forth, the person flattens another piece of dough. Several prepared balls of dough are visible on a plate nearby. [0:13:28 - 0:13:29]: The individual rolls out the last piece of dough, ensuring it is thin and even. Other kitchen items remain undisturbed in their places. [0:13:29 - 0:13:30]: They place the dough aside and adjust the rolling pin. The person is focused on the preparation, with the cooking pans emitting steam. [0:13:30 - 0:13:31]: The individual continues their dough preparation, leaning slightly forward over the countertop. The background shelves with glassware and kitchen supplies are visible. [0:13:31 - 0:13:32]: Rolling another piece of dough, the person maintains a steady pace. The organized kitchen setting remains consistent, with various utensils and jars positioned around the countertops. [0:13:32 - 0:13:33]: The individual carefully presses the dough, ensuring it is properly flattened. Their attention stays on the task, with the stovetop still visible in the background. [0:13:33 - 0:13:34]: The person continues working with precision, rolling out the dough. The shelves behind them hold various kitchen equipment and glassware. [0:13:34 - 0:13:35]: They examine the dough, stretching it gently to achieve the desired shape and consistency. Items on the countertop remain neatly arranged. [0:13:35 - 0:13:36]: The individual then places the dough on the board and readjusts the rolling pin. The kitchen background and countertop setup remain unchanged. [0:13:36 - 0:13:37]: They work systematically, ensuring each piece of dough is evenly processed. The organized kitchen setting continues to provide a clear workspace. [0:13:37 - 0:13:38]: Their focus stays on rolling the dough, with all necessary utensils within easy reach. The kitchen remains tidy and functional, with all tools in their designated spots. [0:13:38 - 0:13:39]: Finally, the individual completes the dough preparation, with the countertop and surrounding utensils remaining orderly. The background shelves still display kitchenware and glass items.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding in the right hand right now?",
+                "time_stamp": "0:13:19",
+                "answer": "A",
+                "options": [
+                    "A. A pen.",
+                    "B. A ladle.",
+                    "C. A knife.",
+                    "D. A rolling pin."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_36_real.mp4"
+    }
+]

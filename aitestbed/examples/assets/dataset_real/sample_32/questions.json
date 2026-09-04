@@ -1,0 +1,91 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:02]: A person is shown chopping a red onion on a wooden cutting board. The person uses a large knife to make precise cuts; the red onion is halved with the flat side facing down. On the counter surrounding the cutting board, there are ingredients such as olive oil, a block of butter, and some leafy greens in a bowl. [0:02:03 - 0:02:07]: The camera perspective widens, showing more of the kitchen setting. The individual, wearing a blue shirt, continues to finely chop the onion. The kitchen has white brick walls, shelves with plates and glasses, and stainless-steel knives hanging on the wall. On the kitchen counter, a frying pan is on the stovetop, and other ingredients, including yellow corn and cherry tomatoes, are visible on the counter. [0:02:08 - 0:02:09]: The view zooms back in on the chopping board as the person continues to slice the onion into thin pieces. The precision of the cuts reveals the layers of the onion, and more of the surrounding ingredients are visible, such as a glass bottle of olive oil and a small plate of butter chunks. [0:02:10 - 0:02:12]: The camera perspective shifts again, showing the person moving the chopped onion pieces to one side of the cutting board. The individual wipes the knife clean with their hand, and in the background, the kitchen shelves are stocked with various colorful plates and bowls, adding a vibrant touch to the setting. [0:02:13 - 0:02:13]: The person appears to be speaking or giving instructions; however, no audio details are available. They emphasize their actions with hand movements, making it clear that they are engaged in demonstrating the cooking process. [0:02:14 - 0:02:17]: The focus shifts to the stovetop where the person begins placing the chopped onion into a heated frying pan. The onions sizzle as they come into contact with the hot surface. In the pan, there are already pieces of yellow corn. The person's hands are busy distributing the sliced onions evenly across the pan. [0:02:18 - 0:02:19]: The view briefly switches to an overhead angle, showing the contents of the pan from above. The yellow corn and finely sliced onions mix together as the person continues to stir and ensure even cooking. Two other pans are seen on the stovetop, although they are not in use at this moment.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person using to chop the onion?",
+                "time_stamp": "0:02:02",
+                "answer": "B",
+                "options": [
+                    "A. A small wooden knife.",
+                    "B. A sliver knife.",
+                    "C. A pair of scissors.",
+                    "D. A fork."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Spatial Understanding",
+                "question": "How are the yellow corn and onions distributed in the frying pan?",
+                "time_stamp": "0:02:19",
+                "answer": "C",
+                "options": [
+                    "A. Randomly scattered.",
+                    "B. Piled in the center.",
+                    "C. Evenly distributed.",
+                    "D. Grouped separately."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_32_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:01]: A stainless steel frying pan containing cooking ingredients is on the stove's burner, with a slice of what appears to be raw meat about to be added. Several small jars are placed in the background near the stovetop, one containing wooden items like a spoon and spatula, and another with cooking tongs. [0:04:01 - 0:04:02]: A person wearing a teal shirt is beside the stove, which has multiple burners. The background has white subway tiles and shelves with kitchenware and dishes. The person appears to be adjusting the heat on one of the stove burners. [0:04:02 - 0:04:03]: The individual in the teal shirt holds a pan in one hand and seems to be discussing or explaining something, pointing to emphasize. [0:04:03 - 0:04:04]: The person places the pan back onto the stove's burner, ready for the next step in the cooking process. They have a casual yet attentive manner. [0:04:04 - 0:04:05]: The individual gestures with both hands, likely explaining the next cooking step or ingredient in focus. [0:04:05 - 0:04:06]: The person stands to the right of the stove, with an extended hand toward a bowl of ingredients lying on the right-hand side. [0:04:06 - 0:04:07]: The top view reveals a chopping board with halved cherry tomatoes varying in color. The board is surrounded by several bowls of ingredients, such as fresh greens, butter, and salt. [0:04:07 - 0:04:08]: The person's hand coats several pieces of raw meat with flour or a similar substance, while the prepared ingredients remain positioned around the chopping board. [0:04:08 - 0:04:09]: The hand of the individual continues to work the raw meat into the flour mixture in the bowl, focusing on making sure they are well-coated. [0:04:09 - 0:04:10]: The person’s hand completes dusting the pieces of raw meat with flour, with the other ingredients awaiting further steps. [0:04:10 - 0:04:11]: The individual adds some seasoning to the raw meat placed in a bowl on the counter, preparing for the next cooking step. The surroundings include various bowls, bottles, and utensils neatly arranged. [0:04:11 - 0:04:12]: The person sprinkles seasoning over the raw meat, now further prepared for cooking, while the stove in the background has a pan frying other ingredients. [0:04:12 - 0:04:13]: The individual continues to season the raw meat in the bowl. Different colorful ingredients and cooking utensils are positioned around the kitchen counter. [0:04:13 - 0:04:14]: With one hand, the person holds the bowl of seasoned meat and uses the other to lift the pan off the stove, showing readiness to rotate between the preparations. [0:04:14 - 0:04:15]: The person hovers between the stove and counter, holding a bowl of seasoned meat in one hand and a frying pan in the other, aligning them for the upcoming steps. [0:04:15 - 0:04:16]: Over the stove, the person readies the pan for the seasoned meat while other kitchen tools and ingredients are visible on the counter. [0:04:16 - 0:04:17]: A view from above shows the frying pan containing colorful cooking ingredients such as corn and onions, along with an empty frying pan beside it. [0:04:17 - 0:04:18]: The person appears to ready another pan, likely in the preparation stage for the cooking process. [0:04:18 - 0:04:19]: Holding the bowl close, the person places the first piece of seasoned meat into an empty frying pan, beginning the cooking process. [0:04:19]: Additional pieces of seasoned meat are added to the empty frying pan as other ingredients continue to cook in the adjacent pan.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding in one hand at the stove?",
+                "time_stamp": "0:04:02",
+                "answer": "B",
+                "options": [
+                    "A. A wooden spoon.",
+                    "B. A pan.",
+                    "C. A bowl.",
+                    "D. A knife."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_32_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:01]: In a modern kitchen setup with a white brick wall and blue cabinets, my hands are shown working over two stainless steel frying pans on a black stovetop. The left pan contains food that is being prodded with a fork, while the right pan holds a sauté mix of diced vegetables, predominately yellow and red. [0:06:01 - 0:06:02]: Using a spoon and fork, I turn over a piece of food in the left pan. The action is precise, and my fingers are close to the pan, indicating careful handling. The vibrant colors of the vegetables in the right pan remain visible.  [0:06:02]: My right hand uses a spoon to flip the piece of food in the pan again. My left hand is steadying the pan by holding its handle. [0:06:03 - 0:06:04]: Now, I use a spoon in my right hand to continue adjusting the food in the left pan. The focus is on ensuring even cooking, as the steam rises lightly from both pans. Background items, such as kitchen utensils and condiments, are neatly arranged. [0:06:04 - 0:06:05]: Pulling back slightly, I step away from the stove but keep my attention on the food. The kitchen's decor becomes more visible, including white shelves holding jars and a cutting board with small items. [0:06:05 - 0:06:06]: I continue managing the food with the spoon, leaning toward the stove. The blue overhead cabinets and various jars on the shelves are more prominent, enhancing the kitchen's modern aesthetic. [0:06:06 - 0:06:07]: I turn away from the stove and reach for a white towel to clean my hands. The expression indicates attentiveness, ensuring that everything is prepared correctly. The background includes a kettle and additional cooking tools. [0:06:07 - 0:06:08]: Holding the towel in both hands, I look at the kitchen counter, likely checking for any necessary adjustments or cleanups needed. [0:06:08 - 0:06:09]: Using a black-handled frying pan in my right hand, I transfer the food to another area in the kitchen. The view of the white brick wall and wooden shelves add context to the spacious cooking area. [0:06:09 - 0:06:10]: I hold the frying pan and walk towards a wooden countertop on the right. Plates and bowls on the counter await the food, creating a warm and organized cooking environment. [0:06:10 - 0:06:11]: Pouring the contents from the pan onto a white plate, I ensure the pieces are carefully placed in a specific arrangement. Bottles and bowls nearby suggest a setup for further preparation or garnishing. [0:06:11 - 0:06:12]: The pan is tilted further, allowing more food to slide onto the plate, filling it gradually. Limes and other ingredients on the counter prepare for final food presentation steps. [0:06:12 - 0:06:13]: Continuing the pour, the plate now shows neatly placed food pieces, while I adjust the pan to guide any remaining items. The organized kitchen space provides ample room for efficient cooking. [0:06:13 - 0:06:14]: The last of the food is guided from the pan to the plate with precision. My focus remains on ensuring all pieces are transferred without any spills. [0:06:14 - 0:06:15]: Any remaining food bits are being carefully poured onto the plate. The kitchen counter includes multiple cooking instruments and ingredients, highlighting a well-stocked cooking environment. [0:06:15 - 0:06:16]: I shake the pan slightly to nudge the last piece of food onto the plate. The pristine white plate contrasts with the rich colors of the food, making it visually appealing. [0:06:16 - 0:06:17]: All food now appears on the plate, neatly arranged, while I lift the pan away. Adjacent are bowls, a cutting board, and ingredients ready for the final touches. [0:06:17 - 0:06:18]: Placing the pan back on the stove, steam rises from the fully cooked food. The countertop remains organized with several different kitchen tools and some green vegetables. [0:06:18 - 0:06:19]: I finish the cooking process with a final look over the stove and kitchen. The kitchen wall's \"COOK\" sign is prominent, blending well within the white brick and wooden shelf decor.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "Where does the person transfer the food after cooking?",
+                "time_stamp": "00:06:24",
+                "answer": "B",
+                "options": [
+                    "A. Onto a white plate on the left countertop.",
+                    "B. Onto a white plate on the right countertop.",
+                    "C. Into a bowl on the left countertop.",
+                    "D. Into a bowl on the right countertop."
+                ],
+                "required_ability": "episodic memory"
+            },
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is the color of the towel used to clean the hands?",
+                "time_stamp": "00:06:07",
+                "answer": "B",
+                "options": [
+                    "A. Blue.",
+                    "B. White.",
+                    "C. Red.",
+                    "D. Yellow."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_32_real.mp4"
+    }
+]

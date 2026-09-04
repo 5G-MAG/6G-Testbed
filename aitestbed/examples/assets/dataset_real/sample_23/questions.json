@@ -1,0 +1,107 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:01]: A person stands in front of a stainless steel double-door refrigerator, which is centered against a white tiled wall. The individual wears a dark blue T-shirt and has short, blonde hair. Their hands are clasped comfortably in front of them, and they are looking directly at the camera; [0:00:01 - 0:00:02]: The individual begins to speak, gesturing slightly with their right hand while their left hand remains positioned near their abdomen. Their facial expression remains calm; [0:00:02 - 0:00:03]: Continuing to speak, the person's left hand now gesticulates while their right hand is lowered. They maintain direct eye contact with the camera; [0:00:03 - 0:00:04]: The individual smiles broadly, raising their left hand slightly as if emphasizing a point. Their posture remains relaxed and inviting; [0:00:04 - 0:00:05]: The person continues to engage with the camera, now clasping their hands together again while speaking; [0:00:05 - 0:00:06]: Raising both arms gently outward, the individual gives the impression of presenting or explaining something important. Their facial expressions are dynamic and engaging; [0:00:06 - 0:00:07]: The individual brings their hands together again, speaking and maintaining an enthusiastic expression. The white tiled wall and stainless steel refrigerator background remain unchanged; [0:00:07 - 0:00:08]: The person's posture relaxes slightly, with hands back in the clasped position. They continue to engage with the audience through direct eye contact; [0:00:08 - 0:00:09]: The individual gestures with their right hand while speaking, the left hand positioned lower, near the torso, emphasizing their points with clear expressions; [0:00:09 - 0:00:10]: Holding both hands together, the person appears to be emphasizing key points. They continue to look at the camera directly, maintaining a sincere facial expression; [0:00:10 - 0:00:11]: The individual raises their right hand, fingers forming a pinching gesture, possibly indicating a small or precise amount. Their expression becomes more instructional; [0:00:11 - 0:00:12]: The person resumes the stance with clasped hands at the front and continues speaking. The background remains consistent with previous frames; [0:00:12 - 0:00:13]: Their facial expression softens, and they briefly close their eyes, possibly for emphasis. Their hands remain together as they continue to address the camera; [0:00:13 - 0:00:14]: With a slight lowering of their hands, the individual maintains a calm and explanatory demeanor, speaking directly to the camera; [0:00:14 - 0:00:15]: The individual continues to smile slightly, their body language relaxed yet engaged as they communicate their message; [0:00:15 - 0:00:16]: Maintaining a consistent speaker's demeanor, the person appears focused and holds their hands together in front of them; [0:00:16 - 0:00:17]: The camera captures the individual standing with a composed posture. Their eyes continue to lock with the camera lens as they finish their statement; [0:00:17 - 0:00:18]: The screen transitions to a new image with the text \"RAMSAY in 10\" in bold red and white letters, and a man with folded arms wearing a white chef's coat appears to the right; [0:00:18 - 0:00:19]: The final frame maintains the same \"RAMSAY in 10\" graphic and the man in the chef's coat, with no visible changes.\n[0:00:20 - 0:00:40] \n[0:00:40 - 0:01:00] ",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What text appears on the screen right now?",
+                "time_stamp": "0:00:19",
+                "answer": "A",
+                "options": [
+                    "A. \"RAMSAY in 10\".",
+                    "B. \"RAMSAY in 5\".",
+                    "C. \"COOKING in 10\".",
+                    "D. \"CHEF in 10\"."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_23_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] [0:00:00 - 0:00:03]: A pair of hands are seen holding a stainless steel bowl above a pot, scooping chopped yellow pieces with a spoon into the pot. The pot is placed on a kitchen stove, with a silver backsplash visible in the background. [0:00:04 - 0:00:07]: The kitchen's countertop is visible, showcasing a variety of items. From left to right, there are three small glass bowls, a large white onion, a wooden pepper grinder, and a tall glass bottle of oil. A woman in a black off-shoulder top is stirring the pot with a spoon while holding a small bowl. [0:00:08 - 0:00:11]: The woman, still in the same position, is seen speaking and stirring the contents of the pot with a spoon, while holding a small bowl in her left hand. Behind her are stainless steel refrigerators and a white-tiled wall. [0:00:12 - 0:00:16]: Close-up shots show a pair of hands holding a knife and cutting an onion into small, even cubes on a wooden cutting board. The knife moves back and forth, swiftly dicing the onion. [0:00:17 - 0:00:19]: The woman in the black top is back in the wider kitchen setting. She continues to dice the onion on the wooden cutting board, with the neatly arranged kitchen items still in place in the background.\n[0:01:20 - 0:01:40] \n[0:01:40 - 0:02:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is the woman holding while stirring the pot?",
+                "time_stamp": "0:01:02",
+                "answer": "D",
+                "options": [
+                    "A. A wooden spoon.",
+                    "B. A glass bottle of oil.",
+                    "C. A pepper grinder.",
+                    "D. A small bowl."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_23_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:04]: In the first frame, a woman wearing a black off-the-shoulder top is standing in a kitchen in front of a counter. The counter has various kitchen items, including a large chopping board, an onion, several glass bowls, a pepper grinder, a bottle of olive oil, and a large pot on a stove. She is in the process of cutting something on the chopping board. The kitchen background consists of stainless steel appliances and white tiled walls. As the video progresses, she continues cutting the ingredients.  [0:02:04 - 0:02:07]: Moving to the next frame, she puts down the knife for a moment and looks towards the pot on the stove, appearing to be in contemplation or about to shift her focus. Her hands are seen resting on the counter. The kitchen setup remains consistent with the previous frames. [0:02:07 - 0:02:12]: Subsequently, she turns her gaze back to the pot on the stove and begins to interact with it, stirring the contents inside. Her attention is fully captured by the cooking process. The camera captures her scooping up some ingredients with a spoon and adding them to the pot. These scenes show her methodical process of cooking. [0:02:12 - 0:02:19]: Finally, the last few frames showcase her repeatedly stirring the contents in the pot. In these frames, she is more engaged with the cooking process and ensures everything is well-mixed. Towards the end, a close-up shot of the pot reveals its bubbling contents as she stirs with a spoon, providing a detailed view of the cooking process in the kitchen.\n[0:02:20 - 0:02:40] \n[0:02:40 - 0:03:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is the woman wearing while she is cooking?",
+                "time_stamp": "00:02:12",
+                "answer": "A",
+                "options": [
+                    "A. A black off-the-shoulder top.",
+                    "B. A white apron.",
+                    "C. A red shirt.",
+                    "D. A blue dress."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_23_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:04]: A first-person view shows a black frying pan being held over a stove. Inside the pan, diced onions and pieces of meat are being sautéed. The pan is being moved around to toss the ingredients. Beside it, there is a smaller frying pan with a sunny-side-up egg being cooked. [0:03:05 - 0:03:09]: The camera angle changes to a kitchen scene featuring a woman with long, dark hair, wearing an off-the-shoulder black top. She is standing behind a counter with various cooking ingredients and utensils laid out. A shiny metal pot is on the stovetop. She seems to be explaining something, gesturing with her hands. Her focus then shifts to arranging green vegetables on a cutting board. [0:03:10 - 0:03:14]: Close-up shots of the woman's hands show her opening a plastic container and taking out fresh, green stalks. She places them carefully on the wooden cutting board, aligning them neatly. A knife and other utensils are visible on the countertop nearby. [0:03:15 - 0:03:19]: The scene switches back to the woman, who starts chopping an onion on the cutting board. She uses a large chef’s knife to make precise cuts. The kitchen setup includes a pepper grinder, olive oil bottle, and several small bowls, creating an organized and clean cooking environment. She continues talking, likely giving instructions or explanations as she works.\n[0:03:20 - 0:03:40] \n[0:03:40 - 0:04:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is being sautéed in the black frying pan?",
+                "time_stamp": "00:03:51",
+                "answer": "D",
+                "options": [
+                    "A. Diced onions and green vegetables.",
+                    "B. Sliced potatoes and pieces of meat.",
+                    "C. Diced onions and mushrooms.",
+                    "D. Diced onions and pieces of meat."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_23_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:02]: The scene starts with a black frying pan positioned on the stovetop, which contains diced onions or vegetables being sautéed. To the left of the pan is a shiny stainless steel pot. A hand appears at the upper section of the frame, seemingly adding an ingredient to the pan. [0:04:03 - 0:04:07]: The camera angle shifts to a wider view of a kitchen featuring white subway tile walls and a window with a pot of green plants on the nearby counter. A woman standing in front of the stovetop shakes pepper into the pot while her other hand handles the stovetop controls. Additional kitchen tools, a bottle of oil, and some ingredients are organized on the countertop.  [0:04:08 - 0:04:12]: The focus shifts back to the stovetop where another frying pan appears, this one containing an egg being fried. The egg whites are nearly set, while the yolk remains intact and bright yellow.  [0:04:13 - 0:04:15]: Returning to the wider kitchen view, the woman tends to the stovetop operations. She uses a spatula to stir the contents of the frying pan before adding an ingredient from a bowl. She occasionally looks down at her tasks. [0:04:16 - 0:04:18]: The woman lifts the frying pan at a slight angle and starts stirring it by shaking. She ensures the onions or vegetables inside are moved around consistently, likely for even cooking. [0:04:19]: The camera zooms in on the frying pan, capturing the contents as they are being sautéed. The pan is held over another burner, displaying the woman’s steady hand as she skillfully tosses the ingredients in motion.\n[0:04:20 - 0:04:40] \n[0:04:40 - 0:05:00] ",
+        "questions": [
+            {
+                "task_type": "Causal Reasoning",
+                "question": "Why does the woman lift the frying pan at a slight angle and shake it?",
+                "time_stamp": "00:04:18",
+                "answer": "C",
+                "options": [
+                    "A. To add more oil to the pan.",
+                    "B. To check if the contents are cooked.",
+                    "C. To ensure the ingredients are moved around for even cooking.",
+                    "D. To cool down the pan."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_23_real.mp4"
+    }
+]

@@ -1,0 +1,91 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:02]: The video begins with a logo of the FC Barcelona club placed centrally on a gradient blue background. The logo is colorful and distinct, featuring the traditional colors and elements of the FC Barcelona crest. An animation introduces a \"SUBSCRIBE\" button below the logo, which starts as partly obscured and then becomes fully visible. [0:00:03 - 0:00:07]: The scene transitions to a live action where several individuals are clapping in what appears to be a stadium or sports field at night. Bright floodlights illuminate the background. The group is in the foreground, and they are dressed in formal or semi-formal attire with medals around their necks. The people are arranged in a loosely spaced line facing the camera.  [0:00:08 - 0:00:15]: The camera continues to focus on the different individuals, one by one. It captures close-up shots of women applauding, all wearing medals. There is a mix of attires, including blazers and more casual outfits. The mood appears celebratory, and the background shows bright stadium lights against a dark night sky. [0:00:16 - 0:00:20]: In the final frames, the scene shifts slightly to show a woman in a black dress holding a silver trophy. Beside her is another woman in a white outfit. Both are standing on a grassy field, likely the stadium pitch, and surrounded by other individuals. There are also quick close-up shots of the trophy being held aloft.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What appears at the very beginning of the video?",
+                "time_stamp": "0:00:08",
+                "answer": "B",
+                "options": [
+                    "A. A football match.",
+                    "B. A logo of FC Barcelona.",
+                    "C. A silver trophy.",
+                    "D. A live concert."
+                ],
+                "required_ability": "episodic memory"
+            },
+            {
+                "task_type": "Spatial Understanding",
+                "question": "What is the position relationship between the woman in a black dress and the woman in a white outfit?",
+                "time_stamp": "0:00:20",
+                "answer": "A",
+                "options": [
+                    "A. They are standing side by side.",
+                    "B. They are standing back to back.",
+                    "C. The woman in black is in front of the woman in white.",
+                    "D. The woman in white is holding the trophy."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_3_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] [0:01:00 - 0:01:02]: The video begins with a close-up shot from a football match. A player in a red and blue striped jersey is about to head a ball toward the goal, while another player in a white jersey observes. The goalkeeper in a green outfit dives to try to block the shot. Surrounding the field, there are advertisements and a crowd in the background. [0:01:02 - 0:01:09]: The view shifts to a wider perspective of the football field, capturing multiple players. The red and blue striped team is on the offensive, dribbling the ball near the right wing toward the opposing team's goal. The defenders in white are positioning themselves to block any potential shots. The goalkeeper stands alert in front of the goalposts, wearing a bright yellow kit. The surroundings include advertising boards and vibrant green turf. [0:01:09 - 0:01:12]: The next scenes show a close-up behind the goal net. The goalkeeper dives to the left attempting to make a save as the ball approaches the goal line. Several players in red and blue are closely following up for a potential rebound, while defenders in white try to block any imminent chances. The crowd can be seen in the background through the net. [0:01:13 - 0:01:15]: The scene changes once more to a wider shot from another part of the field. The white jersey team is attacking now, moving down the left wing. They are passing the ball in an attempt to break through the defensive line of the red and blue striped team. The defense and midfielders from the defending team are trying to intercept the play, positioning themselves strategically around the penalty box. [0:01:15 - 0:01:20]: The final frames display the white team attempting a cross into the box from the left wing. Multiple players from both teams inside the box are anticipating the ability to control the ball. The red and blue defenders are prepared to clear the ball, and the goalkeeper is alert, ready to react to any incoming shots. Advertising boards, the field’s vibrant green color, and the stadium seating filled with spectators are visible in the background.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the goalkeeper's kit when standing in front of the goalposts?",
+                "time_stamp": "0:01:09",
+                "answer": "C",
+                "options": [
+                    "A. Red.",
+                    "B. Green.",
+                    "C. Yellow.",
+                    "D. Blue."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_3_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:03]: A player in a blue and red uniform prepares to kick a soccer ball within the penalty area. An opposing player in a white uniform with the number 9 on his back watches closely. The red advertisement boards in the background display \"ESTRELLA DAMM\", and a cameraman is visible behind the boards. [0:02:03 - 0:02:06]: The player in the blue and red uniform kicks the ball towards the goal. Another opposing player in a white uniform with the number 22 on his back is moving towards the ball. The focus is primarily on the action near the goal area. [0:02:06 - 0:02:08]: The ball is being saved by a goalkeeper in a yellow kit, stretching to his left to block the shot. In front of the goal, an opposing player in a white uniform with the number 26 on his back watches the action unfolding.  [0:02:08 - 0:02:12]: The goalkeeper in yellow successfully blocks the shot and holds the ball while lying on the ground. The players in blue and red as well as the player in the white uniform with the number 26 stand near the goal, watching. [0:02:12 - 0:02:20]: The viewpoint changes, showing a wider angle of the soccer field. A set-piece or corner kick is happening, with several players from both teams positioned inside the penalty box. The attacking team, wearing blue and red, has several players clustered near the goal, while the defending team in white is positioned to cover them. The advertisements around the field show \"AMBILIGHT TV\" and several other sponsors. The crowd in the stands watches intently, and a few players outside the box are preparing for the play.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What advertisement is displayed on the red boards behind the goal?",
+                "time_stamp": "0:02:03",
+                "answer": "C",
+                "options": [
+                    "A. AMBILIGHT TV.",
+                    "B. NIKE.",
+                    "C. ESTRELLA DAMM.",
+                    "D. ADIDAS."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What are the two people in the video frame doing now?",
+                "time_stamp": "0:02:51",
+                "answer": "A",
+                "options": [
+                    "A. handshaking.",
+                    "B. Hugging.",
+                    "C. High-fiving.",
+                    "D. Fist bumping."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_3_real.mp4"
+    }
+]

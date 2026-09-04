@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:02]: The video begins with the FOX SPORTS logo. The logo is in silver, bold typeface and is centrally positioned against a dark blue background with curved, layered graphical elements. A bright light glows from behind the \"O\" in \"FOX\", creating a lens flare effect that shifts slightly in intensity and position. [0:00:03 - 0:00:05]: A football player wearing a white jersey with the number 26 and several logos stands on the field. He appears focused, with a serious expression, looking forward. The crowd in the background is slightly blurred, emphasizing the player.  [0:00:06 - 0:00:10]: The player wearing number 26 is now in motion, running towards the football placed on the ground for a penalty shot. He swings his right leg back in preparation to kick. The goalpost, goalkeeper, and a lively crowd filled with red-clad fans are visible. [0:00:11 - 0:00:14]: The goalkeeper, wearing a black jersey with the name \"DIOGO COSTA\" and the number 22 on his back, walks back towards his goal, looking attentive and composed as he prepares for the next play.  [0:00:15 - 0:00:18]: The video switches to a different scene showing the crowd. People in the crowd, wearing red and with expressions of exuberance, are cheering energetically, raising their arms, and clenching their fists. The vibrant colors of the crowd's attire and the background banners create a lively atmosphere. [0:00:19 - 0:00:20]: An overlay of the Euro 2024 trophy logo with colorful ribbons appears on the screen. The background displays fans continuing to celebrate energetically with smiles and raised fists.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is the color and number of the football player's jersey who is preparing for a penalty kick?",
+                "time_stamp": "00:00:05",
+                "answer": "D",
+                "options": [
+                    "A. Red, 10.",
+                    "B. Blue, 14.",
+                    "C. Black, 22.",
+                    "D. White, 26."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What name and number are on the goalkeeper's jersey righ now?",
+                "time_stamp": "00:00:14",
+                "answer": "D",
+                "options": [
+                    "A. COSTA, 26.",
+                    "B. RONALDO, 7.",
+                    "C. MESSI, 10.",
+                    "D. DIOGO COSTA, 22."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_8_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:20 - 0:01:40] [0:01:20 - 0:01:22]: Two fans are shown in the stands, cheering enthusiastically. The fan on the left is draped in a red scarf and is wearing a white shirt, while the fan on the right is wearing a jacket with a red and green design and has his arms raised in excitement. Both have exuberant expressions on their faces. [0:01:23]: A graphic of the tournament trophy appears with colorful segments radiating from it, transitioning between scenes. [0:01:24 - 0:01:25]: The camera shifts to a wide shot of the football field. The view is from behind the goal towards the corner of the field, showing the goalkeeper in a yellow uniform, a player in white preparing to take a penalty kick, and the referee standing nearby. The stadium is filled with spectators, and there are \"Booking.com\" advertisements around the perimeter of the field. [0:01:26 - 0:01:31]: The view remains centered on the penalty area. The player in white is seen preparing to take the shot, with the referee watching closely and the goalkeeper ready in position. Various angles capture the anticipation before the kick, and the scoreboard showing 1-0 in favor of Portugal is visible. [0:01:32 - 0:01:34]: A close-up of the player in a white jersey with the number 3 on it as he prepares for the penalty kick. The player appears focused, and the close-up emphasizes the intensity of the moment. [0:01:35 - 0:01:36]: The close-up shifts slightly, showing the player moving his head down as he takes a deep breath. His expression remains focused and determined, showing his concentration before the decisive moment. [0:01:37]: The player begins his run-up to take the penalty kick, leaning forward with intent. The background shows the crowd watching with bated breath. [0:01:38 - 0:01:39]: The wide shot of the penalty area returns. The player is in motion, about to strike the ball. The referee and goalkeeper are in their positions, and the crowd in the background is visible.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What advertisement is visible around the perimeter of the field right now?",
+                "time_stamp": "00:01:25",
+                "answer": "C",
+                "options": [
+                    "A. \"Airbnb\".",
+                    "B. \"Expedia\".",
+                    "C. \"Booking.com\".",
+                    "D. \"TripAdvisor\"."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_8_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:40 - 0:03:00] [0:02:40 - 0:02:41]: A football player is seen in a red uniform with a serious expression on his face, presumably preparing for an action on the field. The background shows a blurred crowd with a scoreboard displaying the scores. [0:02:42 - 0:02:43]: The scene shifts to an excited crowd of fans, waving flags and scarves, celebrating enthusiastically. One fan is wearing a red shirt with green trimming, holding up a green and red scarf. [0:02:44 - 0:02:46]: The scene changes to a football field where the player in red approaches the ball placed near the penalty spot. The goal and goalkeeper, clad in yellow, are in the background. [0:02:47 - 0:02:49]: The player kicks the ball towards the goal, and the goalkeeper dives in an attempt to save it. The ball is on its way towards the net. [0:02:50 - 0:02:52]: The scene cuts to the crowd again, showing a fan with face paint and a green and white shirt appearing anxious and then extremely joyful. Other fans around him are equally animated and celebrating. [0:02:53 - 0:02:56]: The footage returns to the football player in red, who is shown shouting or celebrating after the goal. The expressive celebration continues with the camera focusing on his face. [0:02:57 - 0:03:00]: The final cut shows another player in white, possibly preparing for a penalty kick, with the scoreboard displaying 2:0 in favor of Portugal. The referee and goalkeeper are in position, ready for the next kick with players and fans in the background.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What colors are present on the shirt of the fan holding the scarf?",
+                "time_stamp": "0:02:43",
+                "answer": "D",
+                "options": [
+                    "A. Red with white trimming.",
+                    "B. Green with red trimming.",
+                    "C. Yellow with red trimming.",
+                    "D. Red with green trimming."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_8_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:03]: A player wearing a red jersey with the number 10, labeled \"Bernardo,\" is bent over on the field, adjusting the position of a soccer ball. The background shows an audience and banners. [0:04:04 - 0:04:05]: The camera shifts to a close-up of a goalkeeper wearing a yellow jersey, standing in front of the goal. The netting, along with some flags and spectators, is visible in the background. [0:04:06 - 0:04:07]: A group of players in red jerseys from the same team as Bernardo stand in a line with their arms around each other's shoulders. They are on the left side of the field, facing the action. [0:04:08 - 0:04:09]: The camera returns to a close-up of Bernardo walking forward, preparing for the penalty. He looks focused as the background shows a blurred glimpse of the crowd. [0:04:10]: A coach on the sideline, dressed in a dark suit, stands with his arm around an assistant wearing a white jacket. Both are observing the game with serious expressions. [0:04:11 - 0:04:12]: Bernardo is seen from behind, running up towards the ball to take the penalty kick, while the goalkeeper prepares to make a save. The crowd and stadium backdrop are clearly visible. [0:04:13]: Bernardo strikes the ball, and the goalkeeper dives to the left. The ball is in mid-air, heading towards the right side of the goal. [0:04:14 - 0:04:15]: The ball hits the back of the net, indicating a successful goal. Bernardo runs towards the left in celebration, while the goalkeeper remains on the ground. [0:04:16 - 0:04:17]: A close-up shows Bernardo embraced by a teammate in celebration near the goal. The scene captures the joy and excitement among players and spectators. [0:04:18 - 0:04:19]: Another player in a red jersey, smiling broadly and with open arms, runs towards the celebrating players. His facial expression shows joy as the team continues to celebrate the successful goal.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the outcome of Bernardo's penalty kick?",
+                "time_stamp": "00:04:16",
+                "answer": "D",
+                "options": [
+                    "A. The ball hits the post.",
+                    "B. The ball goes out of bounds.",
+                    "C. The goalkeeper saves the ball.",
+                    "D. The ball hits the back of the net."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_8_real.mp4"
+    }
+]

@@ -1,0 +1,91 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00] The video starts with an animation on a blue background showing a large number '10' in white. The inside of the '0' features a clock-like display with a knife and fork crossing each other. [0:00:01 - 0:00:04] The scene transitions to a person standing against a blue backdrop with the words \"RAMSAY in 10\" prominently displayed behind them. The knife and fork clock is now integrated into the zero of the \"10\". [0:00:05 - 0:00:19] The person is now in a kitchen environment, standing in front of a white brick wall with shelves containing various kitchen items such as cups, plates, bottles, and jars. A large red \"COOK\" sign is visible on the top left corner of the wall. Throughout this segment, the person is seen speaking, gesturing with their hands, and occasionally looking to the side. The kitchen counter has utensils and dishes organized neatly on it.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What is prominently displayed behind the person standing against a blue backdrop?",
+                "time_stamp": "00:00:20",
+                "answer": "D",
+                "options": [
+                    "A. \"CHEF in 10\".",
+                    "B. \"COOK in 10\".",
+                    "C. \"BAKE in 10\".",
+                    "D. \"RAMSAY in 10\"."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_40_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:01]: The video begins with a close-up view of hands working over a small blender cup placed on a wooden cutting board. The background includes a gas stove to the left, blue cabinets, and a wooden drawer. The person is adding fresh herbs to the blender cup filled halfway with a creamy liquid. [0:04:01 - 0:04:02]: The hands are seen squeezing the herbs between fingers, ensuring they are finely broken up before dropping them into the blender cup. [0:04:02 - 0:04:03]: The camera shifts to reveal more details about the person. A man in a teal polo shirt stands at the counter, continuing to handle the herbs. Behind him, there are white brick walls, shelves with dishes, and kitchen utensils. [0:04:03 - 0:04:04]: The man concentrates on adding the herbs to the blender cup, pulling apart the green leaves. Various ingredients, like bottles and spices, are organized on the counter around him. [0:04:04 - 0:04:05]: Continuing from the previous segment, the man adds the last bits of herbs into the blender cup. His expression indicates a focus on ensuring the correct quantity is used. [0:04:05 - 0:04:06]: The man is breaking apart more herbs over the blender cup. The countertop displays ingredients, including an avocado, oil, and spices ready for use. Cookware and dishes are neatly arranged behind him. [0:04:06 - 0:04:07]: The scene transitions to an overhead view, showing the person's hands intermittently adding herbs to the cup. The cutting board is clean, with a few small herb leaves scattered around. A few additional ingredients, such as small bowls of salt and pepper, are present around the workspace. [0:04:07 - 0:04:08]: The person continues to add herbs to the blender cup. Above the cutting board view, the kitchen setup includes a gas stove and various small kitchen tools like a blender lid and seasoning bowls. [0:04:08 - 0:04:09]: Details from the previous segment continue. The person's fingers are breaking apart the herbs before placing them into the blender cup. The camera angle allows for a clear view of the workspace and positioned herbs. [0:04:09 - 0:04:10]: The process of adding herbs progresses, with hands clearly seen handling the fresh ingredients. The creamy liquid in the cup shows slight signs of infusion from the herbs. [0:04:10 - 0:04:11]: The overhead shot reveals the herb preparation steps. The person's hands place the final amount of herbs into the blender cup. The countertop displays several small containers and kitchen utensils. [0:04:11 - 0:04:12]: The scene focuses on the person's hand positioning the blender cup. Preparation appears complete, and the person is about to finish arranging the ingredients. [0:04:12 - 0:04:13]: The person's hand gently moves towards the left, placing a seasoning container down. The workspace is tidy with all necessary ingredients near the wooden cutting board. [0:04:13 - 0:04:14]: The video shows the person reaching towards something on the left, likely completing the final steps of preparation. [0:04:14 - 0:04:15]: The hand appears to be adjusting or placing additional seasoning or herb containers while ensuring the area remains organized for subsequent steps. [0:04:15 - 0:04:16]: The man finishes adding the herbs, and he begins to position the blender cup centrally on the cutting board. He looks down, ensuring everything is in place. [0:04:16 - 0:04:17]: The man adjusts the blender cup on the cutting board. He reaches out to grab a small jar from the counter. Other ingredients like bottles and seasoning containers are within easy reach. [0:04:17 - 0:04:18]: The man picks up an avocado with a knife in hand, ready to prepare it. The blender cup with the creamy liquid and herbs sits in the background. His focus shifts from the herbs to the avocado. [0:04:18 - 0:04:19]: He starts to cut the avocado, carefully slicing it with the knife. The workspace remains organized, with the blender cup in the middle containing the mixtures of ingredients. His attention remains on precisely cutting the avocado.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person adding to the blender cup?",
+                "time_stamp": "0:04:00",
+                "answer": "D",
+                "options": [
+                    "A. Fresh fruits.",
+                    "B. Spices.",
+                    "C. Oil.",
+                    "D. Fresh herbs."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_40_real.mp4"
+    },
+    {
+        "time": "[0:08:00 - 0:09:00]",
+        "captions": "[0:08:00 - 0:08:20] [0:08:00 - 0:08:01]: A pair of hands is slicing bread into small cubes on a wooden cutting board. The bread is light brown with a rough texture, and the knife has a straight, shiny blade. On the left side, a dark rectangular stove burner is visible.   [0:08:01 - 0:08:02]: One hand is moving towards a pile of bread cubes scattered on the wooden cutting board, while the other hand holds the knife. A portion of the dark stove remains visible in the background. [0:08:02 - 0:08:03]: The video shifts to an overhead view of the kitchen setup. On the left, there are various ingredients placed on the countertop, including a small bowl of a green substance, a round citrus fruit, and a small dish of chopped ingredients. In the center, a grill pan with two halves of a lemon and a piece of grilled meat is on the stove. [0:08:03 - 0:08:04]: The view remains overhead as the hands rearrange bread cubes on the cutting board to the left. The grill pan continues to emit steam, indicating it is hot. [0:08:04 - 0:08:05]: A hand holding a black pan moves it over the burner on the right, with the bread cubes still on the cutting board to the left. The grilled meat and lemons remain in the center grill pan. [0:08:05 - 0:08:06]: The hand continues to position the pan over the burner, while the other hand begins to move towards the left. The bread cubes on the cutting board and the grill pan in the center remain unchanged. [0:08:06 - 0:08:07]: The hand on the left arranges the bread cubes on the cutting board. The other hand adjusts the pan on the right. The counter remains cluttered with various kitchen items and ingredients. [0:08:07 - 0:08:08]: The hands of a person with short gray hair are visible, pivoting from the cutting board towards the pan on the right. The bread cubes and grill pan with the grilled meat and lemon halves are still in view. [0:08:08 - 0:08:09]: One hand picks up a black pan filled with bread cubes, moving it over towards the burner on the right. The cutting board is now clearer with fewer bread cubes, with the grill pan and its contents visible in the center. [0:08:09 - 0:08:10]: The bread cubes are added to the pan, which sits atop the burner. Cooking utensils and containers with ingredients are placed around the stove. In the foreground, the bread cubes start to brown in the pan. [0:08:10 - 0:08:11]: The pan with bread cubes is on the burner, with steam rising, indicating the bread is being heated. The background showcases a variety of cooking supplies and a large blue pot on the counter. [0:08:11 - 0:08:12]: Bread cubes continue to brown in the pan on the burner. The adjacent grill pan, with grilled meat and lemon halves, remains in the center. Surrounding cooking tools and ingredients retain their positions. [0:08:12 - 0:08:13]: The pan with bread cubes is still on the burner, the cubes starting to toast. Steam rises steadily, with the background kitchen setup unchanged, incorporating various utensils, a large blue pot, and a dark stove. [0:08:13 - 0:08:14]: The pan with bread cubes is shifted slightly. The person holding the pan stirs the cubes, ensuring uniform toasting. Surrounding kitchen objects, including the plates and utensils, remain as is. [0:08:14 - 0:08:15]: Hands adjust the pan on the burner, as bread cubes are toasted. To the right, grilled meat and lemon halves on the grill pan are seen. A person steps back from the stove, revealing the blue pot in the background. [0:08:15 - 0:08:16]: A middle-aged person in a green shirt leans forward towards the grill pan, checking the food. Shelves with various utensils and a white brick backsplash are in the background. [0:08:16 - 0:08:17]: The person continues checking the food on the central grill pan, adding ingredients. The background showcases a neatly organized kitchen with shelves holding crockery and cooking supplies. [0:08:17 - 0:08:18]: The person in the green shirt reaches towards the cutting board, picking up a small round container. A well-organized kitchen, with labeled containers and hanging utensils, forms the backdrop. [0:08:18 -",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person slicing with the knife?",
+                "time_stamp": "0:08:01",
+                "answer": "D",
+                "options": [
+                    "A. Lemon.",
+                    "B. Meat.",
+                    "C. Apple.",
+                    "D. Bread."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What food is on the baking tray now?",
+                "time_stamp": "0:08:26",
+                "answer": "A",
+                "options": [
+                    "A. Two slices of lemon and a roasted chicken.",
+                    "B. Three slices of lime and a grilled fish.",
+                    "C. Four slices of orange and a baked ham.",
+                    "D. Five slices of cucumber and a roasted turkey."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Causal Reasoning",
+                "question": "What indicates that the grill pan is hot?",
+                "time_stamp": "0:08:12",
+                "answer": "B",
+                "options": [
+                    "A. The grill pan has lemons on it.",
+                    "B. The grill pan is emitting steam.",
+                    "C. The grill pan is being repositioned.",
+                    "D. The grill pan is making noise."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_40_real.mp4"
+    }
+]

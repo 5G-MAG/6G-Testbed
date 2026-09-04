@@ -1,0 +1,107 @@
+[
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] [0:01:00 - 0:01:05]: A person is holding tongs and stirring a pot of noodles that are boiling in water. The pot is stainless steel and is placed on a stovetop. The camera angle is close-up, focusing on the pot and the hand holding the tongs. [0:01:06 - 0:01:10]: The camera angle changes to a wider shot, where the person is seen standing in a kitchen. She continues to stir the noodles in the pot with tongs. She is in a modern kitchen with white cabinets and a large stainless steel refrigerator to her left. Various items such as a pepper grinder, a bottle of olive oil, and a block of butter are on the counter. [0:01:11 - 0:01:13]: The person continues to stir the noodles in the pot. She then stops and turns to face a frying pan that is placed on a stovetop to her right. She picks up a bottle of olive oil with her right hand and prepares to pour it into the frying pan. [0:01:14]: The camera zooms in to a close-up view of the frying pan. The person begins to pour olive oil into the pan. [0:01:15 - 0:01:16]: After pouring the olive oil, she stops and stands near the stovetop, speaking while holding the bottle. She gestures with her left hand, explaining something. [0:01:17 - 0:01:18]: The person lowers the frying pan onto the stovetop with one hand while still holding the bottle of olive oil with the other. [0:01:19]: The camera shifts to a closer view of the stovetop area where the frying pan is being placed down. Steam is rising from the pot of noodles noticeable in the scene.\n[0:01:20 - 0:01:40] \n[0:01:40 - 0:02:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding right now?",
+                "time_stamp": "0:01:06",
+                "answer": "C",
+                "options": [
+                    "A. A spatula.",
+                    "B. A spoon.",
+                    "C. An olive oil bottle.",
+                    "D. A whisk."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_21_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:05]: A woman stands in a modern kitchen with white cabinetry and a stainless steel stove, facing the camera. She's wearing a red tank top and is holding a large pepper grinder over a black frying pan on the stovetop. There's a stainless steel pot with a ladle beside the frying pan, and steam is rising from it. Various items, including a green ceramic teapot and a bottle of oil, are positioned on the countertop; the kitchen has a clean and organized look, and sunlight streams in through a window in the background.  [0:02:06 - 0:02:09]: The camera zooms in on the frying pan, where food is sizzling and steaming. Steam fills the frame, clouding some details of the pan's contents. [0:02:10 - 0:02:14]: The camera zooms out, revealing the woman continuing to use the pepper grinder over the frying pan. She then places the pepper grinder down and appears to reach for something off-camera to her left while holding the ladle with her right hand. An oven mitt, bottle of oil, and a green teapot are visible on the countertop.  [0:02:15 - 0:02:17]: The camera focuses closer on the woman, showing her face more clearly as she stirs the contents of the pot with the ladle. [0:02:18 - 0:02:19]: The camera zooms back out, showing the woman continuing to stir the pot contents while speaking to the camera. The caption \"RECIPE IS IN THE DESCRIPTION BELOW\" appears at the bottom of the screen.\n[0:02:20 - 0:02:40] \n[0:02:40 - 0:03:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the woman holding over the black frying pan?",
+                "time_stamp": "0:02:45",
+                "answer": "C",
+                "options": [
+                    "A. A wooden spoon.",
+                    "B. A salt shaker.",
+                    "C. noodles.",
+                    "D. A spatula."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_21_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:02]: A close-up view of a frying pan on a stove. Inside the pan, there are partially cooked noodles that appear to be in the process of being stirred. A pot, which is oriented upside down, has just poured additional liquid, likely water, into the pan, as evidenced by the stream of liquid flowing out. The countertops around the stove are clean and modern in appearance, and the stove itself is positioned against a tiled backsplash. [0:03:03]: The scene shifts to show a wide-angle view of a woman standing in a modern kitchen. She is positioned to the left of the camera frame, stirring the contents of a pot on the stovetop. Her hair is long and brown, and she is dressed in a reddish tank top. The kitchen features white subway tiles on the wall and a large window with an ample view of greenery outside. A pot with a thriving green plant occupies the corner space below the window. [0:03:04 - 0:03:05]: The woman stops stirring and reaches for a different pot. The kitchen is well-lit with natural light coming through the window. To the right of the stove is a bottle whose label is partially visible, suggesting cooking oil or another liquid ingredient. Various other kitchen elements such as utensils, a pepper grinder, and possibly a salt shaker are seen on the countertop. [0:03:06 - 0:03:11]: The woman begins adding a white substance, possibly grated cheese or another ingredient, into the frying pan with the noodles. As she does this, steam rises from the pot she was stirring earlier, indicating it contains a hot liquid or food. Her hand movement is deliberate as she sprinkles the ingredient evenly over the entire surface of the noodles. [0:03:12 - 0:03:17]: The camera focuses back on the frying pan, zooming in to show a detailed view of the woman’s hand sprinkling the white substance into the pan. The noodles are starting to incorporate the added ingredient, and steam is gently rising from the dish, showing it is being actively cooked. [0:03:18 - 0:03:19]: The scene shifts back to a wider angle where the woman is seen again stirring the pot on the stove. She occasionally glances at the frying pan, ensuring the cooking process is proceeding correctly. The atmosphere remains bright and clean, characteristic of a modern, well-maintained kitchen.\n[0:03:20 - 0:03:40] \n[0:03:40 - 0:04:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the woman holding while she is stirring the pot on the stove?",
+                "time_stamp": "0:03:05",
+                "answer": "C",
+                "options": [
+                    "A. A ladle.",
+                    "B. A whisk.",
+                    "C. A tongs.",
+                    "D. A spatula."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_21_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:01]: A person in a sleeveless red top is holding a silver pot and pouring noodles into a black frying pan positioned on a stovetop. The stovetop has a burner and a metal grid. [0:04:01]: The person has long brown hair and is focusing on the task. The background features white kitchen cabinets and a countertop. [0:04:02 - 0:04:03]: The person is looking downward, possibly at the pot or the frying pan, with their face slightly downward and to the left. [0:04:04]: The person is still engaged with the cooking activity, holding a utensil near the frying pan, which contains noodles. [0:04:05 - 0:04:07]: The person continues stirring the noodles in the frying pan, making sure they are evenly cooked. The frying pan starts to release steam, indicating the heating of the contents. [0:04:08 - 0:04:09]: The camera captures a wider view of the kitchen with the person standing over the stove, stirring the noodles in the pan. There is a window in the background allowing natural light to fill the room and a countertop with a bowl of colorful fruits, a bottle of oil, and an assortment of utensils. [0:04:10 - 0:04:11]: The person looks up momentarily, probably talking or interacting with someone off-camera, while continuing to stir the food. [0:04:12 - 0:04:13]: The person resumes looking at the frying pan, attentively cooking the noodles. The room remains well-lit with clear visibility of kitchen details, including a refrigerator and cabinets. [0:04:14 - 0:04:16]: The person uses a pair of tongs to stir the contents of the frying pan thoroughly. The kitchen environment maintains its neat and bright appearance. [0:04:17 - 0:04:19]: A close-up shot shows the noodles being stirred in the frying pan. The noodles are yellow and appear to be softening as they mix with a liquid in the pan. Steam continues to rise, indicating the food's hot temperature.\n[0:04:20 - 0:04:40] \n[0:04:40 - 0:05:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the pot being used by the person in the kitchen?",
+                "time_stamp": "00:04:01",
+                "answer": "B",
+                "options": [
+                    "A. Black.",
+                    "B. Silver.",
+                    "C. Red.",
+                    "D. White."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_21_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:05:40]",
+        "captions": "[0:05:00 - 0:05:20] \n[0:05:20 - 0:05:40] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is the woman holding in her hand right now?",
+                "time_stamp": "0:05:15",
+                "answer": "B",
+                "options": [
+                    "A. A red book.",
+                    "B. A salt grinder.",
+                    "C. A cup of coffee.",
+                    "D. A newspaper."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_21_real.mp4"
+    }
+]

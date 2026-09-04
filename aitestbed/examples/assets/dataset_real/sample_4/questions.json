@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:02]: The video begins with the emblem of a football club, featuring a shield design with several colors including red, yellow, and white. This emblem is set against a gradient blue background. At the one-second mark, a partially revealed \"SUBSCRIBE\" text appears beneath the emblem, eventually becoming fully visible in red with white text. [0:00:03 - 0:00:04]: The scene changes to a football pitch where a referee in a neon yellow shirt and black shorts, with various badges, is in the foreground. A football on a stand is centered. In the background, blurred teams are lining up, likely for a match start. [0:00:05 - 0:00:07]: The camera shifts to a handshake line where players from two teams, one in red and blue and the other in green and white, are greeting each other. Both teams wear jerseys and shorts, indicating the start of the game. [0:00:08]: On the sidelines, two coaches exchange a handshake and a brief hug in front of a dugout. Others, including an elderly man and another coach, watch nearby. They are against a background of fans seated in the stands. [0:00:09 - 0:00:10]: The focus is on two players from the same team in red and blue jerseys. Both players have serious expressions and are looking towards a point off-camera, likely during a match moment. [0:00:11]: A close-up shows one of the players in the red and blue jersey, who seems to be in motion or slightly turning. [0:00:12 - 0:00:16]: The action shifts to the gameplay. Several players, primarily in white jerseys with some in red and blue, are positioned around the penalty area, gearing up for an offensive play. The ball is in play, with players situating themselves for potential moves. Advertising boards and crowds are visible in the background. [0:00:17 - 0:00:19]: In another match sequence, players from both teams are actively engaged in chasing and dribbling the ball. The offensive team, in blue and red, makes a move toward the goal, culminating in a shot aimed at the goal. The defenders in green and white strive to intercept, while the goalkeeper and others react to the play in the backdrop. This segment captures the dynamic and tense nature of the attack.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What emblem appears at the beginning of the video?",
+                "time_stamp": "00:00:20",
+                "answer": "B",
+                "options": [
+                    "A. An animal symbol.",
+                    "B. A football club shield.",
+                    "C. A national flag.",
+                    "D. A corporate logo."
+                ],
+                "required_ability": "episodic memory"
+            },
+            {
+                "task_type": "Causal Reasoning",
+                "question": "Why are the players in green and white striving to intercept the ball?",
+                "time_stamp": "00:00:19",
+                "answer": "C",
+                "options": [
+                    "A. They are warming up for the game.",
+                    "B. They are practicing their defensive moves.",
+                    "C. They are reacting to an offensive move toward the goal.",
+                    "D. They are performing a choreographed play."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_4_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] [0:01:00 - 0:01:04]: The football match is taking place on a well-maintained green pitch. The timestamp shows 31:48 minutes in the first half with the score reading 2-0 in favor of the team in blue and red. The attacking team (in purple/red) is advancing towards the goal defended by the team in white. Notable elements include the goalpost at the center-bottom of the frames and several players in action near the penalty area; [0:01:05 - 0:01:09]: The scene changes to a different part of the pitch where the team in white is now closer to the goal, lining up for an attacking opportunity. There are fewer defenders in this sequence, and the player dressed in white is about to attempt a scoring shot. The subsequent frames show the striker managing to get a powerful shot off, while the goalkeeper in orange makes a desperate dive to stop the ball, but ultimately fails to do so; [0:01:10]: Close-up shot of the goalkeeper in orange, looking disappointed, possibly after conceding a goal. The background shows a crowded stadium with numerous fans observing the game; [0:01:11]: Close-up of a player from the team in white. He appears to be reacting to the previous play, his demeanor suggesting focus or determination. The surrounding crowd remains visible in the background, contributing to the lively atmosphere; [0:01:12 - 0:01:14]: The camera angle changes to show a goalpost from behind, providing a clear view of the defensive attempt by the goalkeeper in orange. The attacking team in white is in prominent positions, with one player directly challenging the defense. The approaching ball is captured just before it reaches the goal area; [0:01:15 - 0:01:19]: The play shifts once more, returning to an image of a white team attacking sequence. The forward momentum of the attacking team is evident, and the defenders in purple are retreating towards their goal. One player in white is advancing with the ball, setting up for either a pass or a shot as they approach the penalty box.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What was the score and the position of the teams right now?",
+                "time_stamp": "00:01:04",
+                "answer": "C",
+                "options": [
+                    "A. 1-0, the team in blue and red is leading.",
+                    "B. 2-0, the team in white is leading.",
+                    "C. 2-0, the team in blue and red is leading.",
+                    "D. 1-1, the teams are tied."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_4_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00]: A close-up action shot of a soccer game, showing the goalkeeper in blue diving to his right attempting to save a shot. The ball is headed towards the goal from the left side of the image. The scoreboard shows the home team leading 3-0, and banners with advertisements are visible in the background. [0:02:01 - 0:02:07]: The perspective shifts to a broader view of the field. Players in purple and white are in action, with the ball being dribbled near the right corner of the goal area by a player in purple. Multiple players from both teams are inside the penalty area, some positioned defensively in anticipation of the attack. [0:02:08 - 0:02:11]: A player in purple is seen running towards the camera after scoring a goal. He is celebrating the goal, as evident from his facial expression and raised hands. The goal is confirmed by the updated score on the top left corner, now standing at 4-0. [0:02:12 - 0:02:15]: The player continues his celebration, heading towards the corner flag. He is joined by his teammates who are approaching him to celebrate together. The stadium is filled with spectators, some of whom are taking photographs or cheering. [0:02:16 - 0:02:18]: The game resumes, and the focus shifts back to another attack from the purple team. Players are moving quickly, with the ball being passed around inside the penalty area. The defensive players in white are trying to block the attacking players' movements. [0:02:19 - 0:02:20]: Another shot on goal is made by a player in purple. The goalkeeper in white dives to try to save the ball, but it is unclear if he succeeds. The defending team appears focused on preventing another goal.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the updated score after the player in number 11 scored a goal?",
+                "time_stamp": "00:02:11",
+                "answer": "D",
+                "options": [
+                    "A. 2-0.",
+                    "B. 3-0.",
+                    "C. 5-0.",
+                    "D. 4-0."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_4_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:03:51]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:02]: The scene takes place in a soccer stadium during a match. Players in purple and white uniforms are on the field. The camera is positioned at a high angle, showing the attacking team in purple advancing towards the goal defended by players in white. The focus is on the player in purple running along the right side of the pitch, nearing the penalty area; [0:03:03 - 0:03:04]: The camera angle changes to a close-up of the goal area, showing the goalkeeper in blue and some players in white and purple hustling around the six-yard box. The ball is in mid-flight, heading towards the goal. The focus is on the action and the anticipation of a potential goal; [0:03:05 - 0:03:06]: The frame provides a closer view near the goalpost, showing intense competition for the ball between the attacking and defending players. The player in purple attempts to gain control while the player in white tries to clear the ball. The crowd in the background is visible; [0:03:07 - 0:03:09]: The camera switches back to a higher angle, showing the entire half of the pitch. Players are spread out, with the team in purple pushing forward in a coordinated attacking move, while the team in white positions itself for defense. The attacking players are passing the ball among themselves to create an opportunity; [0:03:10 - 0:03:12]: The frame captures the attacking team breaking through the defensive line, with players in purple sprinting towards the goal. A player on the left flank receives a pass and prepares to cross the ball into the penalty area; [0:03:13 - 0:03:16]: The attacking player crosses the ball from the left wing into the box. Players from both teams move into position. The ball is aimed towards the center, causing the defending team to react quickly; [0:03:17]: A close-up captures a player in purple entangled with the goal net, showing visible frustration. The player's emotions suggest a missed opportunity or a close moment during the attack; [0:03:18 - 0:03:19]: The player in purple disentangles from the net and turns to face the field. Another player in blue approaches, indicating a possible conversation or reaction to the recent play. The intensity and expressions reflect the competitive atmosphere of the match.\n[0:03:40 - 0:03:51] [0:03:40]: A group of soccer players are seen on the field, wearing different team uniforms. The player to the left is wearing a red and blue striped jersey with the name \"JOAO CANCELO\" and the number 21 on the back. The player on the right is wearing a similar jersey with the name \"MARCOSA\" and the number 17; [0:03:41 - 0:03:50]: The video transitions to a still image with bold text and graphics. The left side has a stylized \"FORCA BARCA\" logo in yellow and blue on a dark background. Below is a prominent \"SUBSCRIBE\" button in red and white. To the right, a red textured vertical stripe extends the length of the frame. In the middle, \"BEHIND THE SCENES,\" \"TRAINING,\" \"CHALLENGES,\" and \"SHOWS\" are listed repeatedly in alternating yellow and white text; [0:03:51]: The same still image featuring promotional text and the \"SUBSCRIBE\" button remains on the screen.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What uniform does the player named \"JOAO CANCELO\" wear?",
+                "time_stamp": "00:03:40",
+                "answer": "B",
+                "options": [
+                    "A. Purple and white.",
+                    "B. Red and blue striped.",
+                    "C. Blue and yellow.",
+                    "D. Green and black."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_4_real.mp4"
+    }
+]

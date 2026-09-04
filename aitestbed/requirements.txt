@@ -28,6 +28,9 @@ pyyaml>=6.0
 python-dotenv>=1.0.0
 requests>=2.28.0
 
+# Logger
+colorlog>=6.10.1
+
 # Optional: Image processing for multimodal
 Pillow>=10.0.0
 
@@ -41,8 +44,7 @@ mitmproxy>=10.0.0
 dpkt>=1.9.8
 
 # Optional: WebRTC transport for realtime scenarios
-aiortc>=1.5.0
-av>=10.0.0  # PyAV — audio frame handling / resampling for WebRTC realtime client
+# aiortc>=1.5.0 # use modified aiortc for realtime video analysis scenario
 
 # Optional: Computer use executor
 playwright>=1.41.0
@@ -61,3 +63,8 @@ alpaca-mcp-server>=0.1.0
 
 # Async support (included in Python 3.7+, but useful for type hints)
 # asyncio is part of stdlib
+
+# VLM
+torch==2.4.1 
+torchvision==0.19.1
+transformers==4.44.2

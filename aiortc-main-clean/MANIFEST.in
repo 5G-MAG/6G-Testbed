@@ -1,0 +1,8 @@
+exclude .readthedocs.yaml
+include CODE_OF_CONDUCT.md
+include LICENSE
+recursive-include docs *.py *.rst *.svg Makefile
+recursive-include examples *.html *.js *.py *.rst *.wav
+recursive-include requirements *.txt
+recursive-include scripts *.json *.py
+recursive-include tests *.bin *.py

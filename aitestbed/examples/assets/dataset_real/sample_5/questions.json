@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:03]: The video begins with a wide-angle view of a football stadium crowded with spectators. The field is lush green, and there are multiple advertisements on the outskirts of the pitch. Players and a referee are seen, with one player in a yellow jersey and another in blue. The player in the yellow jersey is near the center. [0:00:04 - 0:00:05]: The focus shifts to a close-up of a player in a yellow jersey. The player appears focused and somewhat intense, with the background slightly blurred, emphasizing his face. [0:00:06 - 0:00:07]: Another scene shows the player wiping his face with his hand, possibly indicating concentration or stress. [0:00:07 - 0:00:09]: The next frame captures the goalkeeper from the back, wearing a bright green jersey with the name \"PICKFORD\" and the number one written on it. The background includes spectators and other players. [0:00:10]: Another close-up shows the player in the yellow jersey again, who has his eyes closed or looking downward, further emphasizing focus or perhaps a moment of contemplation. [0:00:11 - 0:00:14]: Two players in yellow jerseys, with \"L. MURIEL 14\" and \"number 15\" on their backs, are seen embracing each other in front of the goal post. A crowd is visible in the background. [0:00:15 - 0:00:18]: The focus moves to the field where a close-up of a player’s feet wearing white cleats with ADIDAS branding can be seen. The player adjusts the position of a football, which has a distinctive red and black pattern. The white socks worn by the player are dirty, indicating the intensity of the match. [0:00:19 - 0:00:20]: The final frame features a player’s lower body in white shorts and socks, standing on the field. The action seems to be gearing up for a critical moment like a kick or a move.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What name is written on the goalkeeper's bright green jersey?",
+                "time_stamp": "00:00:14",
+                "answer": "B",
+                "options": [
+                    "A. NEUER.",
+                    "B. PICKFORD.",
+                    "C. DE GEA.",
+                    "D. COURTOIS."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "What brand is visible on the player's white cleats?",
+                "time_stamp": "00:00:18",
+                "answer": "C",
+                "options": [
+                    "A. Nike.",
+                    "B. Puma.",
+                    "C. Adidas.",
+                    "D. Under Armour."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_5_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:20 - 0:02:40] [0:02:20 - 0:02:24]: The video shows a penalty shootout in a soccer match. A player in a yellow jersey is preparing to take a penalty kick. He stands a few meters away from the ball, which is placed on the penalty spot. The goalkeeper, in a bright green jersey, is positioned in front of the goal, getting ready to defend the shot. The crowd in the stands behind the goal is waving flags and banners, and there is a visible advertisement board with \"Coca-Cola\" repeated on it. [0:02:25 - 0:02:29]: After taking the shot, the player in the yellow jersey runs forward a few steps and begins to celebrate. His facial expression shows determination and joy. He pumps his fist as he runs, clearly elated by the outcome of his kick. [0:02:30 - 0:02:33]: The video cuts back to a close-up of the player in the yellow jersey just as he strikes the ball with his right foot. The goalkeeper dives to his left, trying to reach the ball, but misses. The ball goes into the net, indicating a successful penalty. [0:02:34 - 0:02:35]: The goalkeeper is seen getting up from the ground after his failed attempt to save the penalty. His body language shows frustration. [0:02:36 - 0:02:39]: The view zooms out to show the entire field and the cheering crowd in the stands. The scoreboard at the bottom of the screen shows the current score: Colombia 2-1 England. The excitement in the stadium is palpable as the camera captures the celebratory atmosphere.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the outcome of the penalty kick just now?",
+                "time_stamp": "00:02:27",
+                "answer": "C",
+                "options": [
+                    "A. The goalkeeper saves the ball.",
+                    "B. The ball hits the post.",
+                    "C. The ball goes over the crossbar.",
+                    "D. The ball goes into the net."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_5_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:40 - 0:05:00] [0:04:40 - 0:04:44]: A penalty kick scene is depicted with a goalkeeper diving to his right, attempting to save a shot. The ball is headed towards the goal, and spectators in the background are intensely watching. Some stewards in neon vests and photographers are visible behind the goal, with a sponsorship banner behind them. [0:04:45 - 0:04:49]: The next sequence shifts focus away from the goal to show players in the playfield. A player in a yellow jersey appears to be walking away from the penalty area, as a group of players in red jerseys are standing together in anticipation. The LED display shows the match information with the score at 3-2, indicating a tense moment in the game. [0:04:50 - 0:04:53]: The scene shifts to the coaching or managerial area. A man in a suit, likely a coach, visibly expresses distress with his hand over his face while being consoled by others. This area also shows the live match updates with the ongoing score displayed at the bottom. [0:04:54 - 0:04:57]: The camera then focuses on a close-up of a player in a yellow jersey, possibly reflecting the emotional aftermath of the penalty kick. Another view captures the interaction between the referee and the player, where the referee's back is towards the camera. [0:04:58 - 0:04:59]: Finally, the focus shifts to a player in a bright green jersey, likely the goalkeeper, who appears to be processing the outcome, showing mixed expressions of frustration and composure. The player lowers his head briefly, indicating a moment of contemplation or disappointment.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What did the goalkeeper do during the penalty kick?",
+                "time_stamp": "00:04:33",
+                "answer": "B",
+                "options": [
+                    "A. Stood still.",
+                    "B. Dived to his right.",
+                    "C. Dived to his left.",
+                    "D. Ran towards the ball."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_5_real.mp4"
+    },
+    {
+        "time": "[0:07:00 - 0:08:00]",
+        "captions": "[0:07:00 - 0:07:20] [0:07:00 - 0:07:05]: A goalkeeper dressed in a bright green kit with the number \"1\" on the back is poised to the left side of the goal line, preparing to dive as a player in a yellow kit takes a penalty kick. The goalkeeper dives to his right, fully stretched in an attempt to save the shot. The ball is seen mid-air to the right of the frame as the goalkeeper reaches out towards it. [0:07:06 - 0:07:09]: A close-up shot shows a man with a serious expression standing next to another individual. The background is blurred, revealing a filled stadium with spectators. Both individuals are focused on the ongoing game. [0:07:10 - 0:07:13]: The focus shifts to a player in a red kit with a look of concentration, possibly preparing for a turn to take a penalty kick. The background shows blurred spectators watching intently. [0:07:14 - 0:07:15]: The same player in the red kit is shown bending over, adjusting his position. An official in black stands close by, overseeing the situation. [0:07:16 - 0:07:17]: A goalkeeper in a teal kit with a determined look is seen standing in front of the goal, anticipating the next move. The net behind him and the crowd in the background are visible. [0:07:18 - 0:07:19]: The focus returns to the player in the red kit, capturing his focused expression as he prepares for his task at hand. The blurred background remains filled with spectators.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What number is on the back of the goalkeeper's kit who is preparing to dive for the penalty kick?",
+                "time_stamp": "0:07:23",
+                "answer": "D",
+                "options": [
+                    "A. 10.",
+                    "B. 7.",
+                    "C. 5.",
+                    "D. 1."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_5_real.mp4"
+    }
+]

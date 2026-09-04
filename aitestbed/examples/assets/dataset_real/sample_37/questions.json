@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:40 - 0:03:00] [0:02:40 - 0:02:43]: The video begins with a first-person perspective focusing on a man standing in a kitchen, holding an egg up to the camera with his right hand. The kitchen background includes white tiled walls, dark cabinets with silver handles, and glass windows on the upper cabinets revealing some items inside. The man is wearing a dark grey T-shirt and light-colored pants, and he is positioned behind a kitchen island. There are pots and pans on the stove, and a chopping board with various ingredients next to him. [0:02:44 - 0:02:45]: The man is focused on the tasks at hand, and the angle shifts slightly to show more of the preparation area on the right side of the kitchen island. He puts the egg down on the chopping board among other ingredients including colorful bell peppers, chopped onion, and various small bowls. [0:02:46 - 0:02:47]: The man picks up a kitchen towel and uses it to hold onto a frying pan on the stove. The camera captures a close-up shot of the stove’s burners, which are turned on with flames visible. There is a grey plate on the stove next to the pan. [0:02:48 - 0:02:49]: He places the grey plate from the stove back onto the kitchen island and continues to prepare the frying pan, ensuring it is clean, while the camera shows more of the surrounding kitchen space, including appliances like a mixer and a toaster. [0:02:50 - 0:02:52]: The man moves slightly to the right, and he picks up a timer from the kitchen counter. The camera focuses on his actions as he sets the cooking timer. The view also offers a glance at the variety of ingredients laid out on the chopping board, including vibrant vegetables and kitchen utensils. [0:02:53]: The man demonstrates setting the cooking timer, holding it up to the camera closer for a clearer view. The timer shows \"10:00\" in large digits, indicating it is set to count down from ten minutes. [0:02:54 - 0:02:55]: After setting the timer, he places it back down on the counter and prepares to use the frying pan. The man directs his attention back toward the stove area, with a white kitchen towel draped over his shoulder. [0:02:56 - 0:02:57]: The man uses the kitchen towel again to lift the frying pan, and the camera captures a close-up of the stove burner beneath the pan. He adjusts the pan on the burner, continuing the cooking process. [0:02:58 - 0:02:59]: He places the frying pan back on the burner, making sure it is stable, and the camera shows more of the kitchen background including the upper cabinets with glass windows. Various kitchen items and appliances are visible around the spacious and well-lit kitchen as he continues working attentively.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man holding up to the camera with his right hand right now?",
+                "time_stamp": "00:02:34",
+                "answer": "A",
+                "options": [
+                    "A. An egg.",
+                    "B. A spoon.",
+                    "C. A bell pepper.",
+                    "D. A chopping board."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the man doing with the egg after holding it up to the camera?",
+                "time_stamp": "00:02:58",
+                "answer": "B",
+                "options": [
+                    "A. Cracking it into a bowl.",
+                    "B. Placing it on the table.",
+                    "C. Cooking it in a pan.",
+                    "D. Putting it back in the refrigerator."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_37_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:20 - 0:05:40] [0:05:20 - 0:05:21]: The video begins with a frying pan on a stove. Inside the pan, there are chunks of minced meat, partially cooked, with visible pink and browned parts. Red chili slices are spread over the meat. The stove burner underneath is lit with a blue flame, and the pan is positioned in the center of the frame. The background shows kitchen cabinets with a dark gray finish and metallic handles. [0:05:21 - 0:05:22]: The scene remains mostly the same, with the focus still on the frying pan. A person begins to enter the frame from the right, with part of their arm becoming visible. [0:05:22]: A close-up of the person shows them holding a piece of yellow lemon in their left hand and a metal grater in their right hand over the pan. The person's torso is visible, wearing a dark-colored shirt and beige shorts. They stand in a modern kitchen with white tiles and dark cabinetry. [0:05:23 - 0:05:28]: The person starts grating the lemon zest directly into the frying pan. The focus is on the grating process as the zest falls onto the cooking meat and chilies. The person's actions are steady and deliberate, ensuring the zest spreads evenly over the ingredients. [0:05:29 - 0:05:37]: The grating process continues, with the person adjusting the angle of the grater slightly to scrape off more zest. The grater is held over the pan while zest collects, mixing with the meat and chilies. The background, including the kitchen cabinets and stove knobs, remains consistent, contributing to the setting's domestic atmosphere. [0:05:38 - 0:05:39]: After finishing grating, the person moves away from the stove, placing the grater down. They turn slightly to the left, extending their right arm towards an unseen object on the countertop. The movement indicates the person is reaching for another ingredient or tool needed for the next step in the cooking process.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is spread over the chunks of minced meat in the frying pan?",
+                "time_stamp": "0:05:11",
+                "answer": "A",
+                "options": [
+                    "A. Red chili slices.",
+                    "B. Green peppers.",
+                    "C. Yellow corn.",
+                    "D. White onion rings."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_37_real.mp4"
+    },
+    {
+        "time": "[0:08:00 - 0:09:00]",
+        "captions": "[0:08:00 - 0:08:20] [0:08:00 - 0:08:02]: A person is standing at a kitchen counter, holding a knife in their right hand and a piece of red bell pepper in their left. They begin slicing the bell pepper on a wooden cutting board placed on a marble counter. On the counter to the left, there is a gas stove with pots and pans. An olive oil bottle with a metallic cap is situated on the counter to the right of the cutting board.   [0:08:02 - 0:08:04]: The person continues slicing the red bell pepper into thin strips. Next to the cutting board, there are other cooking ingredients, including a small white bowl, a mushroom, and various vegetables like an onion and a leek. A large silver knife is the person’s choice of tool.  [0:08:04 - 0:08:08]: The person steadily progresses with chopping the bell pepper into even smaller pieces, his hands working methodically on the cutting board. The kitchen background includes dark-colored cabinets, a white tile backsplash, and some kitchen appliances.   [0:08:08 - 0:08:12]: The person keeps chopping the bell pepper until it is finely sliced. They then place the knife down on the counter and pick up a chunk of the pepper. Behind them, the gas stove continues to be a focal point, with burners visible and cooking utensils arranged around it. [0:08:13 - 0:08:15]: The person moves to the stove, carrying the chopped bell pepper in their hand. They add the sliced pepper to a pan on the stove, which is turned on with visible flames. Above the stove, glass-front cabinets filled with dishes and kitchen items can be seen. [0:08:15 - 0:08:17]: The person then stirs the contents in the pan with a spatula, ensuring they are cooked evenly. The stove's burners and a countertop with other ingredients and cooking tools are visible in the foreground. [0:08:17 - 0:08:19]: The person continues to stir the contents in the pan, lifting it slightly to toss the ingredients. The kitchen remains brightly lit with a clean, organized setup, showcasing various kitchen equipment on counters and shelves.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is notable about the knife the person is using?",
+                "time_stamp": "0:08:23",
+                "answer": "A",
+                "options": [
+                    "A. It is a large silver knife.",
+                    "B. It has a wooden handle.",
+                    "C. It is a small paring knife.",
+                    "D. It has a serrated edge."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_37_real.mp4"
+    },
+    {
+        "time": "[0:10:00 - 0:11:00]",
+        "captions": "[0:10:40 - 0:11:00] [0:10:40 - 0:10:41]: A colorful assortment of vegetables, including sliced mushrooms, red and green bell peppers, and other greens, are being stir-fried in a black pan. The pan is centered over a flame on a gas stove, and a person's hand is slightly visible at the top-right corner. [0:10:42 - 0:10:42]: The vegetables continue to sizzle and mix in the black pan, maintaining their vibrant colors. The positioning remains constant, with the pan still centered over the stove flame and part of the stovetop controls in view. [0:10:43]: The shot zooms out slightly, revealing more of the kitchen setting. The stovetop is surrounded by a marble countertop, and more of the gas stove's controls and knobs become visible. A person in khaki pants and a dark shirt stands beside the stove, focusing on the pan. [0:10:44 - 0:10:45]: The person adjusts the pan while speaking, using a hand gesture to emphasize their point. A checkered cloth is draped over their shoulder. The kitchen background showcases dark cabinets and countertops, with kitchen utensils and appliances arranged neatly. [0:10:46 - 0:10:47]: The person continues to gesture and speak, occasionally looking into the pan. Their other hand holds a utensil, and they seem to be explaining a cooking technique. The background remains the same, with the neatly arranged kitchen visible. [0:10:48]: The person leans slightly toward the pan, which is still over the flame. The person appears to check the progress of the sautéed vegetables, ensuring they are cooked evenly. [0:10:49]: Raising the pan slightly off the stove, the person prepares to transfer its contents. The hand holding the pan is firm, while the other hand appears ready to assist in the process. [0:10:50 - 0:10:51]: With the pan raised, the person uses a wooden spatula to move the sautéed vegetables from the pan to a white plate on the counter. Next to the white plate is a grey plate filled with a different cooked dish, possibly meat mixed with vegetables. [0:10:52]: The person continues scraping the pan's contents onto the white plate, ensuring all the vegetables are transferred. Steam rises from both plates, indicating the dishes are hot and freshly cooked. [0:10:53]: Standing with the empty pan, the person reaches for a towel to wipe their hands. The kitchen environment, with its clean and organized counters, remains consistent. [0:10:54 - 0:10:55]: The person turns slightly to one side, likely preparing for the next cooking step. On the counter, the two plates with their respective dishes are clearly visible, steam still rising. [0:10:56]: The person faces the counter, ready to begin another task. The stovetop setup, with various cooking tools like a wooden spoon, a cutting board with chopped ingredients, and the empty pan on the stove, is clearly seen. [0:10:57 - 0:10:59]: The person continues with their cooking process, switching between tasks efficiently. The person seems to be multitasking, possibly preparing another dish or cleaning up in between steps.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What vegetables are being stir-fried in the black pan?",
+                "time_stamp": "0:10:14",
+                "answer": "A",
+                "options": [
+                    "A. Sliced mushrooms, red and green bell peppers, and other greens.",
+                    "B. Carrots, peas, and broccoli.",
+                    "C. Zucchini, tomatoes, and onions.",
+                    "D. Eggplants, spinach, and corn."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_37_real.mp4"
+    }
+]

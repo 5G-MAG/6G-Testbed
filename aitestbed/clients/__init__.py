@@ -34,6 +34,8 @@ from .realtime_client import (
     Voice,
 )
 from .realtime_webrtc_client import RealtimeWebRTCClient
+from .realtime_webrtc_vlm_client import RealtimeWebRTCVLMClient
+from .openai_token_client import OpenAITokenClient
 
 __all__ = [
     "LLMClient",
@@ -67,4 +69,8 @@ __all__ = [
     "RealtimeEventType",
     "Modality",
     "Voice",
+    # Real-time VLM
+    "RealtimeWebRTCVLMClient",
+    # chat with token ID
+    "OpenAITokenClient",
 ]

@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:11]: A man in a white shirt with the number 10 and red shorts is walking on a soccer field. He gradually approaches a referee in a red shirt and black shorts, who is holding a soccer ball. The crowd in the background is large, with fans cheering and some wearing team colors and waving flags. Multiple security personnel in yellow vests are also visible near the stands. Around the stadium, various sponsors’ banners, such as Wanda and Vivo, are displayed prominently. [0:00:12 - 0:00:14]: A line of soccer players, wearing white shirts and red shorts, stand side by side facing away from the camera, looking towards the goal. One player in a white shirt with the number 20 is kneeling on the ground. All seem focused on the events on the field. [0:00:15 - 0:00:17]: From a wider angle, the same man in the white shirt with the number 10 appears to be preparing for a penalty kick. He is positioned on the penalty mark, facing the goalkeeper wearing a bright green kit. The referee stands to the side, holding the soccer ball. The audience watches from the stands in the background. [0:00:18 - 0:00:20]: Close to the goal, the player places the ball on the penalty mark, preparing to take the kick. The goalkeeper stands on the goal line, focused and ready. The referee observes the scene closely, ensuring the player is ready for the penalty kick. The vibrant crowd continues to watch attentively.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What action is the player in the white shirt with number 20 doing?",
+                "time_stamp": "0:00:14",
+                "answer": "D",
+                "options": [
+                    "A. Walking on the field.",
+                    "B. Preparing for a penalty kick.",
+                    "C. Waving to the crowd.",
+                    "D. Kneeling on the ground."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_6_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:20 - 0:02:40] [0:02:20 - 0:02:25]: A football player in a white and red uniform stands on the grass near the penalty spot, preparing for a penalty kick. The goalkeeper, in a green uniform, stands in front of the goal. The crowd behind the goal is full of spectators, with some stewards in yellow vests positioned near the barriers. There are \"Kia Motors\" advertisements on the boards behind the goal. [0:02:26 - 0:02:28]: The camera shifts to a close-up of the crowd. A woman with emotional expressions has painted red marks on her face and is surrounded by other spectators who appear engaged with the game. [0:02:29 - 0:02:30]: The camera returns to the player on the field. The football player now appears focused, looking at the ball in preparation for the kick. The crowd in the background is still visible, and the yellow-vested stewards remain in position. [0:02:31 - 0:02:32]: The camera focuses again on the crowd, showing two men in red shirts with their hands clasped, seemingly in prayer or anticipation. [0:02:33 - 0:02:36]: The camera angle shifts to show a wider view of the field. The player, still standing near the ball, looks ready to take the penalty while the referee and the goalkeeper await. The stadium is elaborately decorated, and the full crowd can be seen. [0:02:37 - 0:02:39]: The perspective shifts to the view from behind the goal, showing the goalkeeper preparing for the shot. The netting of the goal is visible, and the lights of the stadium shine brightly. The player is seen in the distance, preparing to strike the ball.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What brand is advertised on the boards behind the goal?",
+                "time_stamp": "00:02:25",
+                "answer": "D",
+                "options": [
+                    "A. Adidas.",
+                    "B. Nike.",
+                    "C. Pepsi.",
+                    "D. Kia Motors."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the crowd's reaction during the player's preparation for the penalty kick?",
+                "time_stamp": "00:02:33",
+                "answer": "D",
+                "options": [
+                    "A. Celebrating wildly.",
+                    "B. Leaving the stadium.",
+                    "C. Booing the player.",
+                    "D. Seemingly in prayer or anticipation."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_6_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:40 - 0:05:00] [0:04:40]: The video begins with the close-up view of a soccer player, wearing a black jersey with a checkered badge, walking with his head down and touching the back of his neck. The background shows a blurry crowd and some FIFA branding. [0:04:41 - 0:04:43]: The camera shifts to a wider view of a large soccer stadium packed with spectators. The focal point is on the penalty area, where a player in a black jersey with red socks stands near the penalty spot, preparing for a kick. [0:04:44 - 0:04:47]: The player in black moves slightly closer to the ball, getting ready to take the shot. The goalkeeper in a yellow jersey is positioned near the goal line, and there are additional figures behind the goal net. [0:04:48 - 0:04:49]: The player in black is now standing very close to the ball, tilting his body forward with one arm raised. The crowd in the background remains intensely engaged in the moment. [0:04:50 - 0:04:52]: The focus tightens on the scenario: the player in black jersey appears to have taken the shot, bending down. The goalkeeper, clad in a bright yellow uniform, is seen behind the goal line with arms outstretched. [0:04:53 - 0:04:54]: A close-up of the goalkeeper, who looks focused and is gesturing with his hands. He seems ready to react to the incoming ball. [0:04:56 - 0:04:57]: The goalkeeper, wearing the number '1' jersey, keeps his eyes on the ball, maintaining a defensive stance in the goal. [0:04:58 - 0:04:59]: Finally, the scene shows the goalkeeper from behind, standing firmly at the goal line with arms raised high, looking toward the field.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the player in the black jersey doing just now?",
+                "time_stamp": "0:04:53",
+                "answer": "D",
+                "options": [
+                    "A. Raising both arms.",
+                    "B. Moving away from the ball.",
+                    "C. Running toward the crowd.",
+                    "D. Bending down to adjust the football."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_6_real.mp4"
+    },
+    {
+        "time": "[0:07:00 - 0:08:00]",
+        "captions": "[0:07:00 - 0:07:20] [0:07:00 - 0:07:05]: A soccer player, dressed in a black and dark red uniform, is about to take a penalty kick. The goalkeeper, in a yellow uniform, stands in front of the goal preparing for the shot. The penalty taker begins his run towards the ball as the referee, dressed in red, observes near the penalty area. The goal's net and an advertisement banner are visible behind the keeper, and the crowd in the background intently watches the scene. [0:07:05 - 0:07:07]: The player strikes the ball towards the goal. The goalkeeper dives to his right side, fully extended, attempting to save the penalty. The ball is in mid-air heading towards the corner of the goal. The referee and audience continue to observe closely as the action unfolds. [0:07:07 - 0:07:09]: The ball narrowly misses the goal, and the goalkeeper starts to get up from his dive. The penalty taker reacts in disappointment while another player, wearing a dark-colored uniform, covers his face with his elbow in a gesture of disbelief or frustration. The crowd behind the goal shows a mixture of reactions - some cheering, while others are seemingly tense. [0:07:10 - 0:07:11]: In a close-up frame, a man in a black shirt inside the spectators’ area reacts with an excited expression. He is surrounded by other individuals who seem equally engaged in the match, showing varying displays of emotion. Another spectator pats him on the back in a congratulatory manner. [0:07:12 - 0:07:13]: The focus shifts to the stands where a man dressed in a red and white checkered shirt appears distraught. His expression suggests disappointment, probably aligning with the missed penalty. He holds his head and looks down as the crowd around him exhibits mixed emotions. [0:07:14 - 0:07:15]: Another man dressed similarly in red and white colors is seen with a noticeable look of concern. He has his hands on the sides of his face, possibly shocked at the penalty miss.  [0:07:16 - 0:07:19]: Returning to the field, the focus is back on the penalty taker, seen from behind, with his name and number (\"PIVARIC 22\") on his jersey. He is making another attempt at scoring as he runs up to kick the ball. The goalkeeper, again in yellow, prepares to defend the goal. The ball is kicked firmly towards the net, and the goalkeeper makes another dive to save it. The player watches anxiously as the ball heads toward the goal.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What is written on the back of the goalkeeper's jersey?",
+                "time_stamp": "0:07:05",
+                "answer": "C",
+                "options": [
+                    "A. SMITH 10.",
+                    "B. JONES 15.",
+                    "C. SCHEMEICHEL 1.",
+                    "D. MARTIN 8."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "football",
+        "video_path": "./videos/sample_6_real.mp4"
+    }
+]

@@ -8,6 +8,7 @@
 
 selected_profiles:
   - no_emulation
+  - lossy
   - 6g_itu_hrllc
   - 5g_urban
   - wifi_good
@@ -25,6 +26,19 @@ profiles:
     jitter_ms: 0
     delay_distribution: fixed
     loss_pct: 0.0
+    loss_correlation_pct: 0
+    reorder_pct: 0.0
+    reorder_correlation_pct: 0
+    duplicate_pct: 0.0
+    limit_packets: null
+    rate_mbit: null
+
+  lossy:
+    description: "Lossy"
+    delay_ms: 0
+    jitter_ms: 0
+    delay_distribution: fixed
+    loss_pct: 10.0
     loss_correlation_pct: 0
     reorder_pct: 0.0
     reorder_correlation_pct: 0
