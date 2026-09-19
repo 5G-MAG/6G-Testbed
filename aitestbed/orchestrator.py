@@ -12,6 +12,7 @@ import time
 import yaml
 import json
 import signal
+import sys
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
@@ -528,6 +529,19 @@ class TestbedOrchestrator:
 
         results = []
 
+        # --run-timeout isolates each run in a forked worker process. Scenarios
+        # whose in-process state cannot survive a fork (see
+        # BaseScenario.fork_isolation) run inline instead, without a timeout.
+        fork_blocker = None
+        if run_timeout is not None:
+            fork_blocker = self._fork_isolation_blocker(scenario)
+            if fork_blocker:
+                logger.warning(
+                    f"Per-run timeout ({run_timeout:.0f}s) is not enforced for "
+                    f"{scenario_name}: {fork_blocker}, so the run cannot be "
+                    "isolated in a forked worker process."
+                )
+
         try:
             for run_index in range(start_run, runs):
                 logger.info(f"Running {scenario_name} [{run_index + 1}/{runs}] with profile {profile_name}")
@@ -537,7 +551,7 @@ class TestbedOrchestrator:
                 while True:
                     t_start = time.time()
 
-                    if run_timeout is not None:
+                    if run_timeout is not None and fork_blocker is None:
                         result = self._run_with_timeout(
                             scenario, profile_name, run_index, run_timeout,
                             scenario_name)
@@ -617,6 +631,29 @@ class TestbedOrchestrator:
             )
 
         return results
+
+    @staticmethod
+    def _fork_isolation_blocker(scenario) -> Optional[str]:
+        """Return why ``scenario`` must not run in a forked worker, or None.
+
+        A fork()ed child inherits the parent's CUDA context, which CUDA then
+        refuses to use ("Cannot re-initialize CUDA in forked subprocess").
+        Scenarios that pull GPU models into the orchestrator process opt out
+        via ``fork_isolation = False`` (e.g. realtime_video_understanding,
+        whose client preloads the Liquid tokenizer in ``__init__``). As a
+        safety net the same applies whenever torch has already initialised
+        CUDA in this process, whatever the scenario declares.
+        """
+        if not getattr(scenario, "fork_isolation", True):
+            return f"{type(scenario).__name__} sets fork_isolation=False"
+        torch = sys.modules.get("torch")
+        if torch is not None:
+            try:
+                if torch.cuda.is_initialized():
+                    return "CUDA is already initialised in the orchestrator process"
+            except Exception:  # noqa: BLE001, torch built without CUDA support
+                pass
+        return None
 
     def _run_with_timeout(
         self,

@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -177,3 +178,40 @@ def test_timeout_kills_worker_before_late_side_effect(tmp_path):
     assert not result.success
     time.sleep(0.5)
     assert not marker.exists()
+
+
+class _GpuScenario:
+    fork_isolation = False
+
+    def run(self, network_profile, run_index):
+        return "in-process"
+
+
+def test_fork_isolation_opt_out_is_honoured(monkeypatch):
+    """A scenario holding fork-unsafe state must not be run in a forked worker."""
+    monkeypatch.delitem(sys.modules, "torch", raising=False)
+    assert _TestbedOrchestrator._fork_isolation_blocker(_SlowScenario(None)) is None
+    assert _TestbedOrchestrator._fork_isolation_blocker(_GpuScenario())
+
+
+def test_fork_isolation_blocked_once_cuda_is_initialised(monkeypatch):
+    """Once the orchestrator process owns a CUDA context, forking is unsafe."""
+    class _Cuda:
+        @staticmethod
+        def is_initialized():
+            return True
+
+    class _Torch:
+        cuda = _Cuda()
+
+    monkeypatch.setitem(sys.modules, "torch", _Torch())
+    assert _TestbedOrchestrator._fork_isolation_blocker(_SlowScenario(None))
+
+
+def test_realtime_video_scenario_opts_out_of_fork_isolation():
+    """The VLM client preloads a CUDA model in __init__ (PR #6)."""
+    import pytest
+    pytest.importorskip("aiortc.codecs.tokenId")
+    from scenarios.realtime_video import RealtimeVideoUnderstandingScenario
+
+    assert RealtimeVideoUnderstandingScenario.fork_isolation is False

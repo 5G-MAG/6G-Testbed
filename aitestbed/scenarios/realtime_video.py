@@ -28,6 +28,14 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
     Real-time video understanding scenario.
     """
 
+    # RealtimeWebRTCVLMClient.__init__ preloads the Liquid image tokenizer onto
+    # CUDA (TokenIdEncoder.preload_bridge), and the orchestrator constructs one
+    # in its own process through get_client("vlm-local"). A CUDA context cannot
+    # be reused in a fork()ed child ("Cannot re-initialize CUDA in forked
+    # subprocess"), so this scenario must run in-process even when
+    # --run-timeout is set. See TestbedOrchestrator._fork_isolation_blocker.
+    fork_isolation = False
+
     def __init__(
         self,
         client: LLMClient,
