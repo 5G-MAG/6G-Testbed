@@ -10,8 +10,13 @@
 #   pip install -r aitestbed/requirements.txt
 
 # LLM Clients
-openai>=1.0.0
-anthropic>=0.40.0
+# openai 3.x, anthropic 1.x and mcp 2.x switched to httpx2, which requires
+# h11>=0.16. Every mitmproxy release that installs on Python 3.10/3.11 (<12)
+# pins h11<0.15, and pip only finds that out after trying each of those
+# releases, then gives up with "resolution-too-deep". The caps keep the
+# resolver on the httpx-based lines the clients were written against.
+openai>=1.0.0,<3
+anthropic>=0.40.0,<1
 azure-ai-inference>=1.0.0b1
 google-genai>=1.0.0
 websockets>=12.0  # For OpenAI Realtime API
@@ -58,7 +63,7 @@ playwright>=1.41.0
 # Some MCP servers are npm packages, others are Python packages.
 # Install npm-based servers: npm install -g @modelcontextprotocol/server-brave-search
 # The Python MCP client uses subprocess to communicate with MCP servers.
-mcp>=1.0.0              # Python MCP client SDK (mcp.types, protocol constants)
+mcp>=1.0.0,<2           # Python MCP client SDK (mcp.types, protocol constants); 2.x is httpx2-based, see "LLM Clients"
 mcp-server-fetch>=2025.0.0
 
 # Optional: Alpaca market data MCP server
