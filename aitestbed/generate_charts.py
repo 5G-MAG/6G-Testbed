@@ -58,6 +58,18 @@ except ImportError:
     HAS_RAN2 = False
     compute_ran2_metrics = None
 
+
+def _boxplot(ax, data, labels, **kwargs):
+    """ax.boxplot with tick labels across matplotlib versions.
+
+    matplotlib 3.9 renamed ``labels=`` to ``tick_labels=`` and 3.11 removed
+    the old name; the requirements floor (3.7) only knows the old one.
+    """
+    try:
+        return ax.boxplot(data, tick_labels=labels, **kwargs)
+    except TypeError:
+        return ax.boxplot(data, labels=labels, **kwargs)
+
 ANONYMIZER = get_anonymizer()
 
 def load_data_from_db(db_path: str = "logs/traffic_logs.db", since_timestamp: float = None) -> list[dict]:
@@ -592,7 +604,7 @@ def generate_protocol_comparison_chart(records: list[dict], output_dir: Path) ->
     data = list(valid_protocols.values())
     labels = list(valid_protocols.keys())
 
-    bp = ax1.boxplot(data, labels=labels, patch_artist=True)
+    bp = _boxplot(ax1, data, labels, patch_artist=True)
     colors = ['#3498db', '#9b59b6', '#e67e22', '#1abc9c', '#e74c3c']
     for patch, color in zip(bp['boxes'], colors[:len(bp['boxes'])]):
         patch.set_facecolor(color)
@@ -1900,7 +1912,7 @@ def generate_token_rate_by_profile_chart(records: list[dict], output_dir: Path) 
 
     # Box plot
     box_data = [profile_rates[p] for p in profiles]
-    bp = ax2.boxplot(box_data, labels=profiles, patch_artist=True)
+    bp = _boxplot(ax2, box_data, profiles, patch_artist=True)
     for patch in bp["boxes"]:
         patch.set_facecolor("#3498db")
         patch.set_alpha(0.6)
@@ -2125,7 +2137,7 @@ def generate_inter_turn_idle_chart(records: list[dict], output_dir: Path) -> str
 
     # Box plot
     box_data = [profile_gaps[p] for p in profiles]
-    bp = ax2.boxplot(box_data, labels=profiles, patch_artist=True)
+    bp = _boxplot(ax2, box_data, profiles, patch_artist=True)
     for patch in bp["boxes"]:
         patch.set_facecolor("#3498db")
         patch.set_alpha(0.6)
@@ -2298,7 +2310,7 @@ def generate_mcp_transport_comparison_chart(records: list[dict], output_dir: Pat
 
     # Latency comparison box plot
     lat_data = [transport_data[t]["latency"] for t in transports]
-    bp1 = ax1.boxplot(lat_data, labels=transports, patch_artist=True)
+    bp1 = _boxplot(ax1, lat_data, transports, patch_artist=True)
     colors_t = ["#3498db", "#e67e22"]
     for patch, color in zip(bp1["boxes"], colors_t):
         patch.set_facecolor(color)
@@ -2310,7 +2322,7 @@ def generate_mcp_transport_comparison_chart(records: list[dict], output_dir: Pat
 
     # Bytes comparison box plot
     byte_data = [transport_data[t]["bytes"] for t in transports]
-    bp2 = ax2.boxplot(byte_data, labels=transports, patch_artist=True)
+    bp2 = _boxplot(ax2, byte_data, transports, patch_artist=True)
     for patch, color in zip(bp2["boxes"], colors_t):
         patch.set_facecolor(color)
         patch.set_alpha(0.7)
@@ -2771,7 +2783,7 @@ def generate_pcap_rtt_chart(pcap_metrics: list, output_dir: Path) -> str:
                 rtt_by_file.append(m.rtt_samples)
                 labels.append(Path(m.pcap_file).stem[:20])
         if rtt_by_file:
-            bp = ax2.boxplot(rtt_by_file, labels=labels, patch_artist=True)
+            bp = _boxplot(ax2, rtt_by_file, labels, patch_artist=True)
             for patch in bp['boxes']:
                 patch.set_facecolor('#3498db')
                 patch.set_alpha(0.7)
