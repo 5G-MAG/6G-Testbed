@@ -4,6 +4,7 @@ The fixtures synthesize small libpcap files with dpkt so the tests exercise
 the real parse path without shipping binary captures.
 """
 
+import json
 import struct
 
 import pytest
@@ -396,3 +397,69 @@ class TestSequenceIntervalMerging:
         ranges = []
         assert PcapAnalyzer._record_sequence_interval(ranges, 100, 100) is False
         assert ranges == []
+
+
+class TestUDPFlows:
+    """UDP flow keying and direction: anchored on a target port when one is
+    known, otherwise on the first datagram seen. Both ends of an RTP stream
+    use ephemeral ports, so the lower-port rule must not be used for UDP."""
+
+    def _bidirectional(self, tmp_path, sport, dport, name="capture_eth0.pcap"):
+        pkts = []
+        for i in range(5):
+            t = 5000.0 + i * 0.02
+            pkts.append((t, _udp_frame(CLIENT_IP, SERVER_IP, sport, dport)))
+            pkts.append((t + 0.005, _udp_frame(SERVER_IP, CLIENT_IP, dport, sport)))
+        path = tmp_path / name
+        _write_pcap(path, pkts)
+        return path
+
+    def test_direction_anchored_on_target_port(self, tmp_path):
+        path = self._bidirectional(tmp_path, 45076, 3478)
+        m = analyze_pcap(str(path), target_ports=[3478])
+
+        assert m.udp_packets == 10
+        assert m.udp_flows == 1
+        assert m.ul_packets == 5 and m.dl_packets == 5
+        assert len({r.flow_key for r in m.packets}) == 1
+        assert m.packets[0].flow_key == f"udp:{CLIENT_IP}:45076-{SERVER_IP}:3478"
+
+    def test_target_port_anchors_even_when_server_speaks_first(self, tmp_path):
+        pkts = [(5000.0, _udp_frame(SERVER_IP, CLIENT_IP, 3478, 45076)),
+                (5000.01, _udp_frame(CLIENT_IP, SERVER_IP, 45076, 3478))]
+        path = tmp_path / "capture_eth0.pcap"
+        _write_pcap(path, pkts)
+        m = analyze_pcap(str(path), target_ports=[3478])
+
+        assert [r.direction for r in m.packets] == ["dl", "ul"]
+        assert m.udp_flows == 1
+
+    def test_first_seen_is_client_when_no_port_is_known(self, tmp_path):
+        # Server holds the *higher* port: the lower-port rule would invert this.
+        path = self._bidirectional(tmp_path, 45076, 51000, name="capture_lo_x.pcap")
+        m = analyze_pcap(str(path))
+
+        assert m.udp_flows == 1
+        assert m.ul_packets == 5 and m.dl_packets == 5
+        assert m.packets[0].direction == "ul"
+        assert m.packets[1].direction == "dl"
+        assert len({r.flow_key for r in m.packets}) == 1
+
+    def test_distinct_tuples_are_distinct_flows(self, tmp_path):
+        pkts = [(5000.0, _udp_frame(CLIENT_IP, SERVER_IP, 40000, 3478)),
+                (5000.1, _udp_frame(CLIENT_IP, SERVER_IP, 40001, 3478)),
+                (5000.2, _udp_frame(SERVER_IP, CLIENT_IP, 3478, 40000))]
+        path = tmp_path / "capture_eth0.pcap"
+        _write_pcap(path, pkts)
+        m = analyze_pcap(str(path))
+
+        assert m.udp_flows == 2
+
+    def test_to_dict_reports_udp(self, tmp_path):
+        path = self._bidirectional(tmp_path, 45076, 3478)
+        d = analyze_pcap(str(path)).to_dict()
+
+        assert d["udp_packets"] == 10
+        assert d["udp_flows"] == 1
+        assert d["udp_bytes"] > 0
+        json.dumps(d)

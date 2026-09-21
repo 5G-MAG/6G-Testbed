@@ -8,7 +8,7 @@ Provides the NetworkEmulator class for applying network condition emulation
 import logging
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 import yaml
 
@@ -95,6 +95,9 @@ class NetworkEmulator:
         self.bidirectional = bidirectional
         self.ifb_device = ifb_device
         self._ifb_initialized = False
+        # Loopback shaping state, see apply_profile_to_loopback().
+        self._lo_port: Optional[int] = None
+        self._lo_selectors: tuple[tuple[str, Optional[int]], ...] = ()
 
         if profiles_path:
             self.load_profiles(profiles_path)
@@ -817,24 +820,64 @@ class NetworkEmulator:
             logger.error(f"tc command error: {e}")
             return False
 
-    def apply_profile_to_loopback(
-        self, profile_name: str, dest_port: int
-    ) -> bool:
-        """Apply a netem profile to the loopback interface for a specific port.
+    # IP protocol numbers for the loopback selectors.
+    _LOOPBACK_PROTOCOLS = {"tcp": 6, "udp": 17}
 
-        Uses ``tc prio`` + ``tc filter`` + ``iptables`` mark so that only
-        traffic to/from *dest_port* is shaped, leaving all other loopback
-        traffic unaffected.
+    def apply_profile_to_loopback(
+        self,
+        profile_name: str,
+        dest_port: Optional[int] = None,
+        *,
+        selectors: Sequence[tuple[str, Optional[int]]] = (),
+    ) -> bool:
+        """Apply a netem profile to selected traffic on the loopback interface.
+
+        A ``prio`` root qdisc on ``lo`` sends only the selected traffic
+        through a netem leaf and leaves everything else on the host
+        untouched. Traffic is selected by ``(protocol, port)`` pairs:
+
+        * ``dest_port`` alone (the original form) selects TCP to or from
+          that port.
+        * ``selectors`` adds any number of ``("tcp" | "udp", port)`` pairs.
+          A port of ``None`` selects every packet of that protocol, which a
+          WebRTC session needs because ICE negotiates its media ports.
+        * With neither, all loopback traffic is shaped.
+
+        IPv4 and IPv6 are both matched. Traffic between two local endpoints
+        crosses ``lo`` once per direction, so a one-way ``delay_ms`` yields
+        a round trip of about twice that, as on a real interface shaped
+        bidirectionally. A ``rate_mbit`` limit uses netem's own rate option
+        and is shared by both directions, since one queue carries them.
+
+        Each call resets the loopback root, so combine selectors in one call
+        rather than calling repeatedly.
 
         Args:
             profile_name: Name of the profile to apply.
-            dest_port: TCP port to filter on.
+            dest_port: TCP port to select.
+            selectors: Additional ``(protocol, port)`` selectors.
 
         Returns:
             True if successful.
+
+        Raises:
+            ProfileNotFoundError: If the profile does not exist.
+            ValueError: On a protocol other than ``"tcp"`` or ``"udp"``.
         """
         if profile_name not in self.profiles:
             raise ProfileNotFoundError(profile_name)
+
+        rules: list[tuple[str, Optional[int]]] = []
+        if dest_port is not None:
+            rules.append(("tcp", int(dest_port)))
+        for proto, port in selectors:
+            proto = proto.lower()
+            if proto not in self._LOOPBACK_PROTOCOLS:
+                raise ValueError(
+                    f"Unsupported loopback selector protocol {proto!r}; "
+                    f"expected one of {sorted(self._LOOPBACK_PROTOCOLS)}"
+                )
+            rules.append((proto, None if port is None else int(port)))
 
         profile = self.profiles[profile_name]
         netem_params = self._build_netem_params(
@@ -853,18 +896,25 @@ class NetworkEmulator:
             duplicate_correlation_pct=profile.duplicate_correlation_pct,
             limit_packets=profile.limit_packets,
         )
-
-        if not netem_params:
-            return True
+        if profile.rate_mbit:
+            # No HTB on lo: netem's built-in rate limiter, one queue for both
+            # directions.
+            netem_params.append(f"rate {profile.rate_mbit}mbit")
 
         # 0) Defensive clear: any stale root qdisc on lo (e.g. from a prior
         # run whose scenario thread was killed by the run-timeout and still
         # holds the qdisc, or from a crashed previous invocation) would cause
         # the `add` below to fail with "Exclusivity flag on, cannot modify".
-        # A delete is idempotent and cheap.
+        # A delete is idempotent and cheap, and a profile with no impairments
+        # must leave lo bare rather than inherit whatever was there.
         self._run_tc_command(
             "sudo tc qdisc del dev lo root", ignore_errors=True
         )
+        self._lo_port = None
+        self._lo_selectors = ()
+
+        if not netem_params:
+            return True
 
         # 1) prio qdisc on lo with 3 bands
         if not self._run_tc_command(
@@ -879,27 +929,58 @@ class NetworkEmulator:
         ):
             return False
 
-        # 3) u32 filters: match TCP dport or sport → band 3 (netem)
-        #    No iptables required — works on minimal systems (e.g. WSL2).
-        #    IP protocol 6 = TCP; dport at offset 22, sport at offset 20 (from IP header start).
-        if not self._run_tc_command(
-            f"sudo tc filter add dev lo parent 1:0 protocol ip prio 1 u32 "
-            f"match ip protocol 6 0xff "
-            f"match ip dport {dest_port} 0xffff flowid 1:3"
-        ):
-            return False
-        if not self._run_tc_command(
-            f"sudo tc filter add dev lo parent 1:0 protocol ip prio 1 u32 "
-            f"match ip protocol 6 0xff "
-            f"match ip sport {dest_port} 0xffff flowid 1:3"
-        ):
-            return False
+        # 3) u32 filters steering the selected traffic to band 3 (netem).
+        #    No iptables required, so this works on minimal systems (WSL2).
+        for cmd in self._loopback_filter_commands(rules):
+            if not self._run_tc_command(cmd):
+                return False
 
         self._lo_port = dest_port
+        self._lo_selectors = tuple(rules)
         logger.info(
-            f"Applied {profile_name} to lo (port {dest_port}): {netem_str}"
+            f"Applied {profile_name} to lo "
+            f"({self._describe_loopback_rules(rules)}): {netem_str}"
         )
         return True
+
+    @classmethod
+    def _loopback_filter_commands(
+        cls, rules: Sequence[tuple[str, Optional[int]]]
+    ) -> list[str]:
+        """tc filter commands steering *rules* into the netem band on lo.
+
+        Port matches use u32's ``ip dport``/``ip sport`` selectors, which
+        assume an IP header without options; the same holds for ``ip6``.
+        """
+        base = "sudo tc filter add dev lo parent 1:0"
+        if not rules:
+            return [f"{base} protocol all prio 1 u32 match u32 0 0 flowid 1:3"]
+        cmds: list[str] = []
+        for proto, port in rules:
+            number = cls._LOOPBACK_PROTOCOLS[proto]
+            for family, prefix in (("ip", "ip"), ("ipv6", "ip6")):
+                head = (
+                    f"{base} protocol {family} prio 1 u32 "
+                    f"match {prefix} protocol {number} 0xff"
+                )
+                if port is None:
+                    cmds.append(f"{head} flowid 1:3")
+                    continue
+                for side in ("dport", "sport"):
+                    cmds.append(
+                        f"{head} match {prefix} {side} {port} 0xffff flowid 1:3"
+                    )
+        return cmds
+
+    @staticmethod
+    def _describe_loopback_rules(
+        rules: Sequence[tuple[str, Optional[int]]]
+    ) -> str:
+        if not rules:
+            return "all traffic"
+        return ", ".join(
+            proto if port is None else f"{proto}:{port}" for proto, port in rules
+        )
 
     def clear_loopback(self) -> bool:
         """Remove netem rules from the loopback interface."""
@@ -909,6 +990,7 @@ class NetworkEmulator:
         )
 
         self._lo_port = None
+        self._lo_selectors = ()
         return True
 
     def get_status(self) -> dict:

@@ -45,6 +45,46 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
         super().__init__(client, logger, config)
         self._vlm_client = None
         self._protocol = "webrtc"
+        # Set by the orchestrator (it looks for an `emulator` attribute) so
+        # the scenario can shape the loopback path its WebRTC media takes.
+        self.emulator = None
+        self._current_network_profile = None
+        self._netem_on_lo = False
+
+    def _apply_loopback_shaping(self, network_profile: str, signaling_port: int) -> None:
+        """Shape the local WebRTC session on lo.
+
+        The VLM server runs on this host. ICE never offers 127.0.0.1 as a
+        host candidate, so the media flows between the primary interface
+        address and itself, which the kernel delivers over ``lo``: the netem
+        tree on the primary interface never sees it. RTP/RTCP ports are
+        negotiated by ICE, so all loopback UDP is shaped, plus TCP on the
+        signaling port. The no_emulation reference profile leaves lo bare.
+        """
+        profile = self._current_network_profile or network_profile
+        if self.emulator is None or not profile or profile == "no_emulation":
+            return
+        try:
+            ok = self.emulator.apply_profile_to_loopback(
+                profile,
+                selectors=[("udp", None), ("tcp", int(signaling_port))],
+            )
+            # Even a partial apply leaves a root qdisc on lo to clear.
+            self._netem_on_lo = True
+            if ok:
+                print(f"  Applied netem ({profile}) to lo: all UDP + tcp:{signaling_port}")
+            else:
+                logger.warning(f"Failed to shape loopback for profile {profile}")
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Failed to shape loopback for profile {profile}: {e}")
+
+    def _clear_loopback_shaping(self) -> None:
+        if self._netem_on_lo and self.emulator is not None:
+            try:
+                self.emulator.clear_loopback()
+            except Exception:  # noqa: BLE001
+                pass
+            self._netem_on_lo = False
 
     @property
     def scenario_type(self) -> str:
@@ -107,6 +147,8 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
             model=model,
             network_profile=network_profile, # for result saving
         )
+
+        self._apply_loopback_shaping(network_profile, signaling_port)
 
         try:
             # Connect
@@ -244,6 +286,9 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
                     await self._vlm_client.disconnect()
                 except:
                     pass
+
+        finally:
+            self._clear_loopback_shaping()
 
         return result
 

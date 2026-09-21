@@ -270,7 +270,9 @@ class PcapMetrics:
             "tcp_packets": self.tcp_packets,
             "udp_packets": self.udp_packets,
             "total_bytes": self.total_bytes,
+            "udp_bytes": self.udp_bytes,
             "tcp_flows": self.tcp_flows,
+            "udp_flows": self.udp_flows,
             "avg_throughput_mbps": self.avg_throughput_mbps,
             "peak_throughput_mbps": self.peak_throughput_mbps,
             "rtt_mean_ms": self.rtt_mean_ms,
@@ -337,6 +339,8 @@ class PcapAnalyzer:
 
         metrics = PcapMetrics(pcap_file=str(pcap_path))
         flows: dict[str, TCPFlow] = {}
+        # Canonical client->server keys of the UDP 5-tuples seen so far.
+        udp_flows: set[str] = set()
         # Locally bound ports are often allocated dynamically. A configured
         # target-port filter is useful on a noisy WAN interface but must never
         # discard traffic from a capture the caller flagged as exempt.
@@ -427,24 +431,11 @@ class PcapAnalyzer:
                             ))
 
                         elif isinstance(ip.data, dpkt.udp.UDP):
-                            udp = ip.data
-                            # Track UDP throughput
-                            if filter_ports is None or udp.sport in filter_ports or udp.dport in filter_ports:
-                                metrics.udp_packets += 1
-                                metrics.udp_bytes += len(buf)
-                                bucket = int(ts / bucket_sec)
-                                direction = self._packet_direction(udp.sport, udp.dport, filter_ports)
-                                throughput_buckets[bucket][f"{direction}_bytes"] += len(ip.data)
-                                metrics.packets.append(PacketRecord(
-                                    timestamp=ts,
-                                    size=len(ip.data),
-                                    direction=direction,
-                                    payload_len=len(udp.data),
-                                    flow_key=(
-                                        f"udp:{src_ip}:{udp.sport}-"
-                                        f"{dst_ip}:{udp.dport}"
-                                    ),
-                                ))
+                            self._record_udp_packet(
+                                udp_flows, metrics, throughput_buckets, bucket_sec,
+                                ts, src_ip, dst_ip, ip.data, len(ip.data), len(buf),
+                                filter_ports,
+                            )
                         else:
                             metrics.other_packets += 1
 
@@ -475,18 +466,11 @@ class PcapAnalyzer:
                                 flow_key=flow.flow_key,
                             ))
                         elif isinstance(ip6.data, dpkt.udp.UDP):
-                            udp = ip6.data
-                            if filter_ports is None or udp.sport in filter_ports or udp.dport in filter_ports:
-                                metrics.udp_packets += 1
-                                metrics.udp_bytes += len(buf)
-                                direction = self._packet_direction(udp.sport, udp.dport, filter_ports)
-                                bucket = int(ts / bucket_sec)
-                                throughput_buckets[bucket][f"{direction}_bytes"] += len(ip6.data)
-                                metrics.packets.append(PacketRecord(
-                                    timestamp=ts, size=len(ip6.data), direction=direction,
-                                    payload_len=len(udp.data),
-                                    flow_key=f"udp:{src_ip}:{udp.sport}-{dst_ip}:{udp.dport}",
-                                ))
+                            self._record_udp_packet(
+                                udp_flows, metrics, throughput_buckets, bucket_sec,
+                                ts, src_ip, dst_ip, ip6.data, len(ip6.data), len(buf),
+                                filter_ports,
+                            )
                         else:
                             metrics.other_packets += 1
 
@@ -501,6 +485,7 @@ class PcapAnalyzer:
         # Process flows
         metrics.flows = list(flows.values())
         metrics.tcp_flows = len([f for f in metrics.flows if f.packets_sent > 0 or f.packets_recv > 0])
+        metrics.udp_flows = len(udp_flows)
 
         # Calculate RTT statistics from handshakes
         rtt_samples = []
@@ -819,6 +804,81 @@ class PcapAnalyzer:
             merged.append((merged_start, merged_end))
         ranges[:] = merged
         return retransmitted
+
+    def _record_udp_packet(
+        self,
+        udp_flows: set[str],
+        metrics: PcapMetrics,
+        throughput_buckets: dict,
+        bucket_sec: float,
+        ts: float,
+        src_ip: str,
+        dst_ip: str,
+        udp: 'dpkt.udp.UDP',
+        ip_payload_len: int,
+        frame_len: int,
+        filter_ports: Optional[set[int]],
+    ) -> None:
+        """Account one UDP datagram: counters, direction, and packet record.
+
+        UDP has no handshake, so a flow is a 5-tuple. Its direction is
+        anchored on a known server port when ``filter_ports`` names one, and
+        otherwise on whichever side sent the first datagram, which is the
+        client for DNS, QUIC and ICE-negotiated WebRTC media alike. The
+        lower-port heuristic used for TCP is wrong for exactly those flows:
+        both ends of an RTP stream use ephemeral ports.
+        """
+        if (
+            filter_ports is not None
+            and udp.sport not in filter_ports
+            and udp.dport not in filter_ports
+        ):
+            return
+        metrics.udp_packets += 1
+        metrics.udp_bytes += frame_len
+        direction, flow_key = self._udp_flow_direction(
+            udp_flows, src_ip, udp.sport, dst_ip, udp.dport, filter_ports
+        )
+        bucket = int(ts / bucket_sec)
+        throughput_buckets[bucket][f"{direction}_bytes"] += ip_payload_len
+        metrics.packets.append(PacketRecord(
+            timestamp=ts,
+            size=ip_payload_len,
+            direction=direction,
+            payload_len=len(udp.data),
+            flow_key=flow_key,
+        ))
+
+    @staticmethod
+    def _udp_flow_direction(
+        udp_flows: set[str],
+        src_ip: str,
+        sport: int,
+        dst_ip: str,
+        dport: int,
+        target_ports: Optional[set[int]],
+    ) -> tuple[str, str]:
+        """Return ``(direction, canonical flow key)`` for a UDP datagram.
+
+        The canonical key is always written client->server, so both
+        directions of a flow share one key, as TCP records do.
+        """
+        forward = f"udp:{src_ip}:{sport}-{dst_ip}:{dport}"
+        reverse = f"udp:{dst_ip}:{dport}-{src_ip}:{sport}"
+        if forward in udp_flows:
+            return "ul", forward
+        if reverse in udp_flows:
+            return "dl", reverse
+        # New flow. Anchor on the server port when one is known; otherwise
+        # the first datagram seen is taken as client -> server.
+        if target_ports and ((dport in target_ports) != (sport in target_ports)):
+            if dport in target_ports:
+                udp_flows.add(forward)
+                return "ul", forward
+            udp_flows.add(reverse)
+            return "dl", reverse
+        udp_flows.add(forward)
+        return "ul", forward
 
     @staticmethod
     def _packet_direction(

@@ -268,6 +268,14 @@ The primary pcap should contain the negotiated bidirectional UDP flow to one
 of the default WebRTC service ports. The paired loopback pcap contains only
 local testbed traffic and is not the WebRTC media source.
 
+The local VLM scenario (`realtime_video_understanding`) is the opposite case.
+Its peer runs on this host, ICE never offers 127.0.0.1, and the kernel
+delivers the media between the primary interface address and itself over
+`lo`. That scenario therefore declares `uses_loopback`, which starts the
+loopback pcap, and shapes all loopback UDP plus the TCP signaling port with
+the active profile through `apply_profile_to_loopback`. Its media is in the
+`capture_lo_*.pcap` file, not in the primary capture.
+
 ### Direct Web Search (No MCP)
 
 | Scenario | Engine | Threads | LLM Synthesis | Description |

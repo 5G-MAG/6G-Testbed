@@ -423,6 +423,11 @@ scenarios:
     type: "realtime_video_understanding"
     description: "Real-time visual understanding via VLM model"
     provider: "vlm-local"
+    # The VLM server is local. ICE never offers 127.0.0.1, so the WebRTC
+    # media runs between the primary interface address and itself, which the
+    # kernel carries over lo. This flag starts the loopback pcap and lets the
+    # scenario shape lo (all UDP plus the TCP signaling port).
+    uses_loopback: true
     model: "liquid"
     target_fps: 2
     stream: true

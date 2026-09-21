@@ -34,6 +34,8 @@ try:
 except ImportError:
     HAS_NUMPY = False
 
+from configs import WEBRTC_UDP_PORTS
+
 # Optional pcap analysis
 try:
     from analysis import (
@@ -4310,11 +4312,14 @@ _SESSION_PCAP_TS_RE = _re.compile(r"capture(?:_[a-z0-9]+)?_(\d{8})_(\d{6})\.pcap
 def _collect_capture_target_ports(
     scenarios_yaml: str = "configs/scenarios.yaml",
 ) -> list[int]:
-    """Server ports kept in pcap analysis: web egress (443/80) plus every
-    loopback agent/gateway port declared in the scenario config (OpenClaw
-    gateway, A2A agents, MCP servers). Hardcoding only 443/80 silently drops
-    all loopback traffic, zeroing per-direction metrics for lo captures."""
-    ports = {443, 80}
+    """Server ports kept in pcap analysis: web egress (443/80), the WebRTC
+    media service ports the capture filter records (STUN/TURN/SRTP on
+    3478/3479/5349/5350/19302), plus every loopback agent/gateway port
+    declared in the scenario config (OpenClaw gateway, A2A agents, MCP
+    servers). Hardcoding only 443/80 silently drops all loopback traffic,
+    zeroing per-direction metrics for lo captures, and drops the whole RTP
+    five-tuple of a WebRTC session, reducing it to its TCP signaling."""
+    ports = {443, 80, *WEBRTC_UDP_PORTS}
     try:
         import yaml
         with open(scenarios_yaml) as f:

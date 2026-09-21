@@ -262,12 +262,20 @@ Every packet is labelled `"ul"` (uplink, client to server) or `"dl"`
 1. **Port-based.** If `target_ports` is set and exactly one of the source or
    destination port is in it, the port in the set is the server. A packet
    *towards* it is `ul`; a packet *from* it is `dl`.
-2. **Fallback heuristic.** Otherwise the lower port number is assumed to be
-   the server: `sport < dport` gives `dl`, else `ul`.
+2. **Fallback.** Otherwise, for TCP the lower port number is assumed to be
+   the server: `sport < dport` gives `dl`, else `ul`. For UDP the first
+   datagram seen on a 5-tuple is taken as client to server, and every later
+   datagram of that flow is labelled relative to it.
 
-The fallback is a heuristic and is wrong for connections between two
-ephemeral ports. Pass `target_ports` whenever the server port is known: it is
-what makes direction attribution on loopback captures reliable.
+The TCP fallback is a heuristic and is wrong for connections between two
+ephemeral ports. The UDP fallback is right whenever the client speaks first,
+which holds for DNS, QUIC and ICE-negotiated WebRTC media, but is arbitrary
+for a flow already in progress when the capture started. Pass `target_ports`
+whenever the server port is known: it is what makes direction attribution on
+loopback captures reliable.
+
+UDP flows are counted in `udp_flows`, one per 5-tuple, and both directions
+of a UDP flow share one `flow_key`, written client to server like TCP keys.
 
 ## Sizes: which byte count is which
 
@@ -754,6 +762,8 @@ NetworkEmulator(
 | `get_profile(name)` | Get a profile by name |
 | `get_status()` | Get current tc/netem status |
 | `check_sudo()` | Check if passwordless sudo is available |
+| `apply_profile_to_loopback(name, dest_port=None, *, selectors=())` | Shape selected traffic on `lo`, see [Loopback Shaping](#loopback-shaping) |
+| `clear_loopback()` | Remove the loopback rules |
 
 An interface passed explicitly to the constructor always wins over
 `default_interface` in a profiles file. The YAML value applies only when the
@@ -847,6 +857,47 @@ Capturing on the shaped interface sees traffic *after* egress shaping and
 conditions. Note that shaping and capture interact: a rate limit delays
 packets before they reach the wire, so the timestamps in a capture on the
 shaping host already include the emulated delay.
+
+## Loopback Shaping
+
+Traffic between two processes on the same host never reaches the shaped
+interface: the kernel delivers it over `lo`, whatever address it carries.
+`apply_profile_to_loopback` shapes that path selectively, installing a
+three-band `prio` root on `lo` with a netem leaf that only selected traffic
+enters:
+
+```python
+# TCP to or from one port (a local HTTP server)
+emulator.apply_profile_to_loopback("poor_cellular", 8080)
+
+# A local WebRTC session: media ports are negotiated by ICE, so shape all
+# UDP, plus the TCP signaling port
+emulator.apply_profile_to_loopback(
+    "poor_cellular", selectors=[("udp", None), ("tcp", 1234)]
+)
+
+# Everything on lo
+emulator.apply_profile_to_loopback("poor_cellular")
+
+emulator.clear_loopback()
+```
+
+Selectors are `(protocol, port)` pairs with `protocol` one of `"tcp"` or
+`"udp"`; a port of `None` selects the whole protocol. IPv4 and IPv6 are both
+matched. Each call resets the loopback root, so pass every selector in one
+call.
+
+Two differences from shaping a real interface:
+
+- Both directions cross `lo` once each, so a one-way `delay_ms` produces a
+  round trip of about twice that. This matches bidirectional shaping on a
+  real interface.
+- There is no HTB on `lo`. A `rate_mbit` limit uses netem's own rate option
+  and is shared by both directions, since one queue carries them.
+
+Note that ICE never offers `127.0.0.1` as a host candidate, so a local WebRTC
+peer exchanges media between the primary interface address and itself. That
+traffic still crosses `lo`, and a capture must run on `lo` to see it.
 
 ## Sudoers Setup
 
