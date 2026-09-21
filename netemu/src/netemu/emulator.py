@@ -958,9 +958,12 @@ class NetworkEmulator:
         cmds: list[str] = []
         for proto, port in rules:
             number = cls._LOOPBACK_PROTOCOLS[proto]
-            for family, prefix in (("ip", "ip"), ("ipv6", "ip6")):
+            # tc rejects filters of different protocols under one priority
+            # ("Protocol mismatch for filter with specified priority"), so
+            # each address family gets its own.
+            for family, prefix, prio in (("ip", "ip", 1), ("ipv6", "ip6", 2)):
                 head = (
-                    f"{base} protocol {family} prio 1 u32 "
+                    f"{base} protocol {family} prio {prio} u32 "
                     f"match {prefix} protocol {number} 0xff"
                 )
                 if port is None:

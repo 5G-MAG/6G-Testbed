@@ -47,6 +47,10 @@ class TestSelectors:
         assert sum("match ip6 dport 8080 0xffff" in f for f in filters) == 1
         assert sum("protocol ipv6 " in f for f in filters) == 2
         assert all(f.endswith("flowid 1:3") for f in filters)
+        # One priority per address family: tc refuses mixed protocols under
+        # a shared prio ("Protocol mismatch for filter with specified priority").
+        assert all(" prio 1 " in f for f in filters if "protocol ip " in f)
+        assert all(" prio 2 " in f for f in filters if "protocol ipv6 " in f)
         assert emu._lo_port == 8080
         assert emu._lo_selectors == (("tcp", 8080),)
 
