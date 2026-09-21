@@ -123,6 +123,11 @@ mcpServers:
       - "-m"
       - "mcp_servers.http_bridge"
       - "uvx"
+      # alpaca-mcp-server 2.2.0 imports fastmcp.tools.tool, which fastmcp 4
+      # removed; its own requirement is only fastmcp>=3.1, so a fresh uvx
+      # resolve picks 4.x and the server dies on import (bridge answers 500).
+      - "--with"
+      - "fastmcp<4"
       - "alpaca-mcp-server==2.2.0"
     env:
       ALPACA_API_KEY: "${ALPACA_API_KEY}"
