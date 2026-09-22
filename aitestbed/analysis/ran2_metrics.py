@@ -9,7 +9,13 @@ report/chart generators read verbatim.
 
 Inputs:
     records:        list[dict] from traffic_logs (one per turn)
-    pcap_metrics:   optional list[PcapMetrics] from analysis.pcap_analyzer
+    pcap_metrics:   optional list[PcapMetrics] from netemu.pcap
+
+Packet-level extraction is delegated to netemu.metrics, which owns the
+definitions of handshake RTT, TLS setup, connection setup and flow duration.
+This module keeps the join to scenario and profile labels, the application-layer
+volumes and token counts from the database, and its own interpolating percentile
+so reported values stay comparable with earlier campaigns.
     profiles_yaml:  optional path to configs/profiles.yaml (for loss_pct lookup in Q4.4)
 
 Outputs (top-level dict shape):
@@ -27,11 +33,15 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import statistics
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Optional
+
+from netemu.metrics import collect_connection_samples
 
 
 # ---------------------------------------------------------------------------
@@ -63,6 +73,30 @@ def _distribution(values: list[float]) -> dict[str, Optional[float]]:
     }
 
 
+def _distribution_extended(values: list[float]) -> dict[str, Optional[float]]:
+    """Like _distribution() but also includes p10/p25/p75/p90, plus sum.
+    Used for metrics that need to be plotted as box-plot / CDF (Q2 burst
+    sizes, durations, peak rates, idle gaps)."""
+    if not values:
+        return {"n": 0, "min": None, "p10": None, "p25": None, "p50": None,
+                "p75": None, "p90": None, "p95": None, "p99": None,
+                "max": None, "mean": None, "sum": 0.0}
+    return {
+        "n": len(values),
+        "min": min(values),
+        "p10": _percentile(values, 10),
+        "p25": _percentile(values, 25),
+        "p50": _percentile(values, 50),
+        "p75": _percentile(values, 75),
+        "p90": _percentile(values, 90),
+        "p95": _percentile(values, 95),
+        "p99": _percentile(values, 99),
+        "max": max(values),
+        "mean": statistics.mean(values),
+        "sum": sum(values),
+    }
+
+
 def _cv(values: list[float]) -> Optional[float]:
     """Coefficient of variation — stdev / mean. Returns None on < 2 samples
     or zero mean."""
@@ -78,11 +112,19 @@ def _metadata(record: dict) -> dict:
     raw = record.get("metadata") or ""
     if not raw:
         return {}
+    if isinstance(raw, dict):
+        return raw
     try:
         meta = json.loads(raw)
         return meta if isinstance(meta, dict) else {}
     except Exception:
         return {}
+
+
+def _record_type(record: dict) -> str:
+    """Normalize the two metadata schemas emitted by scenario implementations."""
+    meta = _metadata(record)
+    return str(meta.get("record_type") or meta.get("type") or "")
 
 
 def _is_primary_turn(record: dict) -> bool:
@@ -92,8 +134,10 @@ def _is_primary_turn(record: dict) -> bool:
         return False
     if record.get("turn_index") is not None and record.get("turn_index") < 0:
         return False
-    meta = _metadata(record)
-    if meta.get("record_type") in ("tool_call", "computer_action", "pcap_capture"):
+    if _record_type(record) in (
+        "tool_call", "mcp_tool_call", "computer_action",
+        "computer_use_action", "pcap_capture",
+    ):
         return False
     return True
 
@@ -115,24 +159,81 @@ def _load_profile_loss_pct(profiles_yaml: Optional[str]) -> dict[str, float]:
         return {}
 
 
-def _pcap_for_scenario_profile(
-    pcap_metrics: Iterable,
-    scenario: str,
-    profile: str,
-) -> list:
-    """Filter pcap metrics to the (scenario, profile) pair. Uses `pcap_file`
-    name convention (orchestrator writes `capture_<iface>_<timestamp>.pcap`
-    inside capture dirs; the association is by run grouping in the DB
-    `interface` + `run_id` metadata). Without tight binding we return all
-    pcap_metrics when the caller doesn't pre-filter; downstream code tolerates."""
-    return list(pcap_metrics)
+_PCAP_TS_RE = re.compile(r"capture(?:_[a-z0-9]+)?_(\d{8})_(\d{6})\.pcap$")
+
+
+def _pcap_start_unix(pcap_file: str) -> Optional[float]:
+    """Parse `capture[_iface]_YYYYMMDD_HHMMSS.pcap` -> unix timestamp (local tz).
+
+    The orchestrator writes pcap filenames using `datetime.now().strftime(...)`,
+    which is local time. `datetime.timestamp()` interprets a naive datetime as
+    local time, so this round-trips correctly."""
+    if not pcap_file:
+        return None
+    m = _PCAP_TS_RE.search(Path(pcap_file).name)
+    if not m:
+        return None
+    try:
+        dt = datetime.strptime(f"{m.group(1)}_{m.group(2)}", "%Y%m%d_%H%M%S")
+        return dt.timestamp()
+    except Exception:
+        return None
+
+
+def _build_pcap_sp_map(pcap_metrics: Iterable, records: list[dict]) -> dict[str, tuple[str, str]]:
+    """Map each pcap_file path to (scenario_id, network_profile).
+
+    The orchestrator is invoked once per (scenario, profile); for every run it
+    writes a *pair* of pcaps (main interface + loopback) with the same timestamp
+    in the filename. We:
+      1. group pcap files by their start timestamp (so each pair shares a vote);
+      2. bucket records by the timestamp window [start[i], start[i+1])
+         and let the dominant (scenario, profile) win;
+      3. expand the per-timestamp result back to every pcap file in that group."""
+    by_ts: dict[float, list[str]] = defaultdict(list)
+    for m in pcap_metrics:
+        pf = getattr(m, "pcap_file", "") or ""
+        ts = _pcap_start_unix(pf)
+        if ts is None:
+            continue
+        by_ts[ts].append(pf)
+    if not by_ts:
+        return {}
+
+    boundaries = sorted(by_ts.keys())
+
+    bucket_votes: dict[float, Counter] = defaultdict(Counter)
+    for r in records:
+        rt = r.get("timestamp") or r.get("t_request_start")
+        if rt is None or rt < boundaries[0]:
+            continue
+        # Binary search for the largest boundary <= rt
+        lo, hi = 0, len(boundaries) - 1
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if boundaries[mid] <= rt:
+                lo = mid
+            else:
+                hi = mid - 1
+        sc = r.get("scenario_id") or "?"
+        pr = r.get("network_profile") or "?"
+        bucket_votes[boundaries[lo]][(sc, pr)] += 1
+
+    result: dict[str, tuple[str, str]] = {}
+    for ts, counter in bucket_votes.items():
+        if not counter:
+            continue
+        (sc, pr), _ = counter.most_common(1)[0]
+        for pf in by_ts.get(ts, []):
+            result[pf] = (sc, pr)
+    return result
 
 
 # ---------------------------------------------------------------------------
 # Q1 — UL-heavy
 # ---------------------------------------------------------------------------
 
-def _q1_ul_heavy(records: list[dict], pcap_metrics: list) -> dict:
+def _q1_ul_heavy(records: list[dict], pcap_metrics: list, pcap_sp_map: dict[str, tuple[str, str]]) -> dict:
     """Q1: UL/DL volumes, ratios, per-direction packet counts/sizes.
     Multi-window per-direction throughput comes from pcap_metrics."""
     out = {"per_scenario_profile": {}, "aggregate": {}}
@@ -165,8 +266,12 @@ def _q1_ul_heavy(records: list[dict], pcap_metrics: list) -> dict:
     # per-window peak throughput (Q1.3, Q1.4).
     pcap_rows = []
     for m in pcap_metrics:
+        pf = getattr(m, "pcap_file", "")
+        sc, pr = pcap_sp_map.get(pf, ("?", "?"))
         pcap_rows.append({
-            "pcap_file": getattr(m, "pcap_file", ""),
+            "pcap_file": pf,
+            "scenario_id": sc,
+            "network_profile": pr,
             "ul_packets": getattr(m, "ul_packets", 0),
             "dl_packets": getattr(m, "dl_packets", 0),
             "ul_mean_pkt_size": getattr(m, "ul_mean_pkt_size", None),
@@ -183,20 +288,46 @@ def _q1_ul_heavy(records: list[dict], pcap_metrics: list) -> dict:
 # Q2 — Bursts & delay-bound
 # ---------------------------------------------------------------------------
 
-def _q2_bursts(records: list[dict], pcap_metrics: list) -> dict:
+def _q2_bursts(records: list[dict], pcap_metrics: list, pcap_sp_map: dict[str, tuple[str, str]]) -> dict:
     """Q2: per-direction bursts at 10/100ms gap; burstiness per window;
     TTFB/TTLB (already supported)."""
-    out = {"per_pcap": [], "per_scenario_profile_delay": {}}
+    out = {
+        "per_pcap": [],
+        "per_scenario_profile_delay": {},
+        "per_scenario_profile_bursts": {},
+    }
+
+    # Raw-value buckets per (scenario, profile) × gap × direction so the
+    # downstream chart generator can render extended distributions and
+    # arrival-rate / duty-cycle without a second pcap pass.
+    raw: dict[tuple[str, str], dict] = defaultdict(
+        lambda: {
+            "capture_duration_sum": 0.0,
+            "by_gap": defaultdict(lambda: {
+                "ul": {"sizes": [], "durs": [], "peaks_mbps": []},
+                "dl": {"sizes": [], "durs": [], "peaks_mbps": []},
+            }),
+        }
+    )
 
     for m in pcap_metrics:
         bursts_by_gap = dict(getattr(m, "bursts_by_gap", {}) or {})
         idle_by_gap = dict(getattr(m, "interburst_idle_by_gap", {}) or {})
+        pf = getattr(m, "pcap_file", "")
+        sc, pr = pcap_sp_map.get(pf, ("?", "?"))
+        cap_dur = float(getattr(m, "capture_duration", 0.0) or 0.0)
         entry: dict[str, Any] = {
-            "pcap_file": getattr(m, "pcap_file", ""),
+            "pcap_file": pf,
+            "scenario_id": sc,
+            "network_profile": pr,
+            "capture_duration_sec": cap_dur,
             "burstiness_by_window": dict(getattr(m, "burstiness_by_window", {}) or {}),
             "burst_stats_by_gap": {},
             "interburst_idle_by_gap": {},
         }
+        sp_key = (sc, pr)
+        if sc != "?" and pr != "?":
+            raw[sp_key]["capture_duration_sum"] += cap_dur
         for label, per_dir in bursts_by_gap.items():
             entry["burst_stats_by_gap"][label] = {}
             for direction, bursts in (per_dir or {}).items():
@@ -209,6 +340,11 @@ def _q2_bursts(records: list[dict], pcap_metrics: list) -> dict:
                     "duration_sec": _distribution(durs),
                     "peak_rate_mbps": _distribution(peaks),
                 }
+                if sc != "?" and pr != "?" and direction in ("ul", "dl"):
+                    bucket = raw[sp_key]["by_gap"][label][direction]
+                    bucket["sizes"].extend(sizes)
+                    bucket["durs"].extend(durs)
+                    bucket["peaks_mbps"].extend(peaks)
         for label, per_dir in idle_by_gap.items():
             entry["interburst_idle_by_gap"][label] = {}
             for direction, gaps in (per_dir or {}).items():
@@ -217,6 +353,32 @@ def _q2_bursts(records: list[dict], pcap_metrics: list) -> dict:
                     "cv": _cv(gaps),
                 }
         out["per_pcap"].append(entry)
+
+    # Per-(scenario, profile) aggregates for the new burst charts.
+    for (sc, pr), data in raw.items():
+        cap_total = data["capture_duration_sum"]
+        sp_entry: dict[str, Any] = {
+            "capture_duration_sec_total": cap_total,
+            "by_gap": {},
+        }
+        for label, per_dir in data["by_gap"].items():
+            sp_entry["by_gap"][label] = {}
+            for direction in ("ul", "dl"):
+                buf = per_dir[direction]
+                sizes = buf["sizes"]
+                durs = buf["durs"]
+                peaks = buf["peaks_mbps"]
+                count = len(sizes)
+                sum_dur = sum(durs)
+                sp_entry["by_gap"][label][direction] = {
+                    "count": count,
+                    "arrival_rate_per_sec": (count / cap_total) if cap_total > 0 else None,
+                    "duty_cycle": (sum_dur / cap_total) if cap_total > 0 else None,
+                    "size_bytes": _distribution_extended(sizes),
+                    "duration_sec": _distribution_extended(durs),
+                    "peak_rate_mbps": _distribution_extended(peaks),
+                }
+        out["per_scenario_profile_bursts"][f"{sc}/{pr}"] = sp_entry
 
     # TTFB/TTLB already present in per-record fields — re-emit per (scenario, profile)
     by_key: dict[tuple[str, str], dict[str, list[float]]] = defaultdict(
@@ -247,36 +409,33 @@ def _q2_bursts(records: list[dict], pcap_metrics: list) -> dict:
 # ---------------------------------------------------------------------------
 
 def _q3_rtt(records: list[dict], pcap_metrics: list) -> dict:
-    """Q3: TCP RTT (supported), TLS handshake + HTTP setup RTT (partial),
-    inter-chunk gap vs RTT (new), E2E latency vs RTT (partial)."""
-    out = {"tcp_rtt": {}, "tls_handshake": {}, "http_setup_rtt": {},
+    """Q3: TCP RTT, TLS handshake, full connection setup (SYN → first TLS
+    ApplicationData), inter-chunk gap vs RTT, E2E latency vs RTT."""
+    out = {"tcp_rtt": {}, "tls_handshake": {}, "connection_setup_ms": {},
            "inter_chunk_vs_rtt": {}, "e2e_latency_vs_rtt": {}}
 
-    # TCP handshake RTT + HTTP setup RTT from pcap flows
-    flow_rtts_ms: list[float] = []
-    http_setup_ms: list[float] = []
-    for m in pcap_metrics:
-        for flow in getattr(m, "flows", []) or []:
-            if flow.handshake_rtt:
-                flow_rtts_ms.append(flow.handshake_rtt * 1000.0)
-            # HTTP setup RTT = time_to_first_data - handshake_duration
-            t2fd = flow.time_to_first_data
-            hs_dur = flow.handshake_duration
-            if t2fd is not None and hs_dur is not None:
-                http_setup_ms.append(max(0.0, (t2fd - hs_dur) * 1000.0))
-    out["tcp_rtt"] = _distribution(flow_rtts_ms)
-    out["http_setup_rtt"] = _distribution(http_setup_ms)
+    # Packet-level samples come from netemu.metrics, which owns the extraction
+    # semantics (handshake RTT, TLS ClientHello to first ApplicationData, and
+    # SYN to first application data for the full connection setup, falling back
+    # to first TCP payload on non-TLS flows). They are summarized here with this
+    # module's interpolating percentile so reported values stay comparable with
+    # earlier campaigns.
+    samples = collect_connection_samples(pcap_metrics)
+    out["tcp_rtt"] = _distribution(samples["tcp_handshake_rtt_ms"])
+    out["connection_setup_ms"] = _distribution(samples["connection_setup_ms"])
 
-    # TLS handshake time — stored in per-record metadata.tls when available
-    tls_ms: list[float] = []
-    for r in records:
-        if not _is_primary_turn(r):
-            continue
-        meta = _metadata(r)
-        tls = meta.get("tls") or {}
-        t = tls.get("handshake_ms") or tls.get("handshake_sec")
-        if isinstance(t, (int, float)):
-            tls_ms.append(float(t) * (1000.0 if t < 1.0 else 1.0))
+    # TLS handshake duration falls back to per-record metadata.tls for clients
+    # that report handshake_ms directly and leave no flow-level value.
+    tls_ms: list[float] = [d for d in samples["tls_handshake_ms"] if d > 0]
+    if not tls_ms:
+        for r in records:
+            if not _is_primary_turn(r):
+                continue
+            meta = _metadata(r)
+            tls = meta.get("tls") or {}
+            t = tls.get("handshake_ms") or tls.get("handshake_sec")
+            if isinstance(t, (int, float)):
+                tls_ms.append(float(t) * (1000.0 if t < 1.0 else 1.0))
     out["tls_handshake"] = _distribution(tls_ms)
 
     # Inter-chunk gap vs RTT for streaming turns
@@ -327,6 +486,7 @@ def _q4_variability(
     records: list[dict],
     pcap_metrics: list,
     profile_loss_pct: dict[str, float],
+    pcap_sp_map: dict[str, tuple[str, str]],
 ) -> dict:
     """Q4: volume/packet-count distributions, per-burst distributions (Q2 reuse),
     reliability vs loss, inter-burst idle CV, flow duration, connection reuse,
@@ -346,23 +506,28 @@ def _q4_variability(
             continue
         by_scenario[r.get("scenario_id") or "?"].append(r)
 
+    packet_counts_by_scenario: dict[str, list[int]] = defaultdict(list)
+    for metric in pcap_metrics:
+        mapped_scenario, _ = pcap_sp_map.get(
+            getattr(metric, "pcap_file", ""), ("?", "?")
+        )
+        if mapped_scenario == "?":
+            continue
+        for flow in getattr(metric, "flows", []) or []:
+            total = (
+                (getattr(flow, "packets_sent", 0) or 0)
+                + (getattr(flow, "packets_recv", 0) or 0)
+            )
+            if total > 0:
+                packet_counts_by_scenario[mapped_scenario].append(total)
+
     for scenario, recs in by_scenario.items():
         req_bytes = [r.get("request_bytes") or 0 for r in recs if r.get("success")]
         resp_bytes = [r.get("response_bytes") or 0 for r in recs if r.get("success")]
-        # Packet counts per turn are only available via a pcap<->session join.
-        # We approximate as: for each pcap file, per-flow packets_sent+packets_recv
-        # counted as a single "turn", aggregated across all pcaps for this scenario.
-        # This is coarse but avoids requiring exact time-window joins here.
-        pkt_counts: list[int] = []
-        for m in pcap_metrics:
-            for flow in getattr(m, "flows", []) or []:
-                total = (getattr(flow, "packets_sent", 0) or 0) + (getattr(flow, "packets_recv", 0) or 0)
-                if total > 0:
-                    pkt_counts.append(total)
         out["volume_distribution"][scenario] = {
             "request_bytes": _distribution(req_bytes),
             "response_bytes": _distribution(resp_bytes),
-            "packet_count_per_flow": _distribution(pkt_counts),
+            "packet_count_per_flow": _distribution(packet_counts_by_scenario[scenario]),
         }
 
     # Reliability vs loss_pct — success rate per (scenario, profile) + profile loss_pct
@@ -391,37 +556,41 @@ def _q4_variability(
                 entry[label][direction] = _cv(gaps)
         out["inter_arrival_cv"][name] = entry
 
-    # Connection duration + reuse ratio (Q4.6) + agentic sub-flows (Q4.7)
-    all_flow_durations: list[float] = []
+    # Flow duration and flows-per-capture come from netemu.metrics, which owns
+    # the extraction. Verified identical to the previous local implementation on
+    # the reference capture set.
+    conn_samples = collect_connection_samples(pcap_metrics)
+    all_flow_durations = conn_samples["flow_duration_s"]
+    flows_per_pcap = conn_samples["flows_per_capture"]
+
+    # These two are deliberately NOT delegated, because netemu defines them
+    # differently and swapping the definitions would move published numbers:
+    #   * reuse here means the same 5-tuple recurring across captures, whereas
+    #     netemu.metrics counts flows carrying two or more application exchanges;
+    #   * a destination here is (ip, port), whereas netemu counts distinct ip.
     flow_keys_seen: set = set()
     reuse_hits = 0
     reuse_total = 0
     distinct_dests_per_pcap: list[int] = []
-    flows_per_pcap: list[int] = []
     for m in pcap_metrics:
-        pcap_flow_keys: set = set()
         pcap_dests: set = set()
         for flow in getattr(m, "flows", []) or []:
-            dur = getattr(flow, "duration", 0.0)
-            if dur > 0:
-                all_flow_durations.append(dur)
             fk = getattr(flow, "flow_key", "")
             if fk:
                 reuse_total += 1
                 if fk in flow_keys_seen:
                     reuse_hits += 1
                 flow_keys_seen.add(fk)
-                pcap_flow_keys.add(fk)
             dst_ip = getattr(flow, "dst_ip", "")
-            dst_port = getattr(flow, "dst_port", 0)
             if dst_ip:
-                pcap_dests.add((dst_ip, dst_port))
-        flows_per_pcap.append(len(pcap_flow_keys))
+                pcap_dests.add((dst_ip, getattr(flow, "dst_port", 0)))
         distinct_dests_per_pcap.append(len(pcap_dests))
 
     out["connection_duration"] = {
-        "flow_duration_sec": _distribution(all_flow_durations),
-        "flows_per_pcap": _distribution([float(x) for x in flows_per_pcap]),
+        # Extended distribution so the chart can show p10 (and other in-between
+        # percentiles) without re-scanning pcaps every time.
+        "flow_duration_sec": _distribution_extended(all_flow_durations),
+        "flows_per_pcap": _distribution(flows_per_pcap),
         "connection_reuse_ratio": (reuse_hits / reuse_total) if reuse_total else None,
     }
     out["agentic_flows"] = {
@@ -433,13 +602,13 @@ def _q4_variability(
 
 def _per_tool_bytes(records: list[dict]) -> dict[str, dict]:
     """Aggregate request/response bytes per MCP tool name, from
-    tool-call records in the DB (metadata.record_type == 'tool_call')."""
+    tool-call records in either supported metadata schema."""
     tool_bytes: dict[str, dict] = defaultdict(
         lambda: {"calls": 0, "request_bytes": 0, "response_bytes": 0, "tool_latency_sec": 0.0}
     )
     for r in records:
         meta = _metadata(r)
-        if meta.get("record_type") != "tool_call":
+        if _record_type(r) not in ("tool_call", "mcp_tool_call"):
             continue
         tool = meta.get("tool_name") or meta.get("tool") or "<unknown>"
         entry = tool_bytes[tool]
@@ -572,13 +741,15 @@ def compute_ran2_metrics(
     """Compute the full RAN2 methodology metric set (S4-260859 Annex D)."""
     pcap_metrics = list(pcap_metrics or [])
     profile_loss = _load_profile_loss_pct(profiles_yaml)
+    pcap_sp_map = _build_pcap_sp_map(pcap_metrics, records)
     return {
         "generated_at": time.time(),
         "n_records": len(records),
         "n_pcap_files": len(pcap_metrics),
-        "Q1": _q1_ul_heavy(records, pcap_metrics),
-        "Q2": _q2_bursts(records, pcap_metrics),
+        "n_pcap_sp_mapped": len(pcap_sp_map),
+        "Q1": _q1_ul_heavy(records, pcap_metrics, pcap_sp_map),
+        "Q2": _q2_bursts(records, pcap_metrics, pcap_sp_map),
         "Q3": _q3_rtt(records, pcap_metrics),
-        "Q4": _q4_variability(records, pcap_metrics, profile_loss),
+        "Q4": _q4_variability(records, pcap_metrics, profile_loss, pcap_sp_map),
         "Q5": _q5_tokenized(records, pcap_metrics),
     }

@@ -28,7 +28,7 @@
 **/*.xlsx
 !aitestbed/run_full_tests.sh
 !aitestbed/test_profiles.sh
-!aitestbed/test_vllm.sh
+!training/run_training.sh
 !netemu/scripts/apply_profile.sh
 !netemu/scripts/clear_profile.sh
 !aitestbed/docker/entrypoint.sh
@@ -54,3 +54,9 @@ ml/models/
 ml/data/*.npz
 ml/synthetic/
 ml/results/
+
+# Contribution material and archives never belong in the public repo
+**/*.pptx
+**/*.tar.gz
+**/*.zip
+**/*.bak_*

@@ -23,11 +23,12 @@ fi
 RUNS_PER_SCENARIO=${RUNS_PER_SCENARIO:-10}
 INTER_SCENARIO_DELAY=${INTER_SCENARIO_DELAY:-2}  # Seconds between scenarios
 INTER_PROVIDER_DELAY=${INTER_PROVIDER_DELAY:-5}  # Seconds between providers
-TRACE_PAYLOADS=${TRACE_PAYLOADS:-1}
+TRACE_PAYLOADS=${TRACE_PAYLOADS:-0}
 TRACE_LOG_DIR=${TRACE_LOG_DIR:-logs/traces}
 CAPTURE_PCAP=${CAPTURE_PCAP:-true}  # Enable L3/L4 packet capture by default
 CAPTURE_DIR=${CAPTURE_DIR:-results/captures}
-CAPTURE_FILTER=${CAPTURE_FILTER:-"port 443 or port 80 or port 8080 or port 8000"}  # HTTPS, HTTP, proxy, and vLLM
+DEFAULT_CAPTURE_FILTER=$(python -c 'from configs import DEFAULT_CAPTURE_FILTER; print(DEFAULT_CAPTURE_FILTER)')
+CAPTURE_FILTER=${CAPTURE_FILTER:-$DEFAULT_CAPTURE_FILTER}  # HTTP(S), vLLM, and WebRTC ICE/SRTP/RTP
 CAPTURE_LOOPBACK=${CAPTURE_LOOPBACK:-true}  # Secondary tcpdump on lo for MCP-over-HTTP frames
 MCP_TRANSPORT=${MCP_TRANSPORT:-http}  # MCP server transport: http (default, netem-shaped) or stdio
 ANONYMIZE_DB=${ANONYMIZE_DB:-true}  # Anonymize provider/model names by default
@@ -36,6 +37,8 @@ NETWORK_INTERFACE=${NETWORK_INTERFACE:-auto}  # Network interface for emulation 
 RUN_TIMEOUT_SEC=${RUN_TIMEOUT_SEC:-600}  # Per-run timeout in seconds (0 = no timeout). 600s = head-room for streaming multi-prompt chat (deepseek-coder, deepseek-reasoner).
 STOP_ON_ERROR=${STOP_ON_ERROR:-true}  # Stop on first failed run (default: true)
 RESUME_MODE=${RESUME_MODE:-false}  # Resume from last successful run
+ADD_RUNS_MODE=${ADD_RUNS_MODE:-false}  # Add N more runs of every combo to the existing cycle
+CYCLE_START_FILE=${CYCLE_START_FILE:-logs/.run_cycle_start}  # Persists cycle start unix-ts across invocations
 QUIET_MODE=${QUIET_MODE:-true}  # Show progress bar instead of verbose output
 
 export TRACE_PAYLOADS TRACE_LOG_DIR
@@ -104,18 +107,19 @@ HAS_MULTIMODAL_IMAGES=false
 HAS_SPOTIFY=false
 HAS_ALPACA=false
 HAS_VLLM=false
+HAS_OPENCLAW=false
 RUN_STRESS_TESTS=false
 
 # vLLM lifecycle. When MANAGE_VLLM=true (default), this script starts vllm
 # before the vllm phase and stops it on exit (including INT/TERM/error).
-# Set MANAGE_VLLM=false to skip auto-management — useful when an operator
+# Set MANAGE_VLLM=false to skip auto-management, useful when an operator
 # already runs a long-lived vllm server independently and the script should
 # only probe reachability. The managed server stays loaded across the whole
 # run; if one is already up at ${VLLM_HOST}:${VLLM_PORT}, it is reused.
 #
 # VLLM_BACKEND selects how the server is launched:
-#   docker (default)  — runs vllm/vllm-openai container; needs docker + nvidia-container-toolkit
-#   host              — spawns `vllm serve` directly; needs `vllm` on PATH and working CUDA
+#   docker (default), runs vllm/vllm-openai container; needs docker + nvidia-container-toolkit
+#   host, spawns `vllm serve` directly; needs `vllm` on PATH and working CUDA
 MANAGE_VLLM=${MANAGE_VLLM:-true}
 VLLM_BACKEND=${VLLM_BACKEND:-docker}
 VLLM_MODEL=${VLLM_MODEL:-Qwen/Qwen3-VL-30B-A3B-Instruct}
@@ -130,9 +134,37 @@ VLLM_STARTUP_TIMEOUT_SEC=${VLLM_STARTUP_TIMEOUT_SEC:-600}
 VLLM_SHUTDOWN_TIMEOUT_SEC=${VLLM_SHUTDOWN_TIMEOUT_SEC:-30}
 VLLM_STARTED_BY_US=false
 # Docker backend knobs
-VLLM_IMAGE=${VLLM_IMAGE:-vllm/vllm-openai:latest}
+VLLM_IMAGE=${VLLM_IMAGE:-vllm/vllm-openai@sha256:ffb2d59b1c059a5bd8d781320c9f5189de8293693b7d95da54befddaa54abf52}
 VLLM_CONTAINER_NAME=${VLLM_CONTAINER_NAME:-vllm-testbed}
 VLLM_HF_CACHE=${VLLM_HF_CACHE:-$HOME/.cache/huggingface}
+
+# OpenClaw lifecycle. When MANAGE_OPENCLAW=true (default) AND the openclaw
+# phase is enabled, this script installs openclaw (if missing and
+# OPENCLAW_AUTO_INSTALL=true), starts its gateway daemon if not already
+# running, and stops it on exit (including INT/TERM/error). Set
+# MANAGE_OPENCLAW=false to only probe a gateway you manage yourself. The exact
+# start/stop commands and provider config are version dependent (see
+# AGENTIC.md "Open items") and overridable via the OPENCLAW_*_CMD env vars.
+MANAGE_OPENCLAW=${MANAGE_OPENCLAW:-true}
+OPENCLAW_AUTO_INSTALL=${OPENCLAW_AUTO_INSTALL:-true}
+OPENCLAW_HOST=${OPENCLAW_HOST:-127.0.0.1}
+OPENCLAW_PORT=${OPENCLAW_PORT:-18789}
+OPENCLAW_NPM_PACKAGE=${OPENCLAW_NPM_PACKAGE:-openclaw@2026.7.1-2}
+OPENCLAW_NPM_PREFIX=${OPENCLAW_NPM_PREFIX:-$HOME/.npm-global}  # user-writable global prefix (no root)
+OPENCLAW_MIN_NODE_MAJOR=${OPENCLAW_MIN_NODE_MAJOR:-22}         # OpenClaw requires a recent Node.js
+# Foreground gateway on the loopback port. --allow-unconfigured lets it start
+# without a fully-provisioned config; --auth none lets the local `openclaw
+# agent` CLI open the gateway WebSocket without credentials (loopback-only,
+# fine for measurement); --force frees the port from a stale run.
+OPENCLAW_START_CMD=${OPENCLAW_START_CMD:-openclaw gateway run --allow-unconfigured --auth none --port ${OPENCLAW_PORT} --force}
+# Optional graceful stop (covers the installed-service variant). Teardown is
+# primarily port-based since `gateway run` forks/detaches. Empty by default.
+OPENCLAW_STOP_CMD=${OPENCLAW_STOP_CMD:-}
+OPENCLAW_LOG=${OPENCLAW_LOG:-logs/openclaw_server.log}
+OPENCLAW_PID_FILE=${OPENCLAW_PID_FILE:-logs/openclaw_server.pid}
+OPENCLAW_STARTUP_TIMEOUT_SEC=${OPENCLAW_STARTUP_TIMEOUT_SEC:-120}
+OPENCLAW_SHUTDOWN_TIMEOUT_SEC=${OPENCLAW_SHUTDOWN_TIMEOUT_SEC:-30}
+OPENCLAW_STARTED_BY_US=false
 
 ALL_PROFILES=()
 TEST_MATRIX_ENTRIES=()
@@ -212,7 +244,7 @@ check_optional_prereqs() {
     else
         log_warn "  - vLLM server not reachable at ${VLLM_HOST}:${VLLM_PORT}"
         if [[ "$MANAGE_VLLM" == "true" ]]; then
-            # Auto-management is on but the server didn't come up — most
+            # Auto-management is on but the server didn't come up, most
             # likely the vllm phase is disabled, so start_vllm_server was
             # skipped. vllm scenarios will be skipped by the prereq check.
             log_warn "    (MANAGE_VLLM=true but the vllm phase is disabled, so no server was started)"
@@ -248,6 +280,8 @@ phase_title() {
         google_search) echo "PHASE 10: Alternative Search Engines" ;;
         stress) echo "PHASE 11: Stress Tests (Optional)" ;;
         vllm) echo "PHASE 12: vLLM Local Inference Scenarios" ;;
+        openclaw) echo "PHASE 13: OpenClaw Local Agent Runtime" ;;
+        a2a) echo "PHASE 14: A2A (Agent2Agent) Scenarios" ;;
         *) echo "PHASE: $1" ;;
     esac
 }
@@ -317,7 +351,7 @@ PY
 }
 
 # Filter out already-completed scenario/profile combos from the test matrix.
-# Only useful in resume mode — queries the DB once up front so the main loop
+# Only useful in resume mode, queries the DB once up front so the main loop
 # never even sees entries that have nothing left to run.
 filter_completed_from_matrix() {
     local db="logs/traffic_logs.db"
@@ -443,10 +477,178 @@ cleanup_network_state() {
 }
 
 cleanup_on_exit() {
-    # vLLM teardown first — kill the server before tearing down lo qdiscs
-    # so its workers see a clean loopback during shutdown.
+    # vLLM / OpenClaw teardown first, kill the servers before tearing down lo
+    # qdiscs so their workers see a clean loopback during shutdown.
     stop_vllm_server || true
+    stop_openclaw_server || true
     cleanup_network_state "${LAST_INTERFACE:-}"
+}
+
+# ---------------------------------------------------------------------------
+# OpenClaw gateway lifecycle
+# ---------------------------------------------------------------------------
+#
+# The openclaw scenario drives the local gateway on
+# http://${OPENCLAW_HOST}:${OPENCLAW_PORT}. The orchestrator shapes lo per
+# scenario (loopback_ports), so the gateway sees unshaped lo at start/stop, # we clear lo before launch to avoid a stale qdisc interfering with startup.
+openclaw_reachable() {
+    curl -sf "http://${OPENCLAW_HOST}:${OPENCLAW_PORT}/" > /dev/null 2>&1
+}
+
+start_openclaw_server() {
+    # No-op when not in managed mode.
+    if [[ "$MANAGE_OPENCLAW" != "true" ]]; then
+        return 0
+    fi
+
+    # Ensure a recent Node (OpenClaw needs >= 22); also covers npx MCP servers.
+    ensure_node_via_nvm
+
+    # Reuse a gateway that is already running (operator-managed or prior run).
+    if openclaw_reachable; then
+        log_info "OpenClaw already reachable at ${OPENCLAW_HOST}:${OPENCLAW_PORT}, reusing"
+        HAS_OPENCLAW=true
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$OPENCLAW_LOG")"
+
+    # Install the CLI if missing.
+    if ! command -v openclaw > /dev/null 2>&1; then
+        # An install from a prior run may already live under our user prefix.
+        if [[ -x "$OPENCLAW_NPM_PREFIX/bin/openclaw" ]]; then
+            export PATH="$OPENCLAW_NPM_PREFIX/bin:$PATH"
+        fi
+    fi
+    if ! command -v openclaw > /dev/null 2>&1; then
+        if [[ "$OPENCLAW_AUTO_INSTALL" != "true" ]]; then
+            log_error "openclaw not on PATH and OPENCLAW_AUTO_INSTALL=false"
+            return 1
+        fi
+        if ! command -v npm > /dev/null 2>&1 || ! command -v node > /dev/null 2>&1; then
+            log_error "openclaw not installed and Node.js/npm not on PATH. Install Node >= ${OPENCLAW_MIN_NODE_MAJOR} (e.g. via nvm), then re-run."
+            return 1
+        fi
+        # OpenClaw needs a recent Node, fail with a clear message instead of a
+        # cryptic EBADENGINE/npm error.
+        local node_major
+        node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+        if (( node_major < OPENCLAW_MIN_NODE_MAJOR )); then
+            log_error "OpenClaw requires Node >= ${OPENCLAW_MIN_NODE_MAJOR}, but found $(node -v 2>/dev/null). Upgrade Node (e.g. 'nvm install ${OPENCLAW_MIN_NODE_MAJOR} && nvm use ${OPENCLAW_MIN_NODE_MAJOR}'), or set MANAGE_OPENCLAW=false and run OpenClaw yourself."
+            return 1
+        fi
+        # Install into a user-writable prefix so 'npm -g' needs no root
+        # (avoids EACCES symlinking into /usr/local/bin).
+        mkdir -p "$OPENCLAW_NPM_PREFIX/bin"
+        log_info "Installing OpenClaw into ${OPENCLAW_NPM_PREFIX} (npm -g ${OPENCLAW_NPM_PACKAGE})..."
+        if ! npm install -g --prefix "$OPENCLAW_NPM_PREFIX" "$OPENCLAW_NPM_PACKAGE" >> "$OPENCLAW_LOG" 2>&1; then
+            log_error "OpenClaw npm install failed, see $OPENCLAW_LOG"
+            return 1
+        fi
+        export PATH="$OPENCLAW_NPM_PREFIX/bin:$PATH"
+        if ! command -v openclaw > /dev/null 2>&1; then
+            log_error "OpenClaw installed to ${OPENCLAW_NPM_PREFIX} but 'openclaw' not found on PATH"
+            return 1
+        fi
+    fi
+
+    # Setup: let the local `openclaw agent` CLI open the gateway WebSocket
+    # without credentials (loopback-only measurement). The agent CLI reads
+    # gateway.auth.mode from ~/.openclaw/openclaw.json, so persist it. Skip if
+    # the operator pinned their own auth via OPENCLAW_SKIP_AUTH_SETUP=true.
+    if [[ "${OPENCLAW_SKIP_AUTH_SETUP:-false}" != "true" ]]; then
+        openclaw config set gateway.auth.mode none >> "$OPENCLAW_LOG" 2>&1 || true
+    fi
+
+    # Make sure lo is unshaped before the gateway binds its sockets.
+    sudo tc qdisc del dev lo root    >/dev/null 2>&1 || true
+    sudo tc qdisc del dev lo ingress >/dev/null 2>&1 || true
+
+    log_info "Starting OpenClaw gateway: ${OPENCLAW_START_CMD}"
+    setsid bash -c "$OPENCLAW_START_CMD" >> "$OPENCLAW_LOG" 2>&1 &
+    OPENCLAW_STARTED_BY_US=true
+
+    # Poll for gateway readiness. `gateway run` forks/detaches, so the real
+    # listener pid differs from $!, record it from the port once it is up.
+    local waited=0
+    while (( waited < OPENCLAW_STARTUP_TIMEOUT_SEC )); do
+        if openclaw_reachable; then
+            _openclaw_port_pids > "$OPENCLAW_PID_FILE" 2>/dev/null || true
+            log_info "OpenClaw gateway reachable after ${waited}s"
+            HAS_OPENCLAW=true
+            return 0
+        fi
+        sleep 2
+        waited=$((waited + 2))
+    done
+
+    log_error "OpenClaw gateway not reachable within ${OPENCLAW_STARTUP_TIMEOUT_SEC}s, see $OPENCLAW_LOG"
+    stop_openclaw_server || true
+    return 1
+}
+
+# Activate a recent Node via nvm for the whole run, so npx-based MCP servers
+# (brave-search, filesystem, memory, google-maps, exa) and the openclaw CLI all
+# use a consistent Node >= OPENCLAW_MIN_NODE_MAJOR instead of an older system
+# Node. No-op when the current Node is already recent enough or nvm is absent.
+ensure_node_via_nvm() {
+    local nm
+    nm=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+    if (( nm >= OPENCLAW_MIN_NODE_MAJOR )); then
+        return 0
+    fi
+    if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+        export NVM_DIR="$HOME/.nvm"
+        # shellcheck disable=SC1091
+        . "$NVM_DIR/nvm.sh" >/dev/null 2>&1 || true
+        nvm use default >/dev/null 2>&1 || nvm use "$OPENCLAW_MIN_NODE_MAJOR" >/dev/null 2>&1 || true
+        local nv; nv=$(node -v 2>/dev/null)
+        [[ -n "$nv" ]] && log_info "Using nvm Node $nv for this run (npx MCP servers + OpenClaw)"
+    fi
+}
+
+# PIDs listening on the gateway port (ss preferred, lsof fallback).
+_openclaw_port_pids() {
+    { ss -ltnpH 2>/dev/null | grep ":${OPENCLAW_PORT} " | grep -oP 'pid=\K[0-9]+'; \
+      lsof -ti "tcp:${OPENCLAW_PORT}" 2>/dev/null; } | grep -E '^[0-9]+$' | sort -u
+}
+
+stop_openclaw_server() {
+    if [[ "$OPENCLAW_STARTED_BY_US" != "true" ]]; then
+        return 0
+    fi
+    OPENCLAW_STARTED_BY_US=false
+
+    # Optional graceful CLI stop (covers the installed-service variant).
+    if [[ -n "$OPENCLAW_STOP_CMD" ]] && command -v openclaw > /dev/null 2>&1; then
+        log_info "Stopping OpenClaw gateway: ${OPENCLAW_STOP_CMD}"
+        bash -c "$OPENCLAW_STOP_CMD" >> "$OPENCLAW_LOG" 2>&1 || true
+    fi
+
+    # Port-based teardown: kill whatever is listening on our gateway port
+    # (safe, we only reach here if we started it). Covers the fork/detach.
+    local pids
+    pids=$(_openclaw_port_pids)
+    if [[ -f "$OPENCLAW_PID_FILE" ]]; then
+        pids=$(printf '%s\n%s\n' "$pids" "$(cat "$OPENCLAW_PID_FILE" 2>/dev/null)" \
+               | grep -E '^[0-9]+$' | sort -u)
+        rm -f "$OPENCLAW_PID_FILE"
+    fi
+    [[ -z "$pids" ]] && return 0
+
+    log_info "Stopping OpenClaw gateway (pids: $(echo $pids | tr '\n' ' '))..."
+    for p in $pids; do kill -TERM "$p" 2>/dev/null || true; done
+    local waited=0
+    while (( waited < OPENCLAW_SHUTDOWN_TIMEOUT_SEC )); do
+        if ! openclaw_reachable; then
+            log_info "OpenClaw stopped cleanly after ${waited}s"
+            return 0
+        fi
+        sleep 1
+        waited=$((waited + 1))
+    done
+    log_warn "OpenClaw did not exit within ${OPENCLAW_SHUTDOWN_TIMEOUT_SEC}s, sending SIGKILL"
+    for p in $pids; do kill -KILL "$p" 2>/dev/null || true; done
 }
 
 # ---------------------------------------------------------------------------
@@ -456,7 +658,7 @@ cleanup_on_exit() {
 # vllm scenarios target http://${VLLM_HOST}:${VLLM_PORT} on the loopback
 # interface. The orchestrator applies tc/netem to lo *per scenario* via the
 # scenarios.yaml `network_interface: lo` setting, so the server itself sees
-# unshaped lo at startup/shutdown — netem only kicks in while a scenario
+# unshaped lo at startup/shutdown, netem only kicks in while a scenario
 # runs. We therefore clear lo before launching vllm to make sure no stale
 # qdisc from a prior crashed run interferes with model load.
 
@@ -473,7 +675,7 @@ start_vllm_server() {
     # If something is already serving on the port, reuse it. The operator may
     # have started it themselves and forgotten to unset MANAGE_VLLM.
     if vllm_reachable; then
-        log_info "vLLM already reachable at ${VLLM_HOST}:${VLLM_PORT} — reusing existing server"
+        log_info "vLLM already reachable at ${VLLM_HOST}:${VLLM_PORT}, reusing existing server"
         HAS_VLLM=true
         return 0
     fi
@@ -576,7 +778,7 @@ _start_vllm_docker() {
         mkdir -p "$(dirname "$VLLM_LOG")"
         : > "$VLLM_LOG"
 
-        # Ensure the HF cache mount target exists on the host — docker will
+        # Ensure the HF cache mount target exists on the host, docker will
         # create it if missing, but if your Docker install is rootless or
         # the parent perms are odd the mount will fail silently.
         mkdir -p "$VLLM_HF_CACHE" 2>/dev/null || true
@@ -667,7 +869,7 @@ _start_vllm_docker() {
 
 # Dump docker-side diagnostics for a vllm container that failed to come up.
 # Shows State (running/exited/dead), ExitCode, OOMKilled, Error, and last 40
-# log lines — or a clear "container does not exist" message if it vanished.
+# log lines, or a clear "container does not exist" message if it vanished.
 _dump_vllm_container_diagnostics() {
     if ! docker inspect "$VLLM_CONTAINER_NAME" >/dev/null 2>&1; then
         log_error "Container '${VLLM_CONTAINER_NAME}' no longer exists."
@@ -704,7 +906,7 @@ _stop_vllm_docker() {
         return 0
     fi
     log_info "Stopping vLLM container '${VLLM_CONTAINER_NAME}' (timeout ${VLLM_SHUTDOWN_TIMEOUT_SEC}s)..."
-    # Save final logs — but only if $VLLM_LOG doesn't already contain the
+    # Save final logs, but only if $VLLM_LOG doesn't already contain the
     # crash dump from _dump_vllm_container_diagnostics. Otherwise we'd wipe
     # it. We snapshot to a side file regardless so nothing is lost.
     docker logs --tail 500 "$VLLM_CONTAINER_NAME" > "${VLLM_LOG}.final" 2>&1 || true
@@ -714,7 +916,7 @@ _stop_vllm_docker() {
     if docker stop --time "$VLLM_SHUTDOWN_TIMEOUT_SEC" "$VLLM_CONTAINER_NAME" > /dev/null 2>&1; then
         log_info "vLLM container stopped cleanly"
     else
-        log_warn "docker stop didn't complete cleanly — sending SIGKILL"
+        log_warn "docker stop didn't complete cleanly, sending SIGKILL"
         docker kill "$VLLM_CONTAINER_NAME" > /dev/null 2>&1 || true
     fi
     docker rm "$VLLM_CONTAINER_NAME" > /dev/null 2>&1 || true
@@ -747,7 +949,7 @@ _stop_vllm_host() {
         waited=$((waited + 1))
     done
 
-    log_warn "vLLM did not exit within ${VLLM_SHUTDOWN_TIMEOUT_SEC}s — sending SIGKILL"
+    log_warn "vLLM did not exit within ${VLLM_SHUTDOWN_TIMEOUT_SEC}s, sending SIGKILL"
     kill -KILL "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
 }
 
@@ -880,6 +1082,9 @@ prereq_satisfied() {
             ;;
         cmd:*)
             command -v "${prereq#cmd:}" > /dev/null 2>&1
+            ;;
+        pymod:*)
+            python -c "import ${prereq#pymod:}" > /dev/null 2>&1
             ;;
         http://*|https://*)
             curl -sf "$prereq" > /dev/null 2>&1
@@ -1105,6 +1310,9 @@ run_test_matrix_suite() {
 clean_start() {
     local ts=$(date +%Y%m%d_%H%M%S)
 
+    # Rotate the cycle marker, the new cycle's start ts is written after START_TIME is set.
+    rm -f "$CYCLE_START_FILE" 2>/dev/null || true
+
     if [[ -f "logs/traffic_logs.db" ]]; then
         local n
         n=$(query_db logs/traffic_logs.db "SELECT COUNT(*) FROM traffic_logs")
@@ -1158,21 +1366,32 @@ main() {
         echo "========================================"
         echo "6G AI Traffic Testbed - Full Test Suite"
         echo "========================================"
+        local _mode_label="clean"
+        [[ "$RESUME_MODE" == "true" ]] && _mode_label="resume (skip completed combos)"
+        [[ "$ADD_RUNS_MODE" == "true" ]] && _mode_label="add-runs (+$RUNS_PER_SCENARIO per combo, append to cycle)"
+        [[ "$RESUME_MODE" != "true" && "$ADD_RUNS_MODE" != "true" && "$CLEAN_START" != "true" ]] && _mode_label="no-clean (keep existing data)"
         echo "Runs per scenario: $RUNS_PER_SCENARIO"
+        echo "Mode:              $_mode_label"
         echo "Packet capture:    $CAPTURE_PCAP"
-        echo "Clean start:       $CLEAN_START"
-        echo "Resume mode:       $RESUME_MODE"
         echo "Stop on error:     $STOP_ON_ERROR"
         echo "Inter-scenario:    ${INTER_SCENARIO_DELAY}s"
         echo "Inter-provider:    ${INTER_PROVIDER_DELAY}s"
         if [[ "$MANAGE_VLLM" == "true" ]]; then
             echo "vLLM:              auto-managed via ${VLLM_BACKEND} (model=${VLLM_MODEL}, bind=${VLLM_HOST}:${VLLM_PORT})"
         fi
+        if [[ "$MANAGE_OPENCLAW" == "true" ]] && phase_explicitly_enabled "openclaw"; then
+            echo "OpenClaw:          auto-managed (bind=${OPENCLAW_HOST}:${OPENCLAW_PORT}, auto-install=${OPENCLAW_AUTO_INSTALL})"
+        fi
         echo ""
     fi
 
     # Check prerequisites
     check_sudo || true
+
+    # Use nvm's recent Node for the whole run so npx-based MCP servers
+    # (brave-search, filesystem, memory, google-maps, exa) don't fall back to
+    # an older system Node. Propagates to the orchestrator subprocess via PATH.
+    ensure_node_via_nvm
 
     # Register the EXIT/INT/TERM trap *before* starting vLLM so a Ctrl-C
     # during the (possibly several-minute) model load still triggers
@@ -1184,11 +1403,22 @@ main() {
     # (No point loading a 24 GB model just to immediately shut it back down.)
     if [[ "$MANAGE_VLLM" == "true" ]] && phase_enabled "vllm"; then
         if ! start_vllm_server; then
-            log_error "vLLM startup failed — aborting (set MANAGE_VLLM=false to skip vllm scenarios instead)"
+            log_error "vLLM startup failed, aborting (set MANAGE_VLLM=false to skip vllm scenarios instead)"
             exit 1
         fi
     elif [[ "$MANAGE_VLLM" == "true" ]]; then
-        log_info "MANAGE_VLLM=true but vllm phase is disabled — not starting server"
+        log_info "MANAGE_VLLM=true but vllm phase is disabled, not starting server"
+    fi
+
+    # Auto-install + start OpenClaw only when the openclaw phase is EXPLICITLY
+    # enabled. The openclaw scenario is opt-in (runner_enabled_by_default:
+    # false), it runs only via --enable openclaw, so gating on explicit
+    # enablement avoids an npm install / daemon start on normal runs.
+    if [[ "$MANAGE_OPENCLAW" == "true" ]] && phase_explicitly_enabled "openclaw"; then
+        if ! start_openclaw_server; then
+            log_error "OpenClaw startup failed, aborting (set MANAGE_OPENCLAW=false to skip openclaw scenarios instead)"
+            exit 1
+        fi
     fi
 
     # Check optional prerequisites (now sees the running server, if managed)
@@ -1203,7 +1433,7 @@ main() {
     if [[ "$RESUME_MODE" == "true" ]]; then
         filter_completed_from_matrix
         if [[ ${#TEST_MATRIX_ENTRIES[@]} -eq 0 ]]; then
-            log_info "All scenario/profile combos already completed — nothing to do."
+            log_info "All scenario/profile combos already completed, nothing to do."
             exit 0
         fi
     fi
@@ -1225,6 +1455,49 @@ main() {
 
     START_TIME=$(date +%s)
 
+    # --add-runs only makes sense if there's a baseline cycle to extend.
+    if [[ "$ADD_RUNS_MODE" == "true" ]]; then
+        if [[ ! -f "$CYCLE_START_FILE" && ( ! -f "logs/traffic_logs.db" || $(query_db logs/traffic_logs.db "SELECT COUNT(*) FROM traffic_logs") == "0" ) ]]; then
+            log_error "--add-runs requires an existing cycle (cycle marker '$CYCLE_START_FILE' or non-empty DB)."
+            log_error "Run a baseline first (e.g. './run_full_tests.sh --quick'), then re-run with --add-runs N."
+            exit 2
+        fi
+    fi
+
+    # Resolve cycle start. Reports + summary queries use this to span the whole
+    # cycle (original baseline + every --add-runs / --resume continuation),
+    # not just the current invocation.
+    if [[ "$CLEAN_START" == "true" ]]; then
+        CYCLE_START=$START_TIME
+        mkdir -p "$(dirname "$CYCLE_START_FILE")"
+        echo "$CYCLE_START" > "$CYCLE_START_FILE"
+        log_info "Cycle start: $(date -d @"$CYCLE_START" '+%Y-%m-%d %H:%M:%S') (new cycle)"
+    elif [[ -f "$CYCLE_START_FILE" ]]; then
+        CYCLE_START=$(tr -d '[:space:]' < "$CYCLE_START_FILE")
+        if ! [[ "$CYCLE_START" =~ ^[0-9]+$ ]]; then
+            log_warn "Cycle marker file is malformed; treating $START_TIME as cycle start"
+            CYCLE_START=$START_TIME
+            echo "$CYCLE_START" > "$CYCLE_START_FILE"
+        else
+            log_info "Cycle start: $(date -d @"$CYCLE_START" '+%Y-%m-%d %H:%M:%S') (inherited from $CYCLE_START_FILE)"
+        fi
+    else
+        # No marker, fall back to oldest DB record so prior runs are still aggregated.
+        local oldest=""
+        if [[ -f "logs/traffic_logs.db" ]]; then
+            oldest=$(query_db logs/traffic_logs.db "SELECT CAST(MIN(timestamp) AS INTEGER) FROM traffic_logs WHERE timestamp IS NOT NULL")
+        fi
+        if [[ -n "$oldest" && "$oldest" != "?" && "$oldest" =~ ^[0-9]+$ ]]; then
+            CYCLE_START=$oldest
+            log_warn "No cycle marker, using earliest DB record ($(date -d @"$CYCLE_START" '+%Y-%m-%d %H:%M:%S')) as cycle start"
+        else
+            CYCLE_START=$START_TIME
+            log_warn "No prior data, cycle starts now"
+        fi
+        mkdir -p "$(dirname "$CYCLE_START_FILE")"
+        echo "$CYCLE_START" > "$CYCLE_START_FILE"
+    fi
+
     # =====================================================
     # Network Profiles referenced by configs/scenarios.yaml:test_matrix
     # (per S4-260848 Table C.Z-1):
@@ -1233,8 +1506,8 @@ main() {
     # - 5g_urban:       20ms / 0.1% loss / 100Mbit (mainstream cellular)
     # - wifi_good:      30ms / 0.1% loss / 50Mbit (non-3GPP local access)
     # - cell_edge:      120ms / 1% loss / 5Mbit (paretonormal jitter, gemodel loss)
-    # - satellite_leo:  ASYMMETRIC — DL 22ms/100Mbit, UL 22ms/15Mbit
-    # - satellite_geo:  ASYMMETRIC — DL 340ms/50Mbit, UL 340ms/3Mbit
+    # - satellite_leo:  ASYMMETRIC, DL 22ms/100Mbit, UL 22ms/15Mbit
+    # - satellite_geo:  ASYMMETRIC, DL 340ms/50Mbit, UL 340ms/3Mbit
     # - congested:      200ms / 3% loss / 1Mbit (bufferbloat / queue stress)
     # - 5qi_7:          80ms / 0.1% loss (Voice / Live Streaming, jitter-corrected PDB)
     # - 5qi_80:         8ms / 0.0001% loss (Low-latency eMBB / AR)
@@ -1254,10 +1527,14 @@ main() {
 
     # =====================================================
     END_TIME=$(date +%s)
-    DURATION=$((END_TIME - START_TIME))
+    DURATION=$((END_TIME - START_TIME))            # this invocation's wall time
+    CYCLE_DURATION=$((END_TIME - CYCLE_START))     # whole-cycle span (for the report's "Test Duration")
 
     log_phase "TESTS COMPLETE - Generating Reports"
     log_info "Test suite completed in $(($DURATION / 3600))h $(($DURATION % 3600 / 60))m"
+    if [[ "$CYCLE_START" -ne "$START_TIME" ]]; then
+        log_info "Cycle span: $(($CYCLE_DURATION / 3600))h $(($CYCLE_DURATION % 3600 / 60))m (reports aggregate the full cycle)"
+    fi
 
     # =====================================================
     # Report Generation Pipeline
@@ -1269,7 +1546,7 @@ main() {
 
     # 1. Generate all charts (including pcap network-layer analysis)
     log_info "Generating charts..."
-    local chart_cmd="python generate_charts.py --since-timestamp $START_TIME"
+    local chart_cmd="python generate_charts.py --since-timestamp $CYCLE_START"
     if [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" ]]; then
         chart_cmd="$chart_cmd --pcap-dir $CAPTURE_DIR"
     fi
@@ -1281,7 +1558,7 @@ main() {
 
     # 2. Export to Excel
     log_info "Exporting to Excel..."
-    if python export_to_excel.py --since-timestamp "$START_TIME" > "$report_out" 2>&1; then
+    if python export_to_excel.py --since-timestamp "$CYCLE_START" > "$report_out" 2>&1; then
         log_info "  Excel exported to results/reports/chart_data.xlsx"
     else
         log_warn "  Excel export failed - continuing anyway"
@@ -1291,8 +1568,8 @@ main() {
     log_info "Generating RESULTS.md..."
     python generate_results_md.py \
         --db logs/traffic_logs.db \
-        --since-timestamp "$START_TIME" \
-        --duration-sec "$DURATION" \
+        --since-timestamp "$CYCLE_START" \
+        --duration-sec "$CYCLE_DURATION" \
         --output RESULTS.md \
         > "$report_out" 2>&1
     log_info "  RESULTS.md generated"
@@ -1301,6 +1578,7 @@ main() {
     log_info "Generating TRACES.md..."
     if python generate_traces_md.py \
         --db logs/traffic_logs.db \
+        --since-timestamp "$CYCLE_START" \
         --output TRACES.md \
         --scenarios "chat_basic,chat_streaming,realtime_text,realtime_audio,image_generation,music_search,direct_web_search,computer_control_agent" \
         > "$report_out" 2>&1; then
@@ -1309,80 +1587,25 @@ main() {
         log_warn "  TRACES.md generation failed - continuing anyway"
     fi
 
-    # 5. Build ML dataset from pcap captures
+    # 5-10. Build, train, evaluate, generate, and export through the canonical
+    # training runner. Keeping one pipeline avoids parameter/default drift.
     local ml_out="/dev/stdout"
     [[ "$QUIET_MODE" == "true" ]] && ml_out="/dev/null"
 
     if [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" ]]; then
-        log_info "Building ML dataset from pcap captures..."
-        if python -m ml.dataset \
-            --captures-dir "$CAPTURE_DIR" \
-            --db-path logs/traffic_logs.db \
-            --output-dir ml/data \
-            --classify-by auto \
-            > "$ml_out" 2>&1; then
-            log_info "  ML dataset built in ml/data/"
+        local training_dir captures_abs db_abs
+        training_dir="$(cd ../training && pwd)"
+        captures_abs="$(cd "$CAPTURE_DIR" && pwd)"
+        db_abs="$(pwd)/logs/traffic_logs.db"
 
-            # 6. Train traffic classifier
-            log_info "Training traffic classifier (k=20)..."
-            if python -m ml.train_classifier \
-                --data-dir ml/data \
-                --k 20 \
-                --epochs 100 \
-                --output-dir ml/models/classifier \
-                > "$ml_out" 2>&1; then
-                log_info "  Classifier trained - results in ml/results/classifier/"
-            else
-                log_warn "  Classifier training failed - continuing anyway"
-            fi
-
-            # 7. Run k-sweep for early classification analysis
-            log_info "Running classifier k-sweep (5,10,15,20,30,50)..."
-            if python -m ml.train_classifier \
-                --data-dir ml/data \
-                --sweep-k 5,10,15,20,30,50 \
-                > "$ml_out" 2>&1; then
-                log_info "  k-sweep complete - accuracy_vs_k.png in ml/results/classifier/"
-            else
-                log_warn "  k-sweep failed - continuing anyway"
-            fi
-
-            # 8. Train traffic generator
-            log_info "Training traffic generator (CVAE)..."
-            if python -m ml.train_generator \
-                --data-dir ml/data \
-                --epochs 200 \
-                --output-dir ml/models/generator \
-                > "$ml_out" 2>&1; then
-                log_info "  Generator trained"
-
-                # 9. Generate synthetic traces for all conditions
-                log_info "Generating synthetic traffic traces..."
-                if python -m ml.train_generator \
-                    --generate \
-                    --all-conditions \
-                    --model-path ml/models/generator/best.pt \
-                    --n-samples 100 \
-                    --output-dir ml/synthetic \
-                    > "$ml_out" 2>&1; then
-                    log_info "  Synthetic traces in ml/synthetic/"
-                fi
-
-                # 10. Evaluate generator quality
-                log_info "Evaluating generator quality..."
-                if python -m ml.train_generator \
-                    --evaluate \
-                    --model-path ml/models/generator/best.pt \
-                    --data-dir ml/data \
-                    --output-dir ml/results/generator \
-                    > "$ml_out" 2>&1; then
-                    log_info "  Generator evaluation in ml/results/generator/"
-                fi
-            else
-                log_warn "  Generator training failed - continuing anyway"
-            fi
+        log_info "Running corrected grouped-split ML pipeline..."
+        if (cd "$training_dir" && \
+            ALLOW_CPU=1 INCLUDE_ARCHIVES=0 MAX_PACKETS=100 \
+            CAPTURES_DIR="$captures_abs" DB_PATH="$db_abs" \
+            bash run_training.sh) > "$ml_out" 2>&1; then
+            log_info "  Models, held-out metrics, synthetic traces, and ONNX exports updated"
         else
-            log_warn "  ML dataset build failed - skipping model training"
+            log_warn "  ML pipeline failed - testbed reports remain available"
         fi
     fi
 
@@ -1409,13 +1632,13 @@ main() {
     log_info "Full evaluation complete!"
     echo "========================================"
 
-    # Count results
-    TOTAL_RECORDS=$(query_db logs/traffic_logs.db "SELECT COUNT(*) FROM traffic_logs WHERE timestamp > $START_TIME")
-    TOTAL_SCENARIOS=$(query_db logs/traffic_logs.db "SELECT COUNT(DISTINCT scenario_id) FROM traffic_logs WHERE timestamp > $START_TIME")
-    TOTAL_PROFILES=$(query_db logs/traffic_logs.db "SELECT COUNT(DISTINCT network_profile) FROM traffic_logs WHERE timestamp > $START_TIME")
-    SUCCESS_RATE=$(query_db logs/traffic_logs.db "SELECT ROUND(100.0 * SUM(success) / COUNT(*), 1) FROM traffic_logs WHERE timestamp > $START_TIME")
+    # Count results, covers the whole cycle (baseline + add-runs / resume continuations)
+    TOTAL_RECORDS=$(query_db logs/traffic_logs.db "SELECT COUNT(*) FROM traffic_logs WHERE timestamp > $CYCLE_START")
+    TOTAL_SCENARIOS=$(query_db logs/traffic_logs.db "SELECT COUNT(DISTINCT scenario_id) FROM traffic_logs WHERE timestamp > $CYCLE_START")
+    TOTAL_PROFILES=$(query_db logs/traffic_logs.db "SELECT COUNT(DISTINCT network_profile) FROM traffic_logs WHERE timestamp > $CYCLE_START")
+    SUCCESS_RATE=$(query_db logs/traffic_logs.db "SELECT ROUND(100.0 * SUM(success) / COUNT(*), 1) FROM traffic_logs WHERE timestamp > $CYCLE_START")
 
-    echo "  Duration:    $(($DURATION / 3600))h $(($DURATION % 3600 / 60))m $(($DURATION % 60))s"
+    echo "  Duration:    $(($DURATION / 3600))h $(($DURATION % 3600 / 60))m $(($DURATION % 60))s (cycle: $(($CYCLE_DURATION / 3600))h $(($CYCLE_DURATION % 3600 / 60))m)"
     echo "  Records:     $TOTAL_RECORDS"
     echo "  Scenarios:   $TOTAL_SCENARIOS"
     echo "  Profiles:    $TOTAL_PROFILES"
@@ -1438,10 +1661,10 @@ main() {
         echo "    Pcaps:       $CAPTURE_DIR/ ($PCAP_COUNT files, $PCAP_SIZE)"
     fi
 
-    if [[ -d "ml/models" ]]; then
-        echo "    ML Models:   ml/models/"
-        echo "    ML Results:  ml/results/"
-        echo "    Synthetic:   ml/synthetic/"
+    if [[ -d "../training/models" ]]; then
+        echo "    ML Models:   ../training/models/"
+        echo "    ML Results:  ../training/results/"
+        echo "    Synthetic:   ../training/synthetic/"
     fi
 
     if [[ "$ANONYMIZE_DB" == "true" ]]; then
@@ -1470,7 +1693,7 @@ cur = conn.execute('''
            SUM(CASE WHEN success=1 THEN 1 ELSE 0 END) as ok,
            ROUND(AVG(latency_sec), 2) as avg_lat
     FROM traffic_logs
-    WHERE timestamp > $START_TIME
+    WHERE timestamp > $CYCLE_START
     GROUP BY scenario_id, network_profile
     ORDER BY scenario_id, network_profile
 ''')
@@ -1527,10 +1750,33 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --resume)
+            if [[ "$ADD_RUNS_MODE" == "true" ]]; then
+                log_error "--resume and --add-runs are mutually exclusive"
+                exit 2
+            fi
             RESUME_MODE=true
             CLEAN_START=false
             log_info "Resume mode: skipping completed experiments, keeping existing data"
             shift
+            ;;
+        --add-runs)
+            if [[ "$RESUME_MODE" == "true" ]]; then
+                log_error "--resume and --add-runs are mutually exclusive"
+                exit 2
+            fi
+            if [[ -z "${2:-}" || "$2" =~ ^- ]]; then
+                log_error "--add-runs requires a positive integer (number of additional runs per scenario/profile)"
+                exit 2
+            fi
+            if ! [[ "$2" =~ ^[1-9][0-9]*$ ]]; then
+                log_error "--add-runs argument must be a positive integer (got: '$2')"
+                exit 2
+            fi
+            ADD_RUNS_MODE=true
+            CLEAN_START=false
+            RUNS_PER_SCENARIO=$2
+            log_info "Add-runs mode: appending $RUNS_PER_SCENARIO more runs per scenario/profile to the existing cycle"
+            shift 2
             ;;
         --verbose|-v)
             QUIET_MODE=false
@@ -1558,32 +1804,37 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --quick        Run 3 iterations per scenario with shorter delays"
-            echo "  --full         Run 30 iterations per scenario (default)"
+            echo "  --full         Run 30 iterations per scenario"
             echo "  --runs N       Set exact number of runs per scenario"
             echo "  --stress       Enable stress tests (burst search, parallel benchmark)"
             echo "  --no-capture   Disable L3/L4 packet capture (enabled by default)"
             echo "  --no-anonymize Disable database anonymization (enabled by default)"
             echo "  --no-clean     Keep existing database and pcaps (default: clean start)"
-            echo "  --resume       Resume from last successful run (implies --no-clean)"
+            echo "  --resume       Resume from last successful run (implies --no-clean);"
+            echo "                 reports now aggregate the entire cycle, not just this leg."
+            echo "  --add-runs N   Append N more runs of every scenario/profile to the existing"
+            echo "                 cycle. Implies --no-clean. Mutually exclusive with --resume."
             echo "  --verbose, -v  Show full output instead of progress bar"
             echo "  --enable LIST  Only run these phases (comma-separated)"
             echo "  --disable LIST Skip these phases (comma-separated)"
             echo ""
             echo "Phase names for --enable/--disable:"
             echo "  chat, realtime, image, search, deepseek, gemini, music,"
-            echo "  trading, computer_use, playwright, multimodal, google_search, stress, vllm"
+            echo "  trading, computer_use, playwright, multimodal, google_search, stress,"
+            echo "  vllm, openclaw, a2a"
             echo ""
             echo "Environment variables:"
-            echo "  RUNS_PER_SCENARIO        Number of runs (default: 30)"
+            echo "  RUNS_PER_SCENARIO        Number of runs (default: 10)"
             echo "  INTER_SCENARIO_DELAY     Seconds between scenarios (default: 2)"
             echo "  INTER_PROVIDER_DELAY     Seconds between providers (default: 5)"
             echo "  CAPTURE_PCAP             Enable pcap capture (default: true)"
             echo "  CAPTURE_DIR              Pcap output directory (default: results/captures)"
-            echo "  CAPTURE_FILTER           BPF filter (default: 'port 443 or port 80 or port 8080 or port 8000')"
+            echo "  CAPTURE_FILTER           BPF filter (default: HTTP(S) plus WebRTC ICE/SRTP/RTP UDP ports)"
             echo "  ANONYMIZE_DB             Anonymize provider/model names (default: true)"
             echo "  CLEAN_START              Archive old data before starting (default: true)"
             echo "  NETWORK_INTERFACE        Global interface override (default: auto)"
-            echo "  RUN_TIMEOUT_SEC          Per-run timeout in seconds (default: 300, 0 = no timeout)"
+            echo "  RUN_TIMEOUT_SEC          Per-run timeout in seconds (default: 600, 0 = no timeout)"
+            echo "  TRACE_PAYLOADS           Persist redacted payload traces (default: 0)"
             echo ""
             echo "Optional API keys (for additional scenarios):"
             echo "  GOOGLE_SEARCH_API_KEY    Enable Google search scenarios"
@@ -1612,6 +1863,15 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Keep source logging and the post-run anonymization switch consistent. This
+# makes --no-anonymize effective instead of writing aliases before the flag is
+# ever consulted.
+if [[ "$ANONYMIZE_DB" == "true" ]]; then
+    export ANONYMIZE_AT_SOURCE=1
+else
+    export ANONYMIZE_AT_SOURCE=0
+fi
 
 main
 if [[ ${#FAILED_SCENARIOS[@]} -gt 0 ]]; then

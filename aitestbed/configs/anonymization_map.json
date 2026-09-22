@@ -10,7 +10,10 @@
     "deepseek": "Provider C",
     "azure_openai": "Provider D",
     "azure_inference": "Provider E",
-    "vllm": "Provider F"
+    "vllm": "Provider F",
+    "a2a": "Agent Protocol",
+    "openclaw": "Local Agent Runtime",
+    "anthropic": "Provider G"
   },
   "models": {
     "gpt-5-mini": "Model A1",
@@ -26,7 +29,13 @@
     "gpt-image-1-mini": "Model D1",
     "Phi-4-mini-instruct": "Model E1",
     "Llama-4-Maverick-17B-128E-Instruct-FP8": "Model E2",
-    "Qwen/Qwen3-VL-30B-A3B-Instruct": "Model F1"
+    "Qwen/Qwen3-VL-30B-A3B-Instruct": "Model F1",
+    "gpt-5.4": "Model A7",
+    "claude-sonnet-4-6": "Model G1",
+    "openclaw": "Runtime Model 1",
+    "echo": "Agent Model 1",
+    "orchestrator": "Agent Model 2",
+    "remote": "Agent Model 3"
   },
   "scenarios": {
     "chat_basic": "Chat Basic",
@@ -69,9 +78,26 @@
     "music_research": "MCP Music Research",
     "trading_market_data": "MCP Market Data",
     "trading_options_scan": "MCP Options Scan",
-    "playwright_web_test": "MCP Browser Test",
-    "playwright_web_test_text": "MCP Browser Test (Text)",
+    "playwright_web_test": "MCP Browser Control",
+    "playwright_web_test_text": "MCP Browser Control (Text)",
+    "weather_risk_assessment": "MCP Weather Risk Assessment",
+    "weather_route_planning": "MCP Weather Route Planning",
+    "maps_route_planning": "MCP Maps Route Planning",
+    "maps_local_discovery": "MCP Maps Local Discovery",
+    "maps_traffic_analysis": "MCP Maps Traffic Analysis",
+    "exa_research": "MCP Exa Research",
+    "exa_similarity_search": "MCP Exa Similarity Search",
+    "twilio_emergency_notification": "MCP Twilio Emergency",
+    "twilio_communication_chain": "MCP Twilio Communication",
+    "smart_home_monitoring": "MCP Smart Home Monitoring",
+    "smart_home_coordination": "MCP Smart Home Coordination",
     "chat_vllm": "Chat (Local Inference)",
-    "video_understanding_vllm": "Video Understanding (Local Inference)"
+    "video_understanding_vllm": "Video Understanding (Local Inference)",
+    "openclaw_personal_assistant": "OpenClaw Personal Assistant",
+    "a2a_single_task_local": "A2A Single Task (Local)",
+    "a2a_streaming_local": "A2A Streaming (Local)",
+    "a2a_multi_agent_local": "A2A Multi-Agent Delegation (Local)",
+    "a2a_single_task_remote": "A2A Single Task (Remote)",
+    "a2a_streaming_remote": "A2A Streaming (Remote)"
   }
 }

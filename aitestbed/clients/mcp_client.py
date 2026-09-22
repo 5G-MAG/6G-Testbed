@@ -63,6 +63,9 @@ class MCPServerConnection:
         self.tools: dict[str, MCPTool] = {}
         self._request_id = 0
         self._lock = asyncio.Lock()
+        # Telemetry for the one-shot MCP handshake (initialize + tools/list).
+        # Drained by the scenario runner after connect() to emit LogRecords.
+        self.discovery: list[dict] = []
 
     async def connect(self) -> bool:
         """Start the MCP server process and initialize connection."""
@@ -83,10 +86,10 @@ class MCPServerConnection:
             )
 
             # Initialize the connection
-            await self._initialize()
+            self.discovery.append(await self._initialize())
 
             # Discover available tools
-            await self._list_tools()
+            self.discovery.append(await self._list_tools())
 
             return True
 
@@ -151,8 +154,8 @@ class MCPServerConnection:
         self.process.stdin.flush()
         return len(encoded)
 
-    async def _initialize(self):
-        """Send initialize request to MCP server."""
+    async def _initialize(self) -> dict:
+        """Send initialize request + ready notification; return telemetry dict."""
         try:
             from mcp.types import LATEST_PROTOCOL_VERSION
             protocol_version = LATEST_PROTOCOL_VERSION
@@ -167,12 +170,26 @@ class MCPServerConnection:
                 "version": "1.0.0"
             }
         }
-        await self._send_request("initialize", params)
-        self._send_notification("notifications/initialized")
+        t_start = time.time()
+        _, req_b, resp_b = await self._send_request("initialize", params)
+        notif_b = self._send_notification("notifications/initialized")
+        t_end = time.time()
+        return {
+            "type": "mcp_initialize",
+            "server": self.config.name,
+            "transport": "stdio",
+            "t_start": t_start,
+            "t_end": t_end,
+            "latency_sec": t_end - t_start,
+            "request_bytes": req_b + notif_b,
+            "response_bytes": resp_b,
+        }
 
-    async def _list_tools(self):
-        """Discover available tools from the server."""
-        result, _, _ = await self._send_request("tools/list")
+    async def _list_tools(self) -> dict:
+        """Discover available tools from the server; return telemetry dict."""
+        t_start = time.time()
+        result, req_b, resp_b = await self._send_request("tools/list")
+        t_end = time.time()
 
         self.tools = {}
         for tool_data in result.get("tools", []):
@@ -183,6 +200,17 @@ class MCPServerConnection:
                 server_name=self.config.name
             )
             self.tools[tool.name] = tool
+        return {
+            "type": "mcp_tools_list",
+            "server": self.config.name,
+            "transport": "stdio",
+            "t_start": t_start,
+            "t_end": t_end,
+            "latency_sec": t_end - t_start,
+            "request_bytes": req_b,
+            "response_bytes": resp_b,
+            "tool_count": len(self.tools),
+        }
 
     async def call_tool(self, tool_name: str, arguments: dict) -> MCPToolResult:
         """Execute a tool and return the result."""
@@ -252,6 +280,9 @@ class MCPHttpConnection:
         self.tools: dict[str, MCPTool] = {}
         self._request_id = 0
         self._base_url: str = ""
+        # Telemetry for the one-shot MCP handshake; drained by the scenario
+        # runner after connect() to emit LogRecords.
+        self.discovery: list[dict] = []
 
     async def connect(self) -> bool:
         try:
@@ -287,8 +318,8 @@ class MCPHttpConnection:
             self._base_url = f"http://{self.config.http_host}:{port}"
 
             # Initialize and list tools
-            await self._initialize()
-            await self._list_tools()
+            self.discovery.append(await self._initialize())
+            self.discovery.append(await self._list_tools())
             return True
 
         except Exception as e:
@@ -344,7 +375,7 @@ class MCPHttpConnection:
         )
         return len(body)
 
-    async def _initialize(self):
+    async def _initialize(self) -> dict:
         try:
             from mcp.types import LATEST_PROTOCOL_VERSION
             protocol_version = LATEST_PROTOCOL_VERSION
@@ -356,11 +387,25 @@ class MCPHttpConnection:
             "capabilities": {},
             "clientInfo": {"name": "6g-ai-traffic-testbed", "version": "1.0.0"},
         }
-        self._send_http("initialize", params)
-        self._send_http_notification("notifications/initialized")
+        t_start = time.time()
+        _, req_b, resp_b = self._send_http("initialize", params)
+        notif_b = self._send_http_notification("notifications/initialized")
+        t_end = time.time()
+        return {
+            "type": "mcp_initialize",
+            "server": self.config.name,
+            "transport": "http",
+            "t_start": t_start,
+            "t_end": t_end,
+            "latency_sec": t_end - t_start,
+            "request_bytes": req_b + notif_b,
+            "response_bytes": resp_b,
+        }
 
-    async def _list_tools(self):
-        result, _, _ = self._send_http("tools/list")
+    async def _list_tools(self) -> dict:
+        t_start = time.time()
+        result, req_b, resp_b = self._send_http("tools/list")
+        t_end = time.time()
         self.tools = {}
         for tool_data in result.get("tools", []):
             tool = MCPTool(
@@ -370,6 +415,17 @@ class MCPHttpConnection:
                 server_name=self.config.name,
             )
             self.tools[tool.name] = tool
+        return {
+            "type": "mcp_tools_list",
+            "server": self.config.name,
+            "transport": "http",
+            "t_start": t_start,
+            "t_end": t_end,
+            "latency_sec": t_end - t_start,
+            "request_bytes": req_b,
+            "response_bytes": resp_b,
+            "tool_count": len(self.tools),
+        }
 
     async def call_tool(self, tool_name: str, arguments: dict) -> MCPToolResult:
         t_start = time.time()
