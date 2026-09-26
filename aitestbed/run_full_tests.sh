@@ -1610,7 +1610,7 @@ main() {
             log_warn "  ML pipeline failed - testbed reports remain available"
         fi
     elif [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" ]]; then
-        log_info "Skipping ML pipeline (../training not present)"
+        log_info "Skipping ML pipeline (training component not present)"
     fi
 
     # 11. Anonymize database
