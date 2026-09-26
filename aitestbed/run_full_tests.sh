@@ -1592,9 +1592,11 @@ main() {
     local ml_out="/dev/stdout"
     [[ "$QUIET_MODE" == "true" ]] && ml_out="/dev/null"
 
-    if [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" && -d "../training" ]]; then
-        local training_dir captures_abs db_abs
-        training_dir="$(cd ../training && pwd)"
+    local training_dir
+    training_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../training" 2>/dev/null && pwd || true)"
+
+    if [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" && -n "$training_dir" ]]; then
+        local captures_abs db_abs
         captures_abs="$(cd "$CAPTURE_DIR" && pwd)"
         db_abs="$(pwd)/logs/traffic_logs.db"
 
