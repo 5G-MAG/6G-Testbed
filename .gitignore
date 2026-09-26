@@ -28,7 +28,6 @@
 **/*.xlsx
 !aitestbed/run_full_tests.sh
 !aitestbed/test_profiles.sh
-!training/run_training.sh
 !netemu/scripts/apply_profile.sh
 !netemu/scripts/clear_profile.sh
 !aitestbed/docker/entrypoint.sh

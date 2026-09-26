@@ -1592,7 +1592,7 @@ main() {
     local ml_out="/dev/stdout"
     [[ "$QUIET_MODE" == "true" ]] && ml_out="/dev/null"
 
-    if [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" ]]; then
+    if [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" && -d "../training" ]]; then
         local training_dir captures_abs db_abs
         training_dir="$(cd ../training && pwd)"
         captures_abs="$(cd "$CAPTURE_DIR" && pwd)"
@@ -1607,6 +1607,8 @@ main() {
         else
             log_warn "  ML pipeline failed - testbed reports remain available"
         fi
+    elif [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" ]]; then
+        log_info "Skipping ML pipeline (../training not present)"
     fi
 
     # 11. Anonymize database

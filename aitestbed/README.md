@@ -11,15 +11,14 @@ The testbed enables:
 - **Evaluation** of QoE metrics under emulated network conditions (latency, loss, bandwidth)
 - **Reporting** in formats suitable for 3GPP standardization contributions
 
-### Relationship to netemu and training
+### Relationship to netemu
 
-This directory is one of three components in the repository.
+This directory is one of two components in the repository.
 
 | Component | Provides | Direction |
 |:----------|:---------|:----------|
 | [`netemu/`](../netemu/) | tc/netem shaping, tcpdump capture, pcap parsing and network-layer metrics | aitestbed **depends on** netemu |
 | `aitestbed/` (here) | Scenarios, LLM/agent clients, application-layer metrics, RAN2 metrics, reports | |
-| [`training/`](../training/) | Traffic-pattern classifier and generative traffic model | training **consumes** aitestbed output files |
 
 The network layer lives entirely in `netemu`, which has no dependency on this
 testbed and is usable on its own:
