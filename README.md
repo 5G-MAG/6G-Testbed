@@ -143,7 +143,7 @@ Table C.Z-1:
 | `satellite_geo` | 340 ms | 15 ms DL / 18 ms UL | 0.1% DL / 0.2% UL | correlated (20% DL / 25% UL) | 50 DL / 3 UL Mbps | GEO satellite (asymmetric) |
 | `congested` | 200 ms | 50 ms | 3% | Gilbert-Elliot | 1 Mbps | Bufferbloat / heavy congestion |
 | `5qi_7` | 80 ms | 10 ms | 0.1% | correlated (20%) | -- | 5QI 7: voice / live streaming |
-| `5qi_80` | 8 ms | 1 ms | 1e-6 | correlated (5%) | -- | 5QI 80: low-latency eMBB / AR |
+| `5qi_80` | 8 ms | 1 ms | 0.0001% | correlated (5%) | -- | 5QI 80: low-latency eMBB / AR |
 
 The asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:` block that
 overrides the egress-side fields. The full table, with jitter, loss models and advanced `netem`
