@@ -96,11 +96,10 @@ with NetworkEmulator(interface="eth0") as emu:
 
 ### Quick start
 
-The commands assume the clone is in a directory named `testbed`:
-
 ```bash
 # Clone and setup
-cd testbed
+git clone https://github.com/5G-MAG/6G-Testbed.git
+cd 6G-Testbed
 python -m venv venv
 source venv/bin/activate
 
