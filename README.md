@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  Measures and analyses AI/LLM service traffic under emulated network conditions, to support
-  3GPP SA4 6G Media Study contributions.
+  Measures, analyses and models AI/LLM service traffic under emulated network conditions, to
+  support 3GPP SA4 6G Media Study contributions.
 </p>
 
 <p align="center">
@@ -34,77 +34,151 @@
 ## Introduction
 
 The testbed runs AI service scenarios against LLM providers while shaping the network with Linux
-`tc`/`netem`, captures the resulting traffic, and logs metrics for SA4 contributions. It has two
-parts: `aitestbed`, the experiment framework, and `netemu`, the network emulation library it uses.
+`tc`/`netem`, captures the resulting traffic, and logs metrics for SA4 contributions. It has three
+parts: `netemu`, the network emulation and capture library; `aitestbed`, the experiment framework
+built on it; and `training`, which learns traffic-pattern models from the captures `aitestbed`
+produces.
 
-| Component | Description |
-|-----------|-------------|
-| [aitestbed/](./aitestbed/) | Main testing framework for running AI traffic experiments |
-| [netemu/](./netemu/) | Network emulation library wrapping Linux tc/netem |
+### Components
+
+| Component | Role | README |
+|:----------|:-----|:-------|
+| [netemu/](./netemu/) | Network emulation, packet capture, and pcap metric extraction. Standalone package, no dependency on the testbed | [netemu/README.md](./netemu/README.md) |
+| [aitestbed/](./aitestbed/) | Experiment orchestration: scenarios, LLM/agent clients, application-layer metrics, reports. Depends on `netemu` | [aitestbed/README.md](./aitestbed/README.md) |
+| [training/](./training/) | Traffic-pattern dataset builder and Markov traffic generators trained on the captures `aitestbed` produces | [training/README.md](./training/README.md) |
+
+The dependencies run one way:
+
+```
+   training/            reads captures + labels produced by aitestbed
+       │
+       ▼
+   aitestbed/           orchestrates experiments, computes application-layer metrics
+       │
+       ▼
+   netemu/              shapes the network, captures packets, parses pcaps
+```
+
+`netemu` does not depend on the testbed and can be used on its own. `aitestbed` imports `netemu`
+for shaping, capture and pcap parsing. `training` reads `aitestbed` output files but imports no
+testbed code.
+
+### What lives where
+
+The measurement stack is split by layer:
+
+| Concern | Where | Why there |
+|:--------|:------|:----------|
+| tc/netem shaping | `netemu.emulator` | Network layer, task-agnostic |
+| tcpdump capture | `netemu.capture` | Produces pcaps; belongs with the thing that reads them |
+| PCAP parsing, flow reassembly, packet/flow/window metrics | `netemu.pcap` | Pure network-layer analysis, no testbed coupling |
+| L7 (decrypted HTTP) capture | `aitestbed/capture/l7_capture.py` | Needs TLS interception and payload redaction policy |
+| Application-layer metrics (TTFT, TTLT, tokens, agent loops) | `aitestbed/analysis/metrics.py` | Defined against the testbed's log schema |
+| RAN2 methodology metrics (S4-260859 Q1-Q5) | `aitestbed/analysis/ran2_metrics.py` | Combines pcap metrics with SQLite session records |
+| Reports, charts, Excel export | `aitestbed/` | Contribution-shaped output |
+| Feature extraction, Markov traffic generators | `training/` | Consumes captures; independent lifecycle |
+
+### netemu
+
+Linux network emulation, with the packet capture and analysis that go with it:
+
+- Wraps `tc`/`netem`/HTB for delay, jitter, loss, rate limiting, corruption, reordering and
+  duplication
+- Bidirectional shaping through IFB devices, with asymmetric uplink and downlink profiles
+- `tcpdump` capture with startup validation and a JSON metadata sidecar for each pcap
+- PCAP parsing (libpcap and pcapng, IPv4 and IPv6, TCP and UDP) with TCP flow reassembly
+- Network-layer metrics: handshake RTT, TLS setup duration, retransmissions, per-direction
+  volumes, multi-window throughput and burstiness, burst segmentation
+- Network profiles loaded from YAML; the testbed's profiles, including the 3GPP 5QI mappings and
+  the SA4 S4-260848 reference conditions, are in `aitestbed/configs/profiles.yaml`
+- Context managers that clear the rules and stop the capture on exit
+
+```python
+from netemu import NetworkEmulator, capture_to, analyze_pcap
+
+with NetworkEmulator(interface="eth0") as emu:
+    emu.apply_profile("5g_urban")           # 20 ms delay, 0.1% loss, 100 Mbps
+    with capture_to("run.pcap", interface="eth0", filter_expr="port 443"):
+        run_workload()
+# tc rules cleared, capture stopped, sidecar written
+
+m = analyze_pcap("run.pcap", target_ports=[443])
+print(m.rtt_mean_ms, m.ul_bytes_total / m.dl_bytes_total, m.burstiness_by_window["100ms"])
+```
+
+The pcap processing and metric calculation are documented in
+[netemu/README.md](./netemu/README.md).
 
 ### aitestbed
 
-Orchestrates experiments across AI providers and scenarios:
+Orchestrates experiments across AI providers, scenarios and network profiles:
 
-- Scenarios: chat (including chat with token IDs), agentic AI with MCP tools, browser automation,
-  image generation, multimodal, video understanding, realtime audio and conversation over WebSocket
-  and WebRTC, and realtime video understanding with a local VLM. They are defined in
+- Scenarios: chat (including chat with token IDs), agentic AI over MCP, browser automation,
+  image generation, multimodal, video understanding, realtime audio and conversation over
+  WebSocket and WebRTC, realtime video understanding with a local VLM, the OpenClaw
+  personal-assistant agent, and agent-to-agent (A2A) scenarios. They are defined in
   `configs/scenarios.yaml`.
-- Providers: OpenAI, Azure OpenAI, Azure AI Inference, Gemini, DeepSeek, vLLM, OpenAI Realtime (WebSocket and WebRTC),
-  and OpenAI-compatible servers.
-- Metrics: TTFT/TTLT, latency percentiles, UL/DL ratios, token rates and agent loop factors,
-  documented in [METRICS.md](aitestbed/METRICS.md).
-- Traffic capture at L3/L4 (tcpdump) and L7 (mitmproxy), with metrics logged to SQLite.
+- Providers: OpenAI, Azure OpenAI, Azure AI Inference, Gemini, DeepSeek, Anthropic, self-hosted
+  vLLM, OpenAI Realtime (WebSocket and WebRTC), and OpenAI-compatible servers.
+- Metrics: TTFT/TTLT, latency percentiles, UL/DL ratios, token rates, agent loop factors and
+  stall detection, documented in [METRICS.md](aitestbed/METRICS.md), plus the RAN2 methodology
+  metrics for questions Q1 to Q5 of S4-260859.
+- Capture at L3/L4 through `netemu.capture` and at L7 through mitmproxy, with metrics logged to
+  SQLite in a structured schema and anonymisation of the logs for submission.
 
 ```bash
 # From the repo root:
-pip install -e netemu
+pip install -e "netemu[pcap]"
 pip install -r aitestbed/requirements.txt
 cd aitestbed
 python orchestrator.py --scenario chat_basic --profile 5g_urban --runs 10
 ```
 
 The full SA4 cross-check run (all scenarios and profiles, with PCAP capture and report generation)
-is described in [aitestbed/README.md](aitestbed/README.md), section "Cross-Checking for SA4 AI Traffic
-Characterization".
+is described in [aitestbed/README.md](./aitestbed/README.md), section "Cross-Checking for SA4 AI
+Traffic Characterization".
 
-### netemu
+### training
 
-A Python library over Linux traffic control:
+Traffic-pattern models learned from the captures the testbed produces:
 
-- Wraps `tc` and `netem` for delay, jitter, packet loss and rate limiting
-- Bidirectional shaping through IFB devices
-- Predefined profiles, including 3GPP 5QI mappings and the SA4 S4-260848 reference conditions
-- Context-manager use, which clears the rules on exit
+- Feature extraction from pcaps and SQLite session labels, with flows attributed to a transport
+  surface and segmented at session boundaries
+- Nine traffic-pattern categories, including agent-to-agent signalling and local agent control
+  channels
+- A shared quantisation codec: log-spaced size and inter-arrival bins, with empirical
+  within-bin dequantisation
+- Zero- and first-order Markov generators conditioned on the category, with per-category
+  sampling and a Kolmogorov-Smirnov (KS) evaluation on held-out data
 
-```python
-from netemu import NetworkEmulator
-
-with NetworkEmulator(interface="eth0") as emu:
-    emu.apply_profile("5g_urban")  # 20ms delay, 0.1% loss, 100 Mbps
-    # Run your tests here
-# Rules automatically cleared
+```bash
+cd training
+pip install -r requirements.txt
+python -m dataset --captures-dir ../aitestbed/results/captures \
+    --db-path ../aitestbed/logs/traffic_logs.db --output-dir data --max-packets 100
+python -m train_markov --data-dir data
 ```
+
+More detail is in [training/README.md](./training/README.md).
 
 ## Install dependencies
 
 - Python 3.10 or later
 - Linux with `iproute2`, for network emulation
+- `tcpdump`, for packet capture
 - Sudo access, or Docker with the `NET_ADMIN` capability
+- Node.js 18 or later for the npm-based MCP servers; 22 or later for the OpenClaw scenario
 
 ## Running
 
 ### Quick start
 
 ```bash
-# Clone and setup
-git clone https://github.com/5G-MAG/6G-Testbed.git
-cd 6G-Testbed
 python -m venv venv
 source venv/bin/activate
 
-# Install netemu first (separate package), then testbed dependencies
-pip install -e netemu
+# Install netemu first (separate package, with the pcap extra), then the testbed
+pip install -e "netemu[pcap]"
 pip install -r aitestbed/requirements.txt
 
 # Set API keys
@@ -147,7 +221,17 @@ Table C.Z-1:
 
 The asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:` block that
 overrides the egress-side fields. The full table, with jitter, loss models and advanced `netem`
-parameters, is in [aitestbed/README.md](aitestbed/README.md).
+parameters, is in [aitestbed/README.md](./aitestbed/README.md).
+
+## Development
+
+### Testing
+
+```bash
+python -m pytest netemu/tests      # emulation, capture, pcap analysis
+python -m pytest aitestbed/tests   # testbed correctness checks
+python -m pytest training/tests    # dataset and model unit tests
+```
 
 ## Contributing
 
