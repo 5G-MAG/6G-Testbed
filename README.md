@@ -1,24 +1,60 @@
-# 6G AI Traffic Characterization Testbed
+<p align="center">
+  <img src=".github/banner.svg" width="100%" alt="Testbeds · 6G AI Traffic Characterization Testbed: 6G AI Traffic Characterization Testbed">
+</p>
 
-A framework for measuring and analyzing AI/LLM service traffic patterns under various network conditions, designed to support 3GPP SA4 6G Media Study contributions.
+<p align="center">
+  Measures and analyses AI/LLM service traffic under emulated network conditions, to support
+  3GPP SA4 6G Media Study contributions.
+</p>
 
-## Components
+<p align="center">
+  <img alt="Status: under development"
+    src="https://img.shields.io/badge/Status-Under%20Development-e67e22">
+  <a href="https://github.com/5G-MAG/6G-Testbed/releases"><img alt="Version"
+    src="https://img.shields.io/github/v/release/5G-MAG/6G-Testbed?label=Version"></a>
+  <a href="LICENSE.md"><img alt="License: 5G-MAG Public License v1.0"
+    src="https://img.shields.io/badge/License-5G--MAG%20PL%20v1.0-blue"></a>
+</p>
+
+<p align="center">
+  <a href="https://www.5g-mag.com/testbeds/6g-testbed/">Project page</a> &nbsp;&middot;&nbsp;
+  <a href="https://github.com/5G-MAG/6G-Testbed/issues">Issues</a> &nbsp;&middot;&nbsp;
+  <a href="https://www.5g-mag.com/contributing">Contributing</a>
+</p>
+
+---
+
+## At a glance
+
+|  |  |
+|---|---|
+| **Supports** | 3GPP SA4 6G Media Study contributions; network profiles aligned with SA4 contribution S4-260848, Table C.Z-1 |
+| **Part of** | [6G AI Traffic Characterization Testbed](https://www.5g-mag.com/testbeds/6g-testbed/) |
+
+## Introduction
+
+The testbed runs AI service scenarios against LLM providers while shaping the network with Linux
+`tc`/`netem`, captures the resulting traffic, and logs metrics for SA4 contributions. It has two
+parts: `aitestbed`, the experiment framework, and `netemu`, the network emulation library it uses.
 
 | Component | Description |
 |-----------|-------------|
 | [aitestbed/](./aitestbed/) | Main testing framework for running AI traffic experiments |
 | [netemu/](./netemu/) | Network emulation library wrapping Linux tc/netem |
 
-## aitestbed
+### aitestbed
 
-The core testing framework that orchestrates experiments across multiple AI providers and scenarios.
+Orchestrates experiments across AI providers and scenarios:
 
-**Features:**
-- **11 scenario types**: Chat, agentic AI with MCP tools, image generation, multimodal, video understanding, realtime WebSocket/WebRTC
-- **LLM providers**: OpenAI, Gemini, DeepSeek, vLLM, plus OpenAI Realtime (WebSocket/WebRTC)
-- **60+ metrics**: TTFT/TTLT, latency percentiles, UL/DL ratios, token rates, agent loop factors
-- **Multi-layer traffic capture**: L3/L4 via tcpdump, L7 via mitmproxy
-- **SQLite logging** with structured metrics schema
+- Scenarios: chat (including chat with token IDs), agentic AI with MCP tools, browser automation,
+  image generation, multimodal, video understanding, realtime audio and conversation over WebSocket
+  and WebRTC, and realtime video understanding with a local VLM. They are defined in
+  `configs/scenarios.yaml`.
+- Providers: OpenAI, Azure OpenAI, Azure AI Inference, Gemini, DeepSeek, vLLM, OpenAI Realtime (WebSocket and WebRTC),
+  and OpenAI-compatible servers.
+- Metrics: TTFT/TTLT, latency percentiles, UL/DL ratios, token rates and agent loop factors,
+  documented in [METRICS.md](aitestbed/METRICS.md).
+- Traffic capture at L3/L4 (tcpdump) and L7 (mitmproxy), with metrics logged to SQLite.
 
 ```bash
 # From the repo root:
@@ -28,17 +64,18 @@ cd aitestbed
 python orchestrator.py --scenario chat_basic --profile 5g_urban --runs 10
 ```
 
-For the full SA4 cross-check run (all scenarios × profiles, with PCAP capture and report generation), see the **Cross-Checking for SA4 AI Traffic Characterization** section in `aitestbed/README.md`.
+The full SA4 cross-check run (all scenarios and profiles, with PCAP capture and report generation)
+is described in [aitestbed/README.md](aitestbed/README.md), section "Cross-Checking for SA4 AI Traffic
+Characterization".
 
-## netemu
+### netemu
 
-A lightweight network emulation library providing a clean interface to Linux traffic control.
+A Python library over Linux traffic control:
 
-**Features:**
-- Wraps `tc` and `netem` for delay, jitter, packet loss, and rate limiting
-- Bidirectional shaping via IFB devices
-- Predefined profiles including 3GPP 5QI mappings and SA4 S4-260848 reference conditions
-- Context manager support for automatic cleanup
+- Wraps `tc` and `netem` for delay, jitter, packet loss and rate limiting
+- Bidirectional shaping through IFB devices
+- Predefined profiles, including 3GPP 5QI mappings and the SA4 S4-260848 reference conditions
+- Context-manager use, which clears the rules on exit
 
 ```python
 from netemu import NetworkEmulator
@@ -49,7 +86,17 @@ with NetworkEmulator(interface="eth0") as emu:
 # Rules automatically cleared
 ```
 
-## Quick Start
+## Install dependencies
+
+- Python 3.10 or later
+- Linux with `iproute2`, for network emulation
+- Sudo access, or Docker with the `NET_ADMIN` capability
+
+## Running
+
+### Quick start
+
+The commands assume the clone is in a directory named `testbed`:
 
 ```bash
 # Clone and setup
@@ -69,7 +116,9 @@ cd aitestbed
 python orchestrator.py --scenario chat_basic --profile 6g_itu_hrllc --runs 5
 ```
 
-## Docker
+### Docker
+
+Build the image from the repository root, then run experiments in it:
 
 ```bash
 docker build -t 6g-ai-testbed -f aitestbed/Dockerfile .
@@ -77,9 +126,12 @@ docker run --cap-add=NET_ADMIN -e OPENAI_API_KEY="..." \
   6g-ai-testbed python orchestrator.py --scenario all --runs 10
 ```
 
-## Network Profiles
+## Configuration
 
-Current test matrix (from `aitestbed/configs/profiles.yaml`, aligned with 3GPP SA4 S4-260848 Table C.Z-1):
+### Network profiles
+
+The test matrix, from `aitestbed/configs/profiles.yaml`, aligned with SA4 contribution S4-260848,
+Table C.Z-1:
 
 | Profile | Delay | Jitter | Loss | Loss Distribution | Rate | Use Case |
 |---------|-------|--------|------|-------------------|------|----------|
@@ -94,11 +146,17 @@ Current test matrix (from `aitestbed/configs/profiles.yaml`, aligned with 3GPP S
 | `5qi_7` | 80 ms | 10 ms | 0.1% | correlated (20%) | -- | 5QI 7: voice / live streaming |
 | `5qi_80` | 8 ms | 1 ms | 1e-6 | correlated (5%) | -- | 5QI 80: low-latency eMBB / AR |
 
-Asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:` block that overrides egress-side fields. See [aitestbed/README.md](./aitestbed/README.md) for the full table with jitter, loss models, and advanced netem parameters.
+The asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:` block that
+overrides the egress-side fields. The full table, with jitter, loss models and advanced `netem`
+parameters, is in [aitestbed/README.md](aitestbed/README.md).
 
-## Requirements
+## Contributing
 
-- Python 3.10+
-- Linux with `iproute2` (for network emulation)
-- Sudo access or Docker with `NET_ADMIN` capability
+Contributions are welcome. How to raise an issue, fork the repository and open a pull request, and
+the Contributor License Agreement required before code can be merged, are described at
+<https://www.5g-mag.com/contributing>.
 
+## License
+
+Distributed under the 5G-MAG Public License v1.0. See [LICENSE.md](LICENSE.md). Third-party
+software, models and datasets the testbed uses are listed in [ATTRIBUTION_NOTICE](ATTRIBUTION_NOTICE).
