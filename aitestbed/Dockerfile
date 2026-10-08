@@ -102,15 +102,11 @@ RUN pip install --no-cache-dir /tmp/netemu && rm -rf /tmp/netemu
 # Copy requirements and install Python dependencies
 # (netemu is already installed above from the sibling directory)
 COPY aitestbed/requirements.lock /tmp/aitestbed-requirements.lock
-COPY training/requirements.lock /tmp/training-requirements.lock
 RUN pip install --no-cache-dir \
-    -r /tmp/aitestbed-requirements.lock \
-    -r /tmp/training-requirements.lock
+    -r /tmp/aitestbed-requirements.lock
 
-# Copy both sibling components so run_full_tests.sh can execute its documented
-# dataset/training stages inside the image.
+# Copy the testbed and its measurement/report pipeline.
 COPY aitestbed/ /app/aitestbed/
-COPY training/ /app/training/
 
 # Create necessary directories
 RUN mkdir -p \

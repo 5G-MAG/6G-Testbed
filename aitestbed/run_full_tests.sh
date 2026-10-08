@@ -1587,29 +1587,7 @@ main() {
         log_warn "  TRACES.md generation failed - continuing anyway"
     fi
 
-    # 5-10. Build, train, evaluate, generate, and export through the canonical
-    # training runner. Keeping one pipeline avoids parameter/default drift.
-    local ml_out="/dev/stdout"
-    [[ "$QUIET_MODE" == "true" ]] && ml_out="/dev/null"
-
-    if [[ "$CAPTURE_PCAP" == "true" && -d "$CAPTURE_DIR" ]]; then
-        local training_dir captures_abs db_abs
-        training_dir="$(cd ../training && pwd)"
-        captures_abs="$(cd "$CAPTURE_DIR" && pwd)"
-        db_abs="$(pwd)/logs/traffic_logs.db"
-
-        log_info "Running corrected grouped-split ML pipeline..."
-        if (cd "$training_dir" && \
-            ALLOW_CPU=1 INCLUDE_ARCHIVES=0 MAX_PACKETS=100 \
-            CAPTURES_DIR="$captures_abs" DB_PATH="$db_abs" \
-            bash run_training.sh) > "$ml_out" 2>&1; then
-            log_info "  Models, held-out metrics, synthetic traces, and ONNX exports updated"
-        else
-            log_warn "  ML pipeline failed - testbed reports remain available"
-        fi
-    fi
-
-    # 11. Anonymize database
+    # 5. Anonymize database
     if [[ "$ANONYMIZE_DB" == "true" ]]; then
         log_info "Anonymizing database..."
         if python anonymize_db.py --db logs/traffic_logs.db > "$report_out" 2>&1; then
@@ -1619,7 +1597,7 @@ main() {
         fi
     fi
 
-    # 12. Final database backup
+    # 6. Final database backup
     BACKUP_FILE="logs/traffic_logs_$(date +%Y%m%d_%H%M%S).db.bak"
     cp logs/traffic_logs.db "$BACKUP_FILE"
     log_info "  Database backed up to $BACKUP_FILE"
@@ -1659,12 +1637,6 @@ main() {
         PCAP_COUNT=$(find "$CAPTURE_DIR" -name "*.pcap" 2>/dev/null | wc -l || echo "0")
         PCAP_SIZE=$(du -sh "$CAPTURE_DIR" 2>/dev/null | cut -f1 || echo "?")
         echo "    Pcaps:       $CAPTURE_DIR/ ($PCAP_COUNT files, $PCAP_SIZE)"
-    fi
-
-    if [[ -d "../training/models" ]]; then
-        echo "    ML Models:   ../training/models/"
-        echo "    ML Results:  ../training/results/"
-        echo "    Synthetic:   ../training/synthetic/"
     fi
 
     if [[ "$ANONYMIZE_DB" == "true" ]]; then
@@ -1847,12 +1819,8 @@ while [[ $# -gt 0 ]]; do
             echo "  2. Export to Excel (15 sheets)"
             echo "  3. Generate RESULTS.md (full evaluation report)"
             echo "  4. Generate TRACES.md (sample request/response traces)"
-            echo "  5. Build ML dataset from pcap captures"
-            echo "  6. Train MLP traffic classifier + k-sweep"
-            echo "  7. Train CVAE traffic generator"
-            echo "  8. Generate synthetic traffic traces"
-            echo "  9. Evaluate synthetic traffic quality (KS tests)"
-            echo " 10. Anonymize database"
+            echo "  5. Anonymize database"
+            echo "  6. Back up database"
             echo ""
             exit 0
             ;;

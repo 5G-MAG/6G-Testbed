@@ -1,6 +1,6 @@
 # 6G AI Traffic Characterization Testbed
 
-A framework for measuring, analyzing, and modelling AI/LLM service traffic under emulated network conditions, built to support 3GPP SA4 6G Media Study contributions.
+A framework for measuring and analyzing AI/LLM service traffic under emulated network conditions, built to support 3GPP SA4 6G Media Study contributions.
 
 ## Components
 
@@ -8,14 +8,10 @@ A framework for measuring, analyzing, and modelling AI/LLM service traffic under
 |:----------|:-----|:-------|
 | [netemu/](./netemu/) | Network emulation, packet capture, and pcap metric extraction. Standalone package, no dependency on the testbed | [netemu/README.md](./netemu/README.md) |
 | [aitestbed/](./aitestbed/) | Experiment orchestration: scenarios, LLM/agent clients, application-layer metrics, reports. Depends on `netemu` | [aitestbed/README.md](./aitestbed/README.md) |
-| [training/](./training/) | Traffic-pattern dataset builder and Markov traffic generators trained on the captures `aitestbed` produces | [training/README.md](./training/README.md) |
 
 The dependency direction is one-way:
 
 ```
-   training/            reads captures + labels produced by aitestbed
-       │
-       ▼
    aitestbed/           orchestrates experiments, computes application-layer metrics
        │
        ▼
@@ -23,8 +19,7 @@ The dependency direction is one-way:
 ```
 
 `netemu` knows nothing about the testbed and is usable on its own. `aitestbed`
-imports `netemu` for shaping, capture, and pcap parsing. `training` consumes
-`aitestbed` output files but imports no testbed code.
+imports `netemu` for shaping, capture, and pcap parsing.
 
 ## What lives where
 
@@ -39,7 +34,6 @@ The measurement stack is split by layer, not by convenience:
 | Application-layer metrics (TTFT, TTLT, tokens, agent loops) | `aitestbed/analysis/metrics.py` | Defined against the testbed's log schema |
 | RAN2 methodology metrics (S4-260859 Q1-Q5) | `aitestbed/analysis/ran2_metrics.py` | Combines pcap metrics with SQLite session records |
 | Reports, charts, Excel export | `aitestbed/` | Contribution-shaped output |
-| Feature extraction, Markov traffic generators | `training/` | Consumes captures; independent lifecycle |
 
 ## netemu
 
@@ -89,26 +83,6 @@ python orchestrator.py --scenario chat_basic --profile 5g_urban --runs 10
 ```
 
 For the full SA4 cross-check run (all scenarios x profiles, with PCAP capture and report generation), see the **Cross-Checking for SA4 AI Traffic Characterization** section in [aitestbed/README.md](./aitestbed/README.md).
-
-## training
-
-Traffic-pattern models learned from the captures the testbed produces.
-
-**Features:**
-- Feature extraction from pcaps plus SQLite session labels, with flows attributed to a transport surface and segmented at session boundaries
-- Nine traffic-pattern categories, including agent-to-agent signaling and local agent control channels
-- A shared quantization codec: log-spaced size and inter-arrival bins with empirical within-bin dequantization
-- Zero and first-order category-conditioned Markov generators, with per-category sampling and held-out KS evaluation
-
-```bash
-cd training
-pip install -r requirements.txt
-python -m dataset --captures-dir ../aitestbed/results/captures \
-    --db-path ../aitestbed/logs/traffic_logs.db --output-dir data --max-packets 100
-python -m train_markov --data-dir data
-```
-
-See [training/README.md](./training/README.md).
 
 ## Quick Start
 
@@ -168,7 +142,6 @@ Asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:`
 ```bash
 python -m pytest netemu/tests      # emulation, capture, pcap analysis
 python -m pytest aitestbed/tests   # testbed correctness checks
-python -m pytest training/tests    # dataset and model unit tests
 ```
 
 ## License
