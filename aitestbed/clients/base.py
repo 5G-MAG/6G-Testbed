@@ -263,6 +263,39 @@ class LLMClient(ABC):
         return self.estimate_tokens("\n".join(parts), model=model)
 
 
+class NullLLMClient(LLMClient):
+    """No-op LLM client for scenarios that do not call an LLM *through the
+    testbed* layer.
+
+    Some scenarios drive an external agent runtime that makes its own model
+    calls (e.g. OpenClaw) or measure agent-to-agent protocol traffic that has
+    no LLM in the testbed's own request path (e.g. A2A). They still need a
+    ``client`` object for provider labelling and token estimation, but must
+    not require an API key just to be constructed (the standard provider
+    clients build a real SDK client that raises without a key). This stub
+    fills that role: it carries a configurable provider name and inherits the
+    base token estimator, and raises if anyone actually tries to chat through
+    it.
+    """
+
+    def __init__(self, provider_name: str = "none"):
+        self._provider = provider_name
+
+    @property
+    def provider(self) -> str:
+        return self._provider
+
+    def chat(self, *args, **kwargs):
+        raise NotImplementedError(
+            f"{self._provider} is a NullLLMClient and does not implement chat()"
+        )
+
+    def chat_streaming(self, *args, **kwargs):
+        raise NotImplementedError(
+            f"{self._provider} is a NullLLMClient and does not implement chat_streaming()"
+        )
+
+
 def estimate_payload_bytes(payload: Any) -> int:
     """Estimate serialized payload size in bytes."""
     try:

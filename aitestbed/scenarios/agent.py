@@ -307,6 +307,46 @@ class BaseAgentScenario(BaseScenario):
             self._netem_on_lo = False
         await self.tool_executor.disconnect()
 
+    def _emit_discovery_records(
+        self,
+        result: "ScenarioResult",
+        session_id: str,
+        run_index: int,
+        network_profile: str,
+    ) -> None:
+        """Drain per-server MCP discovery telemetry (initialize + tools/list)
+        captured during setup() and emit one LogRecord per call so the
+        per-session waterfall reflects the handshake cost. Bytes/latency are
+        the real values measured at setup time; turn_index is -1 so they sort
+        before the first LLM call. Drained on first call only."""
+        for server in self.tool_executor.mcp_client.servers.values():
+            for event in getattr(server, "discovery", []):
+                meta = {
+                    "type": event["type"],
+                    "server": event.get("server"),
+                    "transport": event.get("transport"),
+                    "tool_count": event.get("tool_count"),
+                }
+                record = self._create_log_record(
+                    session_id=session_id,
+                    turn_index=-1,
+                    run_index=run_index,
+                    network_profile=network_profile,
+                    request_bytes=event.get("request_bytes"),
+                    response_bytes=event.get("response_bytes"),
+                    t_request_start=event.get("t_start"),
+                    latency_sec=event.get("latency_sec"),
+                    http_status=200,
+                    success=True,
+                    trace_note=event["type"],
+                    metadata=json.dumps(meta),
+                )
+                self.logger.log(record)
+                result.log_records.append(record)
+            # Clear once emitted so a re-used connection across runs (if any
+            # future runner does that) doesn't double-log.
+            server.discovery = []
+
     def run(self, network_profile: str, run_index: int = 0) -> ScenarioResult:
         """Synchronous wrapper for async run."""
         return asyncio.get_event_loop().run_until_complete(
@@ -817,6 +857,7 @@ Be thorough but efficient. Provide actionable recommendations with real data."""
         try:
             # Setup MCP connections
             await self.setup()
+            self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
                 await self._wait_between_prompts_async(prompt_index)
@@ -911,6 +952,7 @@ Be thorough - fetch multiple sources before synthesizing."""
         try:
             # Setup MCP connections
             await self.setup()
+            self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
                 await self._wait_between_prompts_async(prompt_index)
@@ -997,6 +1039,7 @@ Use these tools effectively to complete the user's request. Be thorough and veri
 
         try:
             await self.setup()
+            self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
                 await self._wait_between_prompts_async(prompt_index)

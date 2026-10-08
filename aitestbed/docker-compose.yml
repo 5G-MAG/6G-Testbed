@@ -5,8 +5,6 @@
 #   docker compose up testbed
 #   docker compose run testbed --help
 
-version: '3.8'
-
 services:
   testbed:
     build:
@@ -32,10 +30,10 @@ services:
       - PYTHONUNBUFFERED=1
 
     volumes:
-      - ./logs:/app/logs
-      - ./results/reports:/app/results/reports
-      - ./results/captures:/app/results/captures
-      - ./results/l7_captures:/app/results/l7_captures
+      - ./logs:/app/aitestbed/logs
+      - ./results/reports:/app/aitestbed/results/reports
+      - ./results/captures:/app/aitestbed/results/captures
+      - ./results/l7_captures:/app/aitestbed/results/l7_captures
       - testbed-sandbox:/tmp/testbed-sandbox
 
     ports:

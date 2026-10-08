@@ -52,6 +52,7 @@ class PlaywrightAgentScenario(BaseAgentScenario):
 
         try:
             await self.setup()
+            self._emit_discovery_records(result, session_id, run_index, network_profile)
 
             for prompt_index, user_prompt in enumerate(prompts):
                 await self._wait_between_prompts_async(prompt_index)

@@ -12,6 +12,7 @@ from .deepseek_client import DeepSeekClient
 from .vllm_client import VLLMClient
 from .azure_openai_client import AzureOpenAIClient
 from .azure_inference_client import AzureInferenceClient
+from .anthropic_client import AnthropicClient
 from .mcp_client import (
     MCPClient,
     MCPServerConfig,
@@ -50,6 +51,7 @@ __all__ = [
     "VLLMClient",
     "AzureOpenAIClient",
     "AzureInferenceClient",
+    "AnthropicClient",
     "MCPClient",
     "MCPServerConfig",
     "MCPServerConnection",

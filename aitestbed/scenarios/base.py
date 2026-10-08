@@ -59,6 +59,13 @@ class BaseScenario(ABC):
     that can be run under different network conditions.
     """
 
+    #: May the orchestrator run this scenario inside a fork()ed worker process
+    #: to enforce ``--run-timeout``? Scenarios whose process state does not
+    #: survive a fork (an initialised CUDA context, a GPU-resident model, a
+    #: running event loop) set this to False. They then run in the
+    #: orchestrator process and the per-run timeout is not enforced for them.
+    fork_isolation: bool = True
+
     def __init__(
         self,
         client: LLMClient,
