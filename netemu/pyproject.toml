@@ -7,7 +7,7 @@ name = "netemu"
 version = "0.1.0"
 description = "Linux tc/netem network emulation wrapper for Python"
 readme = "README.md"
-license = "Apache-2.0"
+license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [
     { name = "6G AI Testbed Team" }
@@ -26,7 +26,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
