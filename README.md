@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/banner.svg" width="100%" alt="Testbeds · 6G AI Traffic Characterization Testbed: 6G AI Traffic Characterization Testbed">
+  <img src=".github/banner.svg" width="100%" alt="Testbeds · 6G AI Traffic Characterization: 6G AI Traffic Characterization Testbed">
 </p>
 
 <p align="center">
@@ -8,8 +8,7 @@
 </p>
 
 <p align="center">
-  <img alt="Status: under development"
-    src="https://img.shields.io/badge/Status-Under%20Development-e67e22">
+  <img alt="Status" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fwww.5g-mag.com%2Fbadges%2Fstatus%2F6G-Testbed.json">
   <a href="https://github.com/5G-MAG/6G-Testbed/releases"><img alt="Version"
     src="https://img.shields.io/github/v/release/5G-MAG/6G-Testbed?label=Version"></a>
   <a href="LICENSE.md"><img alt="License: 5G-MAG Public License v1.0"
@@ -29,7 +28,7 @@
 |  |  |
 |---|---|
 | **Supports** | 3GPP SA4 6G Media Study contributions; network profiles aligned with SA4 contribution S4-260848, Table C.Z-1 |
-| **Part of** | [6G AI Traffic Characterization Testbed](https://www.5g-mag.com/testbeds/6g-testbed/) |
+| **Part of** | [6G AI Traffic Characterization](https://www.5g-mag.com/testbeds/6g-testbed/), alongside [netemu-dashboard](https://github.com/5G-MAG/netemu-dashboard) |
 
 ## Introduction
 
