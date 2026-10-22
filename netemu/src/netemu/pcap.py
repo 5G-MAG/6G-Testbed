@@ -95,6 +95,9 @@ class TCPFlow:
     sent_seq_ranges: list[tuple[int, int]] = field(default_factory=list)
     recv_seq_ranges: list[tuple[int, int]] = field(default_factory=list)
 
+    initiator_ip: Optional[str] = None
+    initiator_port: Optional[int] = None
+
     @property
     def duration(self) -> float:
         """Flow duration in seconds."""
@@ -254,7 +257,8 @@ class PcapMetrics:
 
     # Per-direction bursts, keyed by gap-threshold label ("10ms", "100ms"):
     #   { "10ms": { "ul": [burst, ...], "dl": [burst, ...] }, "100ms": {...} }
-    # Each burst: {start, end, duration_sec, total_bytes, packet_count, peak_rate_bps}
+    # Each burst: {start, end, duration_sec, total_bytes, packet_count, mean_rate_bps}
+    # peak_rate_bps is retained only as a deprecated compatibility alias.
     bursts_by_gap: dict = field(default_factory=dict)
 
     # Inter-burst idle-gap durations per direction, keyed same as bursts_by_gap.
@@ -400,21 +404,7 @@ class PcapAnalyzer:
 
                             # Track throughput by time bucket
                             bucket = int(ts / bucket_sec)
-                            # Determine direction: prefer known server ports
-                            # (target_ports); a packet towards a server port is
-                            # UL, from a server port is DL. Fall back to the
-                            # lower-port-is-server heuristic when ambiguous.
-                            if filter_ports and (
-                                (tcp.dport in filter_ports)
-                                != (tcp.sport in filter_ports)
-                            ):
-                                direction = (
-                                    "ul" if tcp.dport in filter_ports else "dl"
-                                )
-                            elif tcp.sport < tcp.dport:
-                                direction = "dl"
-                            else:
-                                direction = "ul"
+                            direction = self._tcp_packet_direction(flow, src_ip, tcp, filter_ports)
                             throughput_buckets[bucket][f"{direction}_bytes"] += len(ip.data)
 
                             # Record per-packet data
@@ -456,7 +446,7 @@ class PcapAnalyzer:
                             flow, flags, tcp_payload_len = self._process_tcp_packet(
                                 flows, ts, src_ip, dst_ip, tcp, len(ip6.data)
                             )
-                            direction = self._packet_direction(tcp.sport, tcp.dport, filter_ports)
+                            direction = self._tcp_packet_direction(flow, src_ip, tcp, filter_ports)
                             bucket = int(ts / bucket_sec)
                             throughput_buckets[bucket][f"{direction}_bytes"] += len(ip6.data)
                             metrics.packets.append(PacketRecord(
@@ -641,7 +631,8 @@ class PcapAnalyzer:
                             "duration_sec": dur,
                             "total_bytes": cur["total_bytes"],
                             "packet_count": cur["packet_count"],
-                            "peak_rate_bps": peak_rate_bps,
+                            "peak_rate_bps": peak_rate_bps,  # Deprecated compatibility field.
+                            "mean_rate_bps": cur["total_bytes"] * 8 / dur if dur > 0 else None,
                         })
                         per_dir_idle[direction].append(iat)
                         cur = {
@@ -668,7 +659,8 @@ class PcapAnalyzer:
                     "duration_sec": dur,
                     "total_bytes": cur["total_bytes"],
                     "packet_count": cur["packet_count"],
-                    "peak_rate_bps": peak_rate_bps,
+                    "peak_rate_bps": peak_rate_bps,  # Deprecated compatibility field.
+                    "mean_rate_bps": cur["total_bytes"] * 8 / dur if dur > 0 else None,
                 })
                 per_dir_bursts[direction] = bursts
             metrics.bursts_by_gap[label] = per_dir_bursts
@@ -725,6 +717,8 @@ class PcapAnalyzer:
         if (flags & dpkt.tcp.TH_SYN) and not (flags & dpkt.tcp.TH_ACK):
             if flow.syn_time is None:
                 flow.syn_time = ts
+                flow.initiator_ip = src_ip
+                flow.initiator_port = tcp.sport
 
         # SYN-ACK - server response
         elif (flags & dpkt.tcp.TH_SYN) and (flags & dpkt.tcp.TH_ACK):
@@ -879,6 +873,17 @@ class PcapAnalyzer:
             return "dl", reverse
         udp_flows.add(forward)
         return "ul", forward
+
+    def _tcp_packet_direction(
+        self, flow: TCPFlow, src_ip: str, tcp: 'dpkt.tcp.TCP',
+        target_ports: Optional[set[int]],
+    ) -> str:
+        """Use the TCP initiator before falling back to port-based inference."""
+        if flow.initiator_ip is not None and flow.initiator_port is not None:
+            return "ul" if (src_ip, tcp.sport) == (
+                flow.initiator_ip, flow.initiator_port
+            ) else "dl"
+        return self._packet_direction(tcp.sport, tcp.dport, target_ports)
 
     @staticmethod
     def _packet_direction(

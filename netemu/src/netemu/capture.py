@@ -18,6 +18,7 @@ mitmproxy instead, that is outside netemu's scope.
 import json
 import logging
 import os
+import re
 import shlex
 import subprocess
 import time
@@ -93,7 +94,10 @@ class CaptureController:
             "sudo", "tcpdump",
             "-i", self.interface,
             "-w", str(self._current_file),
+            "-n", "-s", "0",  # Numeric addresses, full packets.
+            "-B", "16384",  # 16 MiB capture buffer for large media transfers.
             "-U",  # Packet-buffered output
+            "--immediate-mode",  # Flush kernel batches for short final transfers.
         ]
 
         if filter_expr:
@@ -104,13 +108,16 @@ class CaptureController:
             self._process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
+                env={**os.environ, "LC_ALL": "C"},
             )
             self._metadata = {
                 "schema_version": 1,
                 "pcap_file": self._current_file.name,
                 "interface": self.interface,
                 "filter": filter_expr or "",
+                "capture_mode": "immediate",
+                "buffer_kib": 16384,
                 "t_start": time.time(),
                 **(metadata or {}),
             }
@@ -154,6 +161,15 @@ class CaptureController:
 
         result = self._current_file
         return_code = self._process.returncode
+        stderr = self._process.stderr.read().decode(errors="replace") if self._process.stderr else ""
+        # Missing counters remain unavailable. They must never imply zero loss.
+        capture_stats = {}
+        for key, label in (("packets_captured", "packets captured"),
+                           ("packets_received_by_filter", "packets received by filter"),
+                           ("packets_dropped_by_kernel", "packets dropped by kernel")):
+            match = re.search(r"(?m)^\s*(\d+) " + label + r"\s*$", stderr)
+            capture_stats[key] = int(match.group(1)) if match else None
+        self._metadata["capture_stats"] = capture_stats
         self._process = None
         self._current_file = None
         if return_code not in (0, -15):

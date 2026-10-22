@@ -1,6 +1,51 @@
 # Scenario Definitions for 6G AI Traffic Testbed
 
 scenarios:
+  # Additional SA1 media workloads; selected explicitly, outside the default matrix.
+  video_generation:
+    type: "video_generation"
+    provider: "google_media"
+    model: "gemini-omni-1.1-flash"
+    description: "Video generation with complete MP4 retrieval and decoding"
+    sa1_use_case: "TR 22.870 UC 6.26, video Gen-AI"
+    workload_kind: "text_to_video"
+    prompt: "A continuous shot of waves reaching a quiet rocky shoreline in daylight."
+    api_style: "interactions"
+    response_format:
+      type: "video"
+      aspect_ratio: "16:9"
+      resolution: "720p"
+    api_key_env: "GEMINI_API_KEY"
+    poll_interval_sec: 5
+    max_duration_sec: 540
+    max_response_bytes: 268435456
+    output_dir: "results/media"
+    retry_count: 0
+
+  image_enhancement:
+    type: "image_enhancement"
+    provider: "openai_images"
+    model: "gpt-image-1.5"
+    description: "Upload six source frames and receive a model-enhanced image"
+    sa1_use_case: "TR 22.870 UC 9.3, synergised photo enhancement"
+    workload_kind: "synthetic_fixture"
+    image_paths:
+      - "examples/assets/sa1/photo_0.png"
+      - "examples/assets/sa1/photo_1.png"
+      - "examples/assets/sa1/photo_2.png"
+      - "examples/assets/sa1/photo_3.png"
+      - "examples/assets/sa1/photo_4.png"
+      - "examples/assets/sa1/photo_5.png"
+    prompt: "These frames show the same scene at different exposures. Produce one enhanced image with reduced noise and recovered highlight and shadow detail. Preserve the scene geometry, objects, and colors."
+    size: "1024x1024"
+    quality: "medium"
+    api_key_env: "OPENAI_API_KEY"
+    max_duration_sec: 540
+    max_input_bytes: 134217728
+    max_response_bytes: 268435456
+    output_dir: "results/media"
+    retry_count: 0
+
   # Scenario-level network fields:
   #   network_interface: primary interface for tc/tcpdump when the runner uses the
   #     default auto-detected interface. Use "lo" for local-only providers such as vLLM.

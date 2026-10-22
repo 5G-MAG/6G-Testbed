@@ -1,0 +1,85 @@
+# TS 22.270 v0.3.0 Table 6.1.1-1; numeric targets remain draft values.
+# Gaming is deliberately outside this evaluation.
+schema_version: 1
+scope: [chatbot, image_genai, visual_assistant, photo_enhancement]
+additional_workloads: [video_generation]
+excluded: [gaming_enhancement]
+seed: 26870
+scenarios:
+  sa1_chat_small:
+    type: sa1_chatbot
+    model: gpt-5-mini
+    reasoning_effort: minimal
+    prompt: 'Explain what a network packet is in one short paragraph.'
+    prompt_bytes: 500
+    stream: false
+    max_completion_tokens: 512
+    sa1_use_case: chatbot
+  sa1_chat_streaming:
+    type: sa1_chatbot
+    model: gpt-5-mini
+    reasoning_effort: minimal
+    prompt: 'Explain packet transfer and burst transfer in two short paragraphs.'
+    prompt_bytes: 6000
+    stream: true
+    max_completion_tokens: 512
+    sa1_use_case: chatbot
+  sa1_image_text:
+    type: sa1_image_generation
+    model: gpt-image-1.5
+    prompt: 'A realistic photograph of a quiet rocky shoreline in daylight, no text.'
+    prompt_bytes: 500
+    size: 1024x1024
+    quality: medium
+    sa1_use_case: image_genai
+  sa1_image_conditioned:
+    type: sa1_image_generation
+    model: gpt-image-1.5
+    prompt: 'Create a natural-looking illustration of the same scene. Preserve its principal objects.'
+    image_asset: image_condition
+    size: 1024x1024
+    quality: medium
+    sa1_use_case: image_genai
+  sa1_photo_enhancement:
+    type: image_enhancement
+    model: gpt-image-1.5
+    prompt: 'These six photographs capture the same scene. Combine them into one enhanced photograph with less noise and recovered detail. Preserve scene geometry, all objects, colors and framing. Do not add or remove objects.'
+    image_asset: photo_paths
+    size: auto
+    quality: high
+    workload_kind: public_raw_burst_rendered_jpeg_proxy
+    sa1_use_case: photo_enhancement
+  sa1_visual_assistant:
+    type: sa1_visual_assistant
+    model: gemini-3.8-flash
+    api_key_env: GOOGLE_API_KEY
+    video_path: examples/assets/test_video.mp4
+    prompt: 'Describe the main events visible in this video in three sentences.'
+    max_output_tokens: 512
+    sa1_use_case: visual_assistant
+    workload_kind: bundled_video_pilot
+  sa1_video_generation:
+    type: video_generation
+    model: gemini-omni-1.1-flash
+    api_style: interactions
+    prompt: 'A continuous eight-second shot of gentle waves reaching a quiet rocky shoreline in daylight. No text.'
+    response_format:
+      type: video
+      resolution: 720p
+      aspect_ratio: '16:9'
+    sa1_use_case: additional_video_generation
+    workload_kind: text_to_video
+
+  sa1_visual_assistant_openai_frames:
+    type: sa1_visual_assistant
+    model: gpt-5-mini
+    api_key_env: OPENAI_API_KEY
+    api_style: openai_frames
+    reasoning_effort: minimal
+    video_path: examples/assets/test_video.mp4
+    prompt: 'These timestamped frames are sampled from a video. Describe the visible scene and changes across time in three sentences. Do not infer unseen motion or audio.'
+    frame_interval_sec: 1
+    max_frames: 60
+    max_output_tokens: 512
+    sa1_use_case: visual_assistant
+    workload_kind: sampled_video_frames_proxy

@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Optional
 from datetime import datetime
 from dataclasses import asdict
+from contextlib import contextmanager
 
 # Load environment variables from .env file
 from dotenv import load_dotenv
@@ -37,6 +38,9 @@ from scenarios import (
     WebSearchAgentScenario,
     GeneralAgentScenario,
     ImageGenerationScenario,
+    VideoGenerationScenario,
+    ImageEnhancementScenario,
+    MeasuredImageGenerationScenario, MeasuredChatScenario, VisualAssistantScenario,
     MultimodalScenario,
     VideoUnderstandingScenario,
     ScenarioResult,
@@ -157,6 +161,11 @@ class TestbedOrchestrator:
             "shopping_agent": ShoppingAgentScenario,
             "web_search_agent": WebSearchAgentScenario,
             "general_agent": GeneralAgentScenario,
+            "sa1_chatbot": MeasuredChatScenario,
+            "sa1_image_generation": MeasuredImageGenerationScenario,
+            "sa1_visual_assistant": VisualAssistantScenario,
+            "video_generation": VideoGenerationScenario,
+            "image_enhancement": ImageEnhancementScenario,
             "image": ImageGenerationScenario,
             "image_generation": ImageGenerationScenario,
             "multimodal": MultimodalScenario,
@@ -234,7 +243,7 @@ class TestbedOrchestrator:
                 self._clients[provider] = RealtimeWebRTCVLMClient()
             elif provider == "openai_token":
                 self._clients[provider] = OpenAITokenClient()
-            elif provider in ("none", "null", "a2a", "openclaw"):
+            elif provider in ("none", "null", "a2a", "openclaw", "veo", "google_media", "openai_images", "sa1_http"):
                 # Scenarios that do not call an LLM through the testbed layer
                 # (A2A agent-to-agent, OpenClaw's own model loop). Use a stub
                 # so construction never requires an API key.
@@ -266,38 +275,51 @@ class TestbedOrchestrator:
             return _needs(scenario_arg)
         return False
 
-    def get_completed_runs(self, scenario_name: str, profile_name: str) -> int:
-        """Query the DB for the number of completed runs (successful or timed out).
-
-        A "completed run" is a distinct session_id for the given
-        scenario+profile that either succeeded on every record OR is a
-        timeout placeholder.  Timed-out runs are legitimate data points
-        (the network conditions *are* the cause) and must not be retried
-        on resume.
-        """
+    @contextmanager
+    def _run_ledger(self):
         import sqlite3
+        connection = sqlite3.connect(self.logger.db_path)
+        connection.execute("""CREATE TABLE IF NOT EXISTS experiment_runs (
+            scenario TEXT, profile TEXT, run_index INTEGER, result_json TEXT NOT NULL,
+            PRIMARY KEY (scenario, profile, run_index))""")
         try:
-            db_path = self.logger.db_path
-            with sqlite3.connect(db_path) as conn:
-                cursor = conn.execute("""
-                    SELECT COUNT(DISTINCT session_id) FROM traffic_logs
-                    WHERE scenario_id = ?
-                      AND network_profile = ?
-                      AND session_id NOT LIKE 'pcap_%'
-                      AND (
-                          session_id LIKE 'timeout_%'
-                          OR session_id NOT IN (
-                              SELECT DISTINCT session_id FROM traffic_logs
-                              WHERE scenario_id = ?
-                                AND network_profile = ?
-                                AND success = 0
-                          )
-                      )
-                """, (scenario_name, profile_name, scenario_name, profile_name))
-                count = cursor.fetchone()[0]
-                return count
-        except Exception:
-            return 0
+            with connection:
+                yield connection
+        finally:
+            connection.close()
+
+    def _completed_results(self, scenario_name, profile_name):
+        """Only explicit terminal records are resumable; partial logs are not."""
+        with self._run_ledger() as connection:
+            rows = connection.execute(
+                "SELECT result_json FROM experiment_runs WHERE scenario=? AND profile=? ORDER BY run_index",
+                (scenario_name, profile_name)).fetchall()
+            if not rows and connection.execute(
+                "SELECT 1 FROM traffic_logs WHERE scenario_id=? AND network_profile=? LIMIT 1",
+                (scenario_name, profile_name),
+            ).fetchone():
+                raise ValueError("Existing logs have no terminal run ledger; use a fresh campaign database")
+        results = []
+        for (raw,) in rows:
+            data = json.loads(raw)
+            if data.get("state") == "started":
+                raise ValueError("An unresolved run may have submitted a provider job; inspect it before resuming")
+            data["log_records"] = [LogRecord(**r) for r in data["log_records"]]
+            results.append(ScenarioResult(**data))
+        return results
+
+    def _save_run_result(self, result):
+        with self._run_ledger() as connection:
+            connection.execute("INSERT OR REPLACE INTO experiment_runs VALUES (?, ?, ?, ?)",
+                (result.scenario_id, result.network_profile, result.run_index, json.dumps(asdict(result))))
+
+    def _mark_run_started(self, scenario, profile, run_index):
+        with self._run_ledger() as connection:
+            connection.execute("INSERT OR REPLACE INTO experiment_runs VALUES (?, ?, ?, ?)",
+                (scenario, profile, run_index, json.dumps({"state": "started", "time": time.time()})))
+
+    def get_completed_runs(self, scenario_name: str, profile_name: str) -> int:
+        return len(self._completed_results(scenario_name, profile_name))
 
     def run_experiment(
         self,
@@ -322,8 +344,8 @@ class TestbedOrchestrator:
             run_timeout: Per-run timeout in seconds. None means no timeout.
             stop_on_error: If True, raise RunFailedError on the first failed run
                           (after retries are exhausted).
-            resume: If True, query the DB for already-completed successful runs
-                   and skip them.
+            resume: If True, restore terminal outcomes by run index, including failures,
+                   and run only missing indices. Use a separate DB per campaign.
 
         Returns:
             List of ScenarioResult objects
@@ -347,27 +369,18 @@ class TestbedOrchestrator:
             raise ValueError(f"Unknown scenario type: {scenario_type}")
 
         defaults = self.scenarios_config.get("defaults", {})
-        retry_count = int(defaults.get("retry_count", 0))
+        retry_count = int(scenario_config.get("retry_count", defaults.get("retry_count", 0)))
         retry_backoff_sec = float(defaults.get("retry_backoff_sec", 1.0))
         retry_backoff_multiplier = float(defaults.get("retry_backoff_multiplier", 2.0))
 
         # Resume: check before any expensive setup (client init, network
         # profile application) so fully-completed combos are skipped cheaply.
-        start_run = 0
-        if resume:
-            completed = self.get_completed_runs(scenario_name, profile_name)
-            if completed >= runs:
-                logger.info(
-                    f"Skipping {scenario_name}/{profile_name}: "
-                    f"all {runs} runs already completed ({completed} in DB)"
-                )
-                return []
-            if completed > 0:
-                start_run = completed
-                logger.info(
-                    f"Resuming {scenario_name}/{profile_name} from run "
-                    f"{start_run + 1}/{runs} ({completed} already completed)"
-                )
+        previous = self._completed_results(scenario_name, profile_name) if resume else []
+        previous = [r for r in previous if 0 <= r.run_index < runs]
+        completed_indices = {r.run_index for r in previous}
+        pending_indices = [i for i in range(runs) if i not in completed_indices]
+        if not pending_indices:
+            return previous
 
         # Get provider and client
         provider = scenario_config.get("provider", "openai")
@@ -395,7 +408,7 @@ class TestbedOrchestrator:
                 f"Failed to apply network profile '{profile_name}'; experiment aborted"
             )
 
-        results = []
+        results = list(previous)
 
         # --run-timeout isolates each run in a forked worker process. Scenarios
         # whose in-process state cannot survive a fork (see
@@ -411,8 +424,10 @@ class TestbedOrchestrator:
                 )
 
         try:
-            for run_index in range(start_run, runs):
+            for run_index in pending_indices:
                 logger.info(f"Running {scenario_name} [{run_index + 1}/{runs}] with profile {profile_name}")
+                if hasattr(self.logger, "db_path"):
+                    self._mark_run_started(scenario_name, profile_name, run_index)
 
                 attempt = 0
                 retry_reason = None
@@ -445,10 +460,9 @@ class TestbedOrchestrator:
 
                 results.append(result)
 
-                # Persist timeout results to the DB so that --resume
-                # counts them as completed and does not retry them.
-                if not result.log_records and result.session_id.startswith("timeout_"):
-                    timeout_record = LogRecord(
+                # Every result contributes a record, including worker timeouts.
+                if not result.log_records:
+                    outcome_record = LogRecord(
                         timestamp=time.time(),
                         scenario_id=scenario_name,
                         session_id=result.session_id,
@@ -458,9 +472,12 @@ class TestbedOrchestrator:
                         model=scenario_config.get("model", ""),
                         network_profile=profile_name,
                         latency_sec=result.total_latency_sec,
-                        success=False,
-                        error_type="timeout")
-                    self.logger.log(timeout_record)
+                        success=result.success,
+                        request_bytes=result.total_request_bytes,
+                        response_bytes=result.total_response_bytes,
+                        error_type=result.error_message or (None if result.success else "run_failed"))
+                    self.logger.log(outcome_record)
+                    result.log_records.append(outcome_record)
 
                 logger.info(
                     f"  Completed: success={result.success}, "
@@ -474,6 +491,9 @@ class TestbedOrchestrator:
                     result.metadata["retry_attempts"] = attempt
                     if retry_reason:
                         result.metadata["retry_reason"] = retry_reason
+
+                if hasattr(self.logger, "db_path"):
+                    self._save_run_result(result)
 
                 if run_index < runs - 1:
                     time.sleep(inter_run_delay)
