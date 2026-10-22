@@ -9,9 +9,10 @@ from pathlib import Path
 import time
 
 from sa1_excel import Book, flat_stats
-from sa1_excel_metrics import build_provider, digest, distribution, GAPS_MS, WINDOWS_MS
+from sa1_excel_metrics import build_provider, digest, distribution, WINDOWS_MS
 from sa1_segment_metrics import build_segment
 
+BURST_GAPS_MS = (10, 100, 1000)
 
 def read(path):
     return json.loads(Path(path).read_text())
@@ -159,6 +160,8 @@ def collect(root):
                         ("window", "Rate_Windows"),
                     ):
                         for item in view[field]:
+                            if field == "burst" and item["idle_gap_ms"] not in BURST_GAPS_MS:
+                                continue
                             record = {**label, **flatten(item)}
                             if field == "burst":
                                 details = [
@@ -207,6 +210,7 @@ def collect(root):
                 )
                 tables["Source_Burst_Runs"].extend(
                     {**label, **flatten(b)} for b in values["source_bursts"]
+                    if b["idle_gap_ms"] in BURST_GAPS_MS
                 )
                 tables["Packet_Thresholds"].extend(
                     {**label, **t} for t in values["packet_thresholds"]
@@ -363,7 +367,7 @@ def export(root, output):
     tables["SA1_Questions"] = [
         {
             "question": "Average uplink/downlink burst size",
-            "answer": "Packet and Burst summaries/runs provide both directions, two capture points, all-TCP and data-only populations at eight gap criteria. Source-burst tables additionally count unique encrypted TCP bytes.",
+            "answer": "Packet and Burst summaries/runs provide both directions, two capture points, and all-TCP and data-only populations. Burst-separation thresholds are 10 ms, 100 ms and 1 s (1000 ms). Source-burst tables additionally count unique encrypted TCP bytes.",
             "limitation": "A traffic cluster is not necessarily one application data unit.",
         },
         {
@@ -383,8 +387,8 @@ def export(root, output):
         },
         {
             "question": "Different burst duration criteria",
-            "answer": f"Strict inter-packet idle gaps {list(GAPS_MS)} ms; throughput windows {list(WINDOWS_MS)} ms. Burst duration is last minus first packet time; one-packet bursts have zero duration and no bytes/duration rate.",
-            "limitation": "10/100 ms are source-report criteria; other gaps are sensitivity analysis.",
+            "answer": f"Strict inter-packet idle gaps {list(BURST_GAPS_MS)} ms (10 ms, 100 ms, 1 s); throughput windows {list(WINDOWS_MS)} ms. Burst duration is last minus first packet time; one-packet bursts have zero duration and no bytes/duration rate.",
+            "limitation": "10/100 ms are TR 26.870 packet-segmentation criteria. The 1 s packet-gap comparison is distinct from the TR's separate request-level ON/OFF criterion.",
         },
         {
             "question": "Gaming",
@@ -658,6 +662,7 @@ def export(root, output):
         "plan_sha256": digest(root / "plan.json"),
         "execution_plan_sha256": digest(root / "execution-plan.json") if (root / "execution-plan.json").exists() else None,
         "repetitions_by_scenario": plan.get("repetitions_by_scenario", {s: plan["repetitions"] for s in plan["scenarios"]}),
+        "burst_gap_thresholds_ms": list(BURST_GAPS_MS),
         "excluded_before_submission": len(plan.get("excluded_jobs", [])),
         "exported_at": time.time(),
     }
