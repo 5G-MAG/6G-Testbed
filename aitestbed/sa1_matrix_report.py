@@ -63,10 +63,15 @@ def collect(root):
         elif (run / "started.json").exists():
             state = "started_without_terminal_result"
         elif (run / "blocked.json").exists():
-            state = "blocked_not_attempted"
+            blocked = read(run / "blocked.json")
+            state = (
+                "deferred_for_balanced_coverage"
+                if blocked.get("state") == "deferred_for_balanced_coverage"
+                else "blocked_not_attempted"
+            )
         row = {
             **base,
-            "execution_order": order,
+            "planned_order": order,
             "state": state,
             "model": plan["scenarios"][job["scenario"]]["model"],
             "client_completion_sec": None,
@@ -435,7 +440,7 @@ def export(root, output):
         for topic, definition in [
             (
                 "Design",
-                f"{len(plan['jobs'])} planned attempts: {len(plan['scenarios'])} scenarios × {len(plan['profiles'])} profiles × {plan['repetitions']} repetitions. Randomized order, seed {plan['seed']}; sequential execution, fresh TCP namespaces per job.",
+                f"{len(plan['jobs'])} planned attempts: {len(plan['scenarios'])} scenarios × {len(plan['profiles'])} profiles × {plan['repetitions']} repetitions. Original randomized order, seed {plan['seed']}; sequential execution, fresh TCP namespaces per job. Any coverage-priority scheduling is documented in the campaign amendment.",
             ),
             (
                 "Failure accounting",
@@ -511,7 +516,7 @@ def export(root, output):
     temporary = output.with_name(output.stem + ".partial.xlsx")
     book = Book(temporary, compact=True)
     descriptions = {
-        "Matrix_Summary": "Ten planned attempts for each scenario/profile pair. Completion statistics use successful jobs; failures and pending jobs remain visible.",
+        "Matrix_Summary": "Planned attempts for each scenario/profile pair. Completion statistics use successful jobs; failures and pending jobs remain visible.",
         "Run_Ledger": "Every planned attempt, including pending, failed, blocked and unresolved jobs. API duration is client completion time, not one-way network delay.",
         "Packet_Summary": "Eligible captures only. Packet-weighted mean and observed maximum; percentiles describe per-run means.",
         "Burst_Summary": "Eligible captures, strict idle-gap grouping; both all-TCP and data-only populations. Statistics summarize observed traffic clusters.",
