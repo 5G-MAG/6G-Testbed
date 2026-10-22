@@ -28,7 +28,7 @@ def flatten(row):
 
 
 def collect(root):
-    plan = read(root / "plan.json")
+    plan = read(root / ("execution-plan.json" if (root / "execution-plan.json").exists() else "plan.json"))
     tables = defaultdict(list)
     for order, job in enumerate(plan["jobs"]):
         run = root / job["id"]
@@ -233,7 +233,7 @@ def collect(root):
                     "scenario": scenario,
                     "profile": profile,
                     "scenario_profile": scenario.removeprefix("sa1_") + " / " + profile,
-                    "planned": plan["repetitions"],
+                    "planned": len(rows),
                     "completed": len(terminal),
                     "successes": len(successes),
                     "failures": len(terminal) - len(successes),
@@ -440,7 +440,7 @@ def export(root, output):
         for topic, definition in [
             (
                 "Design",
-                f"{len(plan['jobs'])} planned attempts: {len(plan['scenarios'])} scenarios × {len(plan['profiles'])} profiles × {plan['repetitions']} repetitions. Original randomized order, seed {plan['seed']}; sequential execution, fresh TCP namespaces per job. Any coverage-priority scheduling is documented in the campaign amendment.",
+                f"{len(plan['jobs'])} planned attempts across {len(plan['scenarios'])} scenarios and {len(plan['profiles'])} profiles. Repetitions per scenario/profile: {plan.get('repetitions_by_scenario', {s: plan['repetitions'] for s in plan['scenarios']})}. Original randomized order, seed {plan['seed']}; sequential execution, fresh TCP namespaces per job. Scheduling and sample-size amendments are documented in the campaign evidence.",
             ),
             (
                 "Failure accounting",
@@ -492,7 +492,7 @@ def export(root, output):
             ),
             (
                 "Earlier evidence",
-                "Earlier baseline/provider and controlled fixture campaigns are separate cohorts and do not count toward this 400-attempt matrix.",
+                "Earlier baseline/provider and controlled fixture campaigns are separate cohorts and do not count toward this matrix.",
             ),
         ]
     ]
@@ -513,6 +513,17 @@ def export(root, output):
             "sha256": digest(Path(__file__).with_name("sa1_segment_metrics.py")),
         },
     ]
+    for filename in ("execution-plan.json", "scenario-caps.json"):
+        if (root / filename).exists():
+            tables["Evidence"].append({"kind": "execution amendment", "path": str(root / filename), "sha256": digest(root / filename)})
+    tables["Excluded_Attempts"] = plan.get("excluded_jobs", [])
+    retry_path = root / "authorized-video-retry.json"
+    if retry_path.exists():
+        retry = read(retry_path)
+        tables["Supplementary_Retries"] = [{k: retry.get(k) for k in (
+            "original_run_id", "original_result", "original_result_sha256", "retry_job",
+            "state", "success", "result", "workbook", "included_in_primary_matrix", "message"
+        )}]
     temporary = output.with_name(output.stem + ".partial.xlsx")
     book = Book(temporary, compact=True)
     descriptions = {
@@ -529,6 +540,8 @@ def export(root, output):
     order = [
         "Matrix_Summary",
         "Run_Ledger",
+        "Excluded_Attempts",
+        "Supplementary_Retries",
         "SA1_Questions",
         "Draft_Requirements",
         "Packet_Summary",
@@ -626,9 +639,7 @@ def export(root, output):
                 "values_data": [r[key] for r in tables["Matrix_Summary"]],
             }
         )
-    chart.set_title(
-        {"name": f"{plan['repetitions']} attempts per scenario/profile pair"}
-    )
+    chart.set_title({"name": "Attempts per scenario/profile pair; see planned counts"})
     chart.set_x_axis({"name": "Attempts", "min": 0, "max": plan["repetitions"]})
     chart.set_y_axis({"reverse": True})
     chart.set_size({"width": 1050, "height": 1000})
@@ -645,6 +656,9 @@ def export(root, output):
         "analysis_errors": len(tables["Analysis_Errors"]),
         "sheets": book.index,
         "plan_sha256": digest(root / "plan.json"),
+        "execution_plan_sha256": digest(root / "execution-plan.json") if (root / "execution-plan.json").exists() else None,
+        "repetitions_by_scenario": plan.get("repetitions_by_scenario", {s: plan["repetitions"] for s in plan["scenarios"]}),
+        "excluded_before_submission": len(plan.get("excluded_jobs", [])),
         "exported_at": time.time(),
     }
     output.with_suffix(".manifest.json").write_text(

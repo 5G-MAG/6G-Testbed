@@ -63,3 +63,28 @@ def test_failed_unresolved_and_blocked_never_count_as_success(tmp_path):
     assert summary["successes"] == summary["failures"] == 1
     assert summary["unresolved"] == summary["blocked"] == 1
     assert len(summary["groups"]) == 40
+
+
+@pytest.mark.parametrize("phase,total", [(4, 160), (6, 220), (8, 280), (10, 340)])
+def test_report_respects_scenario_caps_without_changing_original_plan(tmp_path, phase, total):
+    from collections import Counter
+    from sa1_matrix_report import collect
+
+    plan, args = make_plan(tmp_path)
+    output = args[0]
+    original = (output / "plan.json").read_bytes()
+    targets = {s: min(phase, 4) if s == "sa1_video_generation" else phase for s in plan["scenarios"]}
+    seen = Counter()
+    selected = []
+    for job in plan["jobs"]:
+        pair = (job["scenario"], job["profile"])
+        seen[pair] += 1
+        if seen[pair] <= targets[job["scenario"]]:
+            selected.append(job)
+    amended = {**plan, "jobs": selected, "repetitions_by_scenario": targets}
+    (output / "execution-plan.json").write_text(json.dumps(amended))
+    reported, tables = collect(output)
+    assert len(reported["jobs"]) == len(tables["Run_Ledger"]) == total
+    assert len(tables["Matrix_Summary"]) == 40
+    assert all(row["planned"] == row["pending_or_unresolved"] == targets[row["scenario"]] for row in tables["Matrix_Summary"])
+    assert (output / "plan.json").read_bytes() == original
