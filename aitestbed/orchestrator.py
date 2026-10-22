@@ -30,7 +30,7 @@ from clients import (
 )
 from analysis import TrafficLogger, MetricsCalculator, LogRecord
 from configs import DEFAULT_CAPTURE_FILTER
-from netemu import NetworkEmulator
+from netemu import NetworkEmulator, load_profile_catalog
 from scenarios import (
     ChatScenario,
     ShoppingAgentScenario,
@@ -135,10 +135,7 @@ class TestbedOrchestrator:
         # Load configurations
         with open(self.config_path) as f:
             self.scenarios_config = yaml.safe_load(f)
-        # Re-parse profiles.yaml as a raw dict so we retain access to optional
-        # `uplink:` blocks (netemu's NetworkProfile dataclass strips them).
-        with open(self.profiles_path) as f:
-            self.profiles_config = yaml.safe_load(f) or {}
+        self.profiles_config = load_profile_catalog(self.profiles_path)
 
         # Initialize components
         self.logger = TrafficLogger(db_path)
@@ -147,12 +144,8 @@ class TestbedOrchestrator:
             profiles_path=str(self.profiles_path),
             bidirectional=not egress_only
         )
-        # Expose the resolved interface (in case "auto" was passed)
         self.network_interface = self.emulator.interface
         self.mcp_transport = mcp_transport
-
-        # Validate any asymmetric `uplink:` blocks now so bad YAML fails fast.
-        self._validate_asymmetric_profiles()
 
         # Initialize clients (lazy loaded based on provider)
         self._clients = {}
@@ -211,141 +204,14 @@ class TestbedOrchestrator:
 
         }
 
-    # ------------------------------------------------------------------
-    # Asymmetric profile support (S4-260848 Table C.Z-1)
-    # ------------------------------------------------------------------
-
-    # Fields that may legally appear at the top level of a profile or
-    # inside an `uplink:` block. Mirrors NetworkProfile dataclass + the
-    # kwargs accepted by NetworkEmulator.apply_settings(). `description`
-    # and `uplink` are intentionally excluded.
-    _PROFILE_IMPAIRMENT_FIELDS = frozenset({
-        "delay_ms", "jitter_ms",
-        "delay_distribution", "delay_correlation_pct",
-        "loss_pct", "loss_correlation_pct", "loss_model",
-        "rate_mbit", "rate_ceil_mbit",
-        "rate_burst_kbit", "rate_cburst_kbit",
-        "corruption_pct", "corruption_correlation_pct",
-        "reorder_pct", "reorder_correlation_pct",
-        "duplicate_pct", "duplicate_correlation_pct",
-        "limit_packets",
-    })
-
-    def _validate_asymmetric_profiles(self) -> None:
-        """Reject malformed `uplink:` blocks at startup.
-
-        Catches: non-dict uplink, nested uplink, unknown fields. Empty
-        uplink (`uplink: {}`) is allowed and logged, treated as symmetric.
-        """
-        profiles = (self.profiles_config or {}).get("profiles", {}) or {}
-        for name, raw in profiles.items():
-            if not isinstance(raw, dict):
-                continue
-            ul = raw.get("uplink")
-            if ul is None:
-                continue
-            if not isinstance(ul, dict):
-                raise ValueError(
-                    f"profile '{name}': 'uplink:' must be a mapping, "
-                    f"got {type(ul).__name__}"
-                )
-            if not ul:
-                logger.warning(
-                    f"profile '{name}': empty uplink: block, treating as symmetric"
-                )
-                continue
-            if "uplink" in ul:
-                raise ValueError(
-                    f"profile '{name}': nested 'uplink:' is forbidden"
-                )
-            unknown = set(ul) - self._PROFILE_IMPAIRMENT_FIELDS
-            if unknown:
-                raise ValueError(
-                    f"profile '{name}': unknown key(s) under uplink: "
-                    f"{sorted(unknown)}"
-                )
-
     def _apply_emulator_profile(
         self, profile_name: str, ingress_profile: Optional[str]
     ) -> bool:
-        """Apply *profile_name*, honoring the optional `uplink:` override.
-
-        Symmetric profiles fall through to ``emulator.apply_profile`` (existing
-        behavior). Asymmetric profiles are applied via ``apply_settings``,
-        which already supports an ``ingress_settings`` dict, no synthetic
-        netemu profiles are registered.
-
-        CLI ``--ingress-profile Y`` wins over a built-in ``uplink:`` block:
-        egress still uses (base ⊕ uplink), ingress uses Y's base fields.
-
-        ``no_emulation`` is a true bypass: any prior tc state is cleared and
-        no qdisc is added, so the device is observed exactly as the kernel
-        sees it (no netem queueing, no IFB).
-        """
-        # No-emulation reference baseline: skip tc/netem entirely.
+        """Let netemu resolve uplink, downlink and explicit ingress overrides."""
+        # Keep the legacy baseline name compatible with older flat catalogs.
         if profile_name == "no_emulation":
-            logger.info(
-                "Profile no_emulation: clearing prior tc state and bypassing netem"
-            )
-            self.emulator.clear()
-            return True
-
-        profiles = (self.profiles_config or {}).get("profiles", {}) or {}
-        raw = profiles.get(profile_name) if isinstance(profiles, dict) else None
-        uplink = raw.get("uplink") if isinstance(raw, dict) else None
-
-        # Symmetric fast path
-        if not uplink:
-            return self.emulator.apply_profile(
-                profile_name, ingress_profile=ingress_profile
-            )
-
-        # Asymmetric, split base + uplink overrides into egress/ingress dicts
-        base = {
-            k: v for k, v in raw.items()
-            if k in self._PROFILE_IMPAIRMENT_FIELDS
-        }
-        egress = {**base, **uplink}
-
-        if ingress_profile == "none":
-            ingress_dict = None
-            disable_ingress = True
-        elif ingress_profile:
-            cli_raw = profiles.get(ingress_profile)
-            if not isinstance(cli_raw, dict):
-                raise ValueError(
-                    f"--ingress-profile '{ingress_profile}' not found in profiles.yaml"
-                )
-            ingress_dict = {
-                k: v for k, v in cli_raw.items()
-                if k in self._PROFILE_IMPAIRMENT_FIELDS
-            }
-            disable_ingress = False
-        else:
-            # Default: ingress uses the base (downlink) fields unchanged
-            ingress_dict = base
-            disable_ingress = False
-
-        logger.info(
-            f"Profile {profile_name} is asymmetric. "
-            f"uplink overrides: {sorted(uplink.keys())}"
-        )
-        if not self.emulator.bidirectional:
-            logger.warning(
-                f"Profile {profile_name} has an uplink: block but --egress-only "
-                f"is set, downlink (base) side will not be applied."
-            )
-        logger.debug(f"  egress (UL):  {egress}")
-        logger.debug(
-            f"  ingress (DL): "
-            f"{ingress_dict if ingress_dict is not None else '<egress-only>'}"
-        )
-
-        return self.emulator.apply_settings(
-            **egress,
-            profile_name=profile_name,
-            ingress_settings=ingress_dict,
-            disable_ingress=disable_ingress)
+            return self.emulator.clear()
+        return self.emulator.apply_profile(profile_name, ingress_profile=ingress_profile)
 
     def get_client(self, provider: str):
         """Get or create an LLM client for the given provider."""
@@ -525,7 +391,9 @@ class TestbedOrchestrator:
         else:
             logger.info(f"Applying network profile: {profile_name} (bidirectional)")
         if not self._apply_emulator_profile(profile_name, ingress_profile):
-            logger.warning(f"Failed to apply network profile (may require sudo)")
+            raise RuntimeError(
+                f"Failed to apply network profile '{profile_name}'; experiment aborted"
+            )
 
         results = []
 

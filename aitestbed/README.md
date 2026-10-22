@@ -523,25 +523,38 @@ inference-bound profile by isolating the agent-to-agent control plane.
 
 ## Network Profiles
 
-The test matrix uses the 10 selected profiles from `configs/profiles.yaml`, aligned with 3GPP SA4 contribution **S4-260848 (Table C.Z-1)**:
+`configs/profiles.yaml` is the corrected calibration schema v1 catalog from
+`profile-contracts-20261010T042239Z`: 22 directional cases exposed as 11 profile
+names by `netemu`. The default test matrix selects ten of them; `lossy` is an
+additional independent 10% loss profile. The catalog retains fixed synthetic
+inputs and calibration evidence; it does not claim workload-independent output
+latency or fitted convergence for every profile.
+
+The selected profiles are:
 
 | Profile | Delay | Jitter | Delay Dist. | Loss | Loss Distribution | Rate | Description |
 |:--------|:------|:-------|:------------|:-----|:------------------|:-----|:------------|
 | `no_emulation` | 0 ms | 0 ms | fixed | 0% | -- | -- | Reference (no tc/netem applied) |
-| `6g_itu_hrllc` | 1 ms | 0.2 ms | normal | 0.001% | correlated (10%) | 300 Mbps | 6G HRLLC (ITU IMT-2030 / M.2160) |
-| `5g_urban` | 20 ms | 5 ms | normal | 0.1% | correlated (25%) | 100 Mbps | Mainstream urban terrestrial cellular |
-| `wifi_good` | 30 ms | 10 ms | normal | 0.1% | correlated (30%) | 50 Mbps | Non-3GPP local access (WiFi avg) |
-| `cell_edge` | 120 ms | 30 ms | paretonormal | 1% | Gilbert-Elliot (35%) | 5 Mbps | Weak radio, heavy-tail jitter |
-| `satellite_leo` ⇄ | 22 ms / 22 ms | 7 ms / 8 ms | normal | 0.5% / 0.8% | correlated (40% / 45%) | 100 / 15 Mbps | LEO satellite (asymmetric UL) |
-| `satellite_geo` ⇄ | 340 ms / 340 ms | 15 ms / 18 ms | normal | 0.1% / 0.2% | correlated (20% / 25%) | 50 / 3 Mbps | GEO satellite (long RTT, asymmetric UL) |
-| `congested` | 200 ms | 50 ms | pareto | 3% | Gilbert-Elliot (40%) | 1 Mbps | Bufferbloat / heavy congestion |
-| `5qi_7` | 80 ms | 10 ms | normal | 0.1% | correlated (20%) | -- | 5QI 7: Voice / Live Streaming (PDB 100 ms, PER 1e-3) |
-| `5qi_80` | 8 ms | 1 ms | normal | 1e-6 | correlated (5%) | -- | 5QI 80: Low-latency eMBB / AR (PDB 10 ms, PER 1e-6) |
-| `lossy` | 0 ms | 0 ms | fixed | 10% | -- | unlimited | High loss test |
+| `6g_itu_hrllc` | 1 ms | 0.2 ms | normal | 0.001% | independent | 300 Mbps | 6G HRLLC (ITU IMT-2030 / M.2160) |
+| `5g_urban` | 20 ms | 5 ms | normal | 0.1% | independent | 100 Mbps | Mainstream urban terrestrial cellular |
+| `wifi_good` | 30 ms | 10 ms | normal | 0.1% | independent | 50 Mbps | Non-3GPP local access (WiFi avg) |
+| `cell_edge` | 120 ms | 30 ms | paretonormal | 1% | GE, mean burst 2.857 packets | 5 Mbps | Weak radio, heavy-tail jitter |
+| `satellite_leo` ⇄ | 22 ms / 22 ms | 7 ms / 8 ms | normal | 0.5% / 0.8% | independent | 100 / 15 Mbps | LEO satellite (asymmetric UL) |
+| `satellite_geo` ⇄ | 340 ms / 340 ms | 15 ms / 18 ms | normal | 0.1% / 0.2% | independent | 50 / 3 Mbps | GEO satellite (long RTT, asymmetric UL) |
+| `congested` | 200 ms | 50 ms | pareto | 3% | GE, mean burst 2.5 packets | 1 Mbps | Bufferbloat / heavy congestion |
+| `5qi_7` | 80 ms | 10 ms | normal | 0.1% | independent | -- | 5QI 7: Voice / Live Streaming (PDB 100 ms, PER 1e-3) |
+| `5qi_80` | 8 ms | 1 ms | normal | 0.0001% | independent | -- | 5QI 80: Low-latency eMBB / AR (PDB 10 ms, PER 1e-6) |
 
-⇄ Asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:` sub-block that overrides egress-side fields only. The columns above show **downlink / uplink**; fields not listed under `uplink:` are inherited from the downlink block. 5QI anchors follow the S4-260848 rule `delay_ms = PDB − 2.054 × jitter_ms` when `jitter_ms > 0`.
+⇄ The columns show **downlink / uplink**. `netemu` pairs the catalog's
+`<name>/downlink` and `<name>/uplink` cases and applies uplink on egress and
+downlink on ingress. Finite-rate profiles use `htb_netem`, including native
+Netem serialization. GE profiles use stationary mean loss and mean burst length;
+random loss is independent. The 5QI 80 loss is **0.0001%** (probability 1e-6).
+See [netemu configuration](../netemu/README.md#profile-yaml-format) for parser,
+rate, burst, slot and legacy-format semantics.
 
-Profiles also carry advanced netem controls: `loss_correlation_pct`, `reorder_pct`, `reorder_correlation_pct`, `duplicate_pct`, and `limit_packets`. See `configs/profiles.yaml` for full definitions.
+The orchestrator aborts an experiment if network setup fails. Configuration
+readers for validation and reports use the same catalog parser.
 
 Bidirectional shaping is applied by default using IFB devices:
 
@@ -552,7 +565,7 @@ python orchestrator.py --scenario chat_basic --profile cell_edge
 # Egress-only
 python orchestrator.py --scenario chat_basic --profile cell_edge --egress-only
 
-# Asymmetric (e.g. terrestrial DL with LEO UL)
+# Asymmetric override (terrestrial UL with LEO DL)
 python orchestrator.py --scenario chat_basic --profile 5g_urban --ingress-profile satellite_leo
 ```
 

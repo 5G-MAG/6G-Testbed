@@ -28,9 +28,8 @@ NETWORK_PROFILES = [
 def _load_profile_descriptions(path: str = "configs/profiles.yaml") -> dict:
     """Profile name -> description, with the shaping parameters appended."""
     try:
-        import yaml
-        with open(path) as f:
-            cfg = yaml.safe_load(f) or {}
+        from netemu import load_profile_catalog
+        cfg = load_profile_catalog(path)
     except Exception:
         return {}
     out = {}

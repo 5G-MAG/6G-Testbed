@@ -117,17 +117,21 @@ Current test matrix (from `aitestbed/configs/profiles.yaml`, aligned with 3GPP S
 | Profile | Delay | Jitter | Loss | Loss Distribution | Rate | Use Case |
 |---------|-------|--------|------|-------------------|------|----------|
 | `no_emulation` | 0 ms | 0 ms | 0% | -- | -- | Reference (no tc/netem) |
-| `6g_itu_hrllc` | 1 ms | 0.2 ms | 0.001% | correlated (10%) | 300 Mbps | 6G HRLLC (ITU IMT-2030 / M.2160) |
-| `5g_urban` | 20 ms | 5 ms | 0.1% | correlated (25%) | 100 Mbps | Mainstream urban cellular |
-| `wifi_good` | 30 ms | 10 ms | 0.1% | correlated (30%) | 50 Mbps | Home/office WiFi |
+| `6g_itu_hrllc` | 1 ms | 0.2 ms | 0.001% | independent | 300 Mbps | 6G HRLLC (ITU IMT-2030 / M.2160) |
+| `5g_urban` | 20 ms | 5 ms | 0.1% | independent | 100 Mbps | Mainstream urban cellular |
+| `wifi_good` | 30 ms | 10 ms | 0.1% | independent | 50 Mbps | Home/office WiFi |
 | `cell_edge` | 120 ms | 30 ms | 1% | Gilbert-Elliot | 5 Mbps | Weak radio, heavy-tail jitter |
-| `satellite_leo` | 22 ms | 7 ms DL / 8 ms UL | 0.5% DL / 0.8% UL | correlated (40% DL / 45% UL) | 100 DL / 15 UL Mbps | LEO satellite (asymmetric) |
-| `satellite_geo` | 340 ms | 15 ms DL / 18 ms UL | 0.1% DL / 0.2% UL | correlated (20% DL / 25% UL) | 50 DL / 3 UL Mbps | GEO satellite (asymmetric) |
+| `satellite_leo` | 22 ms | 7 ms DL / 8 ms UL | 0.5% DL / 0.8% UL | independent | 100 DL / 15 UL Mbps | LEO satellite (asymmetric) |
+| `satellite_geo` | 340 ms | 15 ms DL / 18 ms UL | 0.1% DL / 0.2% UL | independent | 50 DL / 3 UL Mbps | GEO satellite (asymmetric) |
 | `congested` | 200 ms | 50 ms | 3% | Gilbert-Elliot | 1 Mbps | Bufferbloat / heavy congestion |
-| `5qi_7` | 80 ms | 10 ms | 0.1% | correlated (20%) | -- | 5QI 7: voice / live streaming |
-| `5qi_80` | 8 ms | 1 ms | 1e-6 | correlated (5%) | -- | 5QI 80: low-latency eMBB / AR |
+| `5qi_7` | 80 ms | 10 ms | 0.1% | independent | -- | 5QI 7: voice / live streaming |
+| `5qi_80` | 8 ms | 1 ms | 0.0001% | independent | -- | 5QI 80: low-latency eMBB / AR |
 
-Asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:` block that overrides egress-side fields. See [aitestbed/README.md](./aitestbed/README.md) for the full table with jitter, loss models, and advanced netem parameters.
+The active calibration catalog contains 22 directional cases, exposed as 11
+named profiles (including an additional `lossy` profile). `netemu` pairs
+`<name>/uplink` and `<name>/downlink`, applies UL on egress and DL on ingress,
+and uses combined HTB/Netem serialization for finite-rate profiles. These are
+fixed synthetic impairment inputs, not universal observed-path guarantees. See [aitestbed/README.md](./aitestbed/README.md) for the full table with jitter, loss models, and advanced netem parameters.
 
 ## Requirements
 

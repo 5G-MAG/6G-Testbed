@@ -148,8 +148,8 @@ def _load_profile_loss_pct(profiles_yaml: Optional[str]) -> dict[str, float]:
     if not profiles_yaml:
         profiles_yaml = "configs/profiles.yaml"
     try:
-        import yaml
-        data = yaml.safe_load(Path(profiles_yaml).read_text())
+        from netemu import load_profile_catalog
+        data = load_profile_catalog(profiles_yaml)
         out = {}
         for name, cfg in ((data or {}).get("profiles") or {}).items():
             if isinstance(cfg, dict) and "loss_pct" in cfg:
