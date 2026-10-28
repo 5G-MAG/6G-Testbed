@@ -1,0 +1,140 @@
+# Scenarios config (encoder-placement CONCURRENT variant) for the 6G AI
+# Traffic Testbed.
+#
+# Standalone sibling of scenarios.yaml for the concurrent encoder-placement
+# experiment — zero changes to the Qwen3-VL config / orchestrator.
+#
+# Run via the standalone runner (does NOT touch orchestrator.py):
+#   python aitestbed/run_encoder_placement_concurrent.py --help
+#
+# ALL knobs are CLI flags on the runner (NO environment variables).
+# Precedence: CLI flag > yaml key below > built-in default. Keys not
+# overridden here fall back to the runner's defaults.
+#
+# Server pairing (REQUIRED — the bootstrap script loads the sglang host
+# patches the edge mode needs; do not launch the server module directly):
+#   bash start_sidecar_concurrent.sh --port 8012
+#   The original serial sidecar also works as a queueing-attribution
+#   baseline (concurrent users serialize on its engine_lock):
+#   bash start_sidecar.sh --port 8002
+
+defaults:
+  retry_count: 0
+  retry_backoff_sec: 1.0
+  retry_backoff_multiplier: 2.0
+
+scenarios:
+  # =============================================================================
+  # Encoder Placement Concurrent (lock-free SGLang sidecar, N users/wave)
+  # =============================================================================
+  encoder_placement_concurrent:
+    type: "encoder_placement_concurrent"
+    inter_prompt_delay_sec: 0  # sec between waves; 0 = back-to-back
+    description: "Encoder placement under concurrency: N barrier-aligned terminal users per wave, server-side ViT (video upload) vs terminal-side ViT (precomputed embedding bundle), lock-free SGLang engine sidecar on port 8012"
+    provider: "sglang-engine"
+    model: "../aicodec/aicodec/models/qwen3_vl_4B"
+    network_interface: "lo"
+    # mode: "server" uploads the original video and the server runs the
+    # full pipeline; "edge" runs decode+processor+ViT on the terminal and
+    # uploads the precomputed_embedding bundle. Runner flag: --mode.
+    mode: "server"
+    # Wave size N: how many concurrent terminal users share each wave.
+    # Runner flag: --users. Keep <= the server's --max-bundles (default
+    # 64) so one wave's uploads never evict each other before their
+    # chat requests pop them.
+    concurrent_users: 2
+    # Drop the SGLang radix + multimodal-preprocess caches before every
+    # WAVE (not every request — N users race one endpoint) so each wave
+    # measures a cold prefix. Runner flag: --no-flush-cache disables.
+    flush_cache: true
+    # Optional VidCom2 token compression of the edge bundle (edge mode
+    # only): '' = upload all video tokens, 'vidcom2' = keep
+    # retention_ratio of them. Runner flags: --compressor /
+    # --retention-ratio.
+    compressor: ""
+    retention_ratio: 0.25
+    # Optional fp8 (e4m3, per-tensor scale) quantization of the uploaded
+    # edge-bundle feature tensor. Only valid together with compressor:
+    # vidcom2 (edge mode). Runner flag: --bundle-quant.
+    bundle_quant: ""
+    # Optional vision-tower-only edge load (edge mode only): true loads
+    # just Qwen3VLVisionModel (~0.4B: ViT + merger + deepstack) instead
+    # of the full model — same class/weights, identical embeddings,
+    # ~8GB -> ~1GB edge VRAM. Ignored with a warning in server mode.
+    # Runner flag: --vision-only.
+    vision_only: false
+    # Attention backend for the terminal-side ViT (edge mode only):
+    # sdpa (default) / flash_attention_4 / eager. flash_attention_2 is
+    # NOT supported on this stack. Backends are not bit-identical —
+    # compare across them with a tolerance and keep them in separate
+    # DBs. Runner flag: --attn-impl (yaml also accepts aliases like
+    # 'fa4' — they are normalized by the client).
+    attn_impl: "sdpa"
+    # Arm topology (either mode): true (default) = run each of the N
+    # users as an OS PROCESS (own interpreter/GIL/connection; edge mode
+    # also own ViT — truly independent terminals; heavy setup happens
+    # before the timing window via a ready/barrier protocol). false =
+    # threads sharing one process (edge: one global ViT; server:
+    # uploads serialize on the shared GIL). VRAM budget in edge
+    # process mode: one model copy per process (vision_only ~1GB
+    # each; full model ~8GB each) alongside the engine.
+    # Runner flags: --enable-multi-processes (explicit on) /
+    # --no-multi-processes (thread mode).
+    edge_processes: true
+    max_frames: 768
+    # Ratio-of-native frame sampling (v3 semantics): sglang's own base
+    # (total_frames/video_fps*fps, i.e. 2fps x duration BEFORE
+    # clamping) multiplied by R, then the native clamp chain (min 4,
+    # cap max_frames/768, <= total, floor to a multiple of 2).
+    # In (0, 1]; absent/null/0 = off. Edge mode samples locally
+    # (patched smart_nframes, v3; the sglang host patch is required —
+    # start_sidecar_concurrent.sh applies it and upgrades any old
+    # patch in place). Server mode: the ENGINE samples with its
+    # STARTUP-time mm_process_config — start the sidecar with the SAME
+    # --frame-ratio. Runner flag: --frame-ratio.
+    frame_ratio: null
+    # decord decode-thread cap (edge mode of this runner; server mode:
+    # start the sidecar with the SAME --decode-threads). Exports
+    # SGLANG_DECORD_NUM_THREADS before the first VideoReader:
+    # process mode -> per worker, thread mode -> in the parent. Under
+    # concurrency N users decode in parallel = N decord pools sized
+    # by HOST cores; set this to the terminals' real core count for
+    # symmetric server-vs-edge comparisons. Runner flag:
+    # --decode-threads. null = decord native default.
+    decode_threads: null
+    max_tokens: 256
+    # OPTIONAL dataset-bench mode: replace the prompts/video_path with
+    # a QA test set — each WAVE answers the next N questions (user i
+    # gets question wave*N+i; the final partial wave pads with the
+    # last question, padded duplicates are logged with metadata.bench.
+    # padded=true and NOT scored). Per-user records carry metadata.bench
+    # (question/answer/model_answer/correct); a summary line prints at
+    # the end. A failed user does not abort the bench. Env
+    # ENCPL_DATASET_DIR wins over dataset_dir. MLVU: json/ + video/
+    # layout (e.g. /data01/MLVU); tasks: null/'' = MCQ tasks 1-7,
+    # 'all' = every task (8/9 generation tasks recorded unscored), or
+    # a stem list like [1_plotQA, 8_sub_scene]. Video-MME: full set
+    # (test-*.parquet + videozip/, e.g. /data01/Video-MME). limit:
+    # 0/null = all questions; set small for smoke runs. sample:
+    # null/'' = stratified (per-task/duration quota); 'head' = first N
+    # rows in file order. dataset: null means the historical
+    # shared-prompt waves. Runner flags: --dataset/--dataset-dir/
+    # --limit/--tasks/--sample. Examples:
+    #   dataset: "mlvu"
+    #   dataset_dir: "/data01/MLVU"
+    #   limit: 20
+    dataset: null
+    dataset_dir: null
+    limit: null
+    tasks: null
+    sample: null
+    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    # Per-user DISTINCT videos (either mode, threads or processes):
+    # user i watches video_paths[i]. STRICT — len(video_paths) MUST
+    # equal concurrent_users; a miscount aborts the run. Relative
+    # entries resolve against video_base_dir, else cwd. Omitted/empty
+    # -> video_path above, shared by all users (original behavior).
+    # Runner flag: --video-paths (N paths).
+    video_paths: []
+    prompts:
+      - "Describe this video in detail."

@@ -15,7 +15,10 @@ from pathlib import Path
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, RTCRtpSender, MediaStreamError
 from aiortc.contrib.signaling import BYE
 from aiortc import VideoStreamTrack
-from aiortc.codecs.tokenId import TokenIdEncoder
+import aicodec
+from aicodec.codec import TokenIdEncoder
+
+aicodec.register()
 
 import av
 
@@ -30,6 +33,7 @@ def signaling_object_to_dict(obj):
         return {"type": obj.type, "sdp": obj.sdp}
     elif isinstance(obj, RTCIceCandidate):
         return {
+            "type": "candidate",
             "candidate": obj.candidate,
             "sdpMid": obj.sdpMid,
             "sdpMLineIndex": obj.sdpMLineIndex
@@ -47,13 +51,27 @@ def signaling_dict_to_object(obj):
             return BYE
         elif obj.get("type") in ["offer", "answer"]:
             return RTCSessionDescription(type=obj["type"], sdp=obj["sdp"])
-        elif "candidate" in obj:
+        elif obj.get("type") == "candidate" or "candidate" in obj:
             return RTCIceCandidate(
                 candidate=obj["candidate"],
-                sdpMid=obj["sdpMid"],
-                sdpMLineIndex=obj["sdpMLineIndex"]
+                sdpMid=obj.get("sdpMid"),
+                sdpMLineIndex=obj.get("sdpMLineIndex")
             )
+        elif obj.get("type") == "model_ack":
+            return ModelAck(ok=obj.get("ok", False), message=obj.get("message", ""))
+        elif obj.get("type") == "model":
+            return {"type": "model", "model": obj.get("model", "")}
     return obj
+
+
+class ModelAck:
+    """Server response to the model negotiation message."""
+    def __init__(self, ok: bool, message: str = ""):
+        self.ok = ok
+        self.message = message
+
+    def __repr__(self):
+        return f"ModelAck(ok={self.ok}, message={self.message!r})"
 
 
 # ======================
@@ -270,9 +288,16 @@ class TcpSignalingClient:
 # ======================
 # Video Stream Track
 # ======================
+# wire format per frame: 1024 uint16 tokens + 12-byte token header (+ ~2B
+# VP8-like descriptor). Used for byte metrics; raw YUV size is NOT what
+# goes on the wire for the token codecs.
+TOKENS_PER_FRAME = 1024
+TOKEN_HEADER_BYTES = 14
+
+
 class realtimeVideoStreamTrack(VideoStreamTrack):
     # kind = "video"
-    def __init__(self, path, target_fps):
+    def __init__(self, path, target_fps, pts_offset=0):
         super().__init__()
         self.kind = "video"
         self.path = path
@@ -281,8 +306,8 @@ class realtimeVideoStreamTrack(VideoStreamTrack):
         self.fps = self.stream.average_rate
         if self.fps is None:
             self.fps = target_fps
-        self.pts_offset = 0
-        self.last_pts = 0
+        self.pts_offset = pts_offset
+        self.last_pts = pts_offset
         self.resample_ratio = max(int(self.fps // target_fps), 1)
         self.frame_count_origin = -1
         self.frame_count = 0
@@ -311,7 +336,8 @@ class realtimeVideoStreamTrack(VideoStreamTrack):
                 
                 if self.frame_count_origin % self.resample_ratio == 0:
                     #-----------------------
-                    # control the frame send rate @FPS
+                    # control the frame send rate @FPS (with catch-up: if we
+                    # fell behind, don't let next_send_time drift into the past)
                     loop = asyncio.get_event_loop()
                     now = loop.time()
                     if self.next_send_time == 0.0:
@@ -319,17 +345,21 @@ class realtimeVideoStreamTrack(VideoStreamTrack):
                     wait_time = self.next_send_time - now
                     if wait_time > 0:
                         await asyncio.sleep(wait_time)
+                    else:
+                        self.next_send_time = now
                     self.next_send_time += self.frame_interval
                     #-----------------------
                     self.frame_count += 1
 
-                    frame_bytes = frame.width * frame.height * 1.5
+                    # actual wire bytes: 1024 uint16 tokens + 12-byte token
+                    # header (+ ~2 bytes VP8-like descriptor), not raw YUV
+                    frame_bytes = TOKENS_PER_FRAME * 2 + TOKEN_HEADER_BYTES
                     self._total_bytes += frame_bytes
-                    
+
                     if self._first_frame_time is None:
                         self._first_frame_time = time.time()
                     self._last_frame_time = time.time()
-                    
+
                     chunk = VLMVideoChunk(
                         frame_index=self.frame_count,
                         timestamp=time.time(),
@@ -339,7 +369,7 @@ class realtimeVideoStreamTrack(VideoStreamTrack):
                         height=frame.height
                     )
                     self._chunks.append(chunk)
-                    
+
                     return frame
             except StopIteration:
                 logger.info("Video finished")
@@ -377,11 +407,13 @@ class RealtimeWebRTCVLMClient:
         target_fps=10,
         model="liquid",
         network_profile='ideal_6g', # for result saving
+        ice_iface=None, # restrict ICE host candidates to this interface (e.g. "lo")
     ):
         self.signaling_host = signaling_host
         self.signaling_port = signaling_port
         self.target_fps = target_fps
         self.model = model
+        self.ice_iface = ice_iface
 
         self.pc = None
         self.signaling = None
@@ -406,8 +438,37 @@ class RealtimeWebRTCVLMClient:
 
         self.network_profile = network_profile # for result saving
         self._bye_close_event = asyncio.Event()
+        self._signaling_task = None
+        # apply configured model before preloading the encoder bridge
+        aicodec.set_model(self.model)
         TokenIdEncoder.preload_bridge()
-        print("vlm model preloaded")
+        print(f"vlm model preloaded ({self.model})")
+
+    async def _negotiate_model(self):
+        """Model negotiation over TCP signaling (before SDP exchange).
+
+        Sends {"type": "model", "model": <name>} and expects a ModelAck.
+        The server rejects with ok=False + message if it cannot serve the
+        requested model, in which case we abort the session.
+        """
+        logger.info(f"[Client] Negotiating model with server: {self.model}")
+        await self.signaling.send({"type": "model", "model": self.model})
+        deadline = time.time() + 30.0
+        while time.time() < deadline:
+            try:
+                obj = await asyncio.wait_for(self.signaling.receive(), timeout=5.0)
+            except asyncio.TimeoutError:
+                continue
+            if isinstance(obj, ModelAck):
+                if obj.ok:
+                    logger.info(f"[Client] Model negotiated: {self.model}")
+                    return
+                raise ConnectionError(
+                    f"server rejected model '{self.model}': {obj.message}"
+                )
+            # ignore anything received before the ack (e.g. stray SDP)
+            logger.debug(f"[Client] Ignoring pre-ack signaling message: {obj}")
+        raise ConnectionError(f"model negotiation timeout for '{self.model}'")
 
     @property
     def provider(self) -> str:
@@ -422,6 +483,13 @@ class RealtimeWebRTCVLMClient:
             model=self.model,
             t_session_start=t_start,
         )
+
+        # apply the ICE interface filter (if any) BEFORE candidate gathering;
+        # must be set before createOffer() triggers gathering
+        if self.ice_iface:
+            from aicodec.register import set_ice_interface
+            set_ice_interface(self.ice_iface)
+            logger.info(f"[Client] ICE host candidates restricted to {self.ice_iface!r}")
 
         self.pc = RTCPeerConnection()
 
@@ -472,6 +540,10 @@ class RealtimeWebRTCVLMClient:
         await self.signaling.connect()
         self.session_metrics.t_signaling_connected = time.time()
 
+        # Model negotiation: tell the server which VLM model to load,
+        # then apply it locally before preloading the encoder bridge.
+        await self._negotiate_model()
+
         # SDP Exchange
         await self.pc.setLocalDescription(await self.pc.createOffer())
         origin_sdp = self.pc.localDescription.sdp
@@ -488,10 +560,15 @@ class RealtimeWebRTCVLMClient:
 
         # Receive and process signaling messages (including ICE candidates)
         t_answer_recv = None
+        signaling_deadline = time.time() + 60.0  # overall budget for answer + ICE
         while True:
             # If answer received and ICE connected, break
             if t_answer_recv and self.pc.connectionState == "connected":
                 logger.info("[Client] ICE connected, breaking signaling loop")
+                break
+            if time.time() > signaling_deadline:
+                logger.error("[Client] Signaling negotiation timed out")
+                self._bye_close_event.set()
                 break
             try:
                 obj = await asyncio.wait_for(self.signaling.receive(), timeout=1.0)
@@ -501,27 +578,34 @@ class RealtimeWebRTCVLMClient:
                 logger.warning(f"[Client] Signaling Connection error: {e}")
                 self._bye_close_event.set()
                 break
-            
+
             # process signaling
             if isinstance(obj, RTCSessionDescription):
                 if obj.type == "answer":
                     await self.pc.setRemoteDescription(obj)
-                    
-                    self.session_metrics.sdp_answer = obj.sdp
-                    # Estimate bytes for metrics
-                    answer_dict = signaling_object_to_dict(obj)
-                    answer_bytes = len(json.dumps(answer_dict).encode())
-                    self.session_metrics.sdp_answer_bytes = answer_bytes
-                    self.session_metrics.sdp_answer_hash = hashlib.sha256(obj.sdp.encode()).hexdigest()
-                    self.session_metrics.total_response_bytes += answer_bytes
-                    
-                    t_answer_recv = time.time()
-                    self.session_metrics.sdp_negotiation_sec = t_answer_recv - t_signaling_start
+
+                    if t_answer_recv is None:
+                        # first answer: record SDP metrics
+                        self.session_metrics.sdp_answer = obj.sdp
+                        # Estimate bytes for metrics
+                        answer_dict = signaling_object_to_dict(obj)
+                        answer_bytes = len(json.dumps(answer_dict).encode())
+                        self.session_metrics.sdp_answer_bytes = answer_bytes
+                        self.session_metrics.sdp_answer_hash = hashlib.sha256(obj.sdp.encode()).hexdigest()
+                        self.session_metrics.total_response_bytes += answer_bytes
+
+                        t_answer_recv = time.time()
+                        self.session_metrics.sdp_negotiation_sec = t_answer_recv - t_signaling_start
+                    else:
+                        logger.info("[Client] Remote answer after ICE restart applied")
 
             elif isinstance(obj, RTCIceCandidate):
-                await self.pc.addIceCandidate(obj)
-                self.session_metrics.ice_candidates_received += 1
-                
+                try:
+                    await self.pc.addIceCandidate(obj)
+                    self.session_metrics.ice_candidates_received += 1
+                except Exception as e:
+                    logger.warning(f"[Client] addIceCandidate failed: {e}")
+
             elif obj is BYE:
                 logger.info("[Signaling] Received bye from server")
                 self._bye_close_event.set()
@@ -537,40 +621,128 @@ class RealtimeWebRTCVLMClient:
             logger.error("[Client] Timeout waiting for Data Channel open")
             raise ConnectionError("Data Channel failed to open")
 
+        # background signaling listener: keeps consuming signaling messages
+        # after connect() returns, so late ICE candidates, ICE-restart offers
+        # (answered locally) and the server's BYE are all handled promptly
+        self._signaling_task = asyncio.create_task(self._signaling_listener())
         logger.info(f"[Client] Connected: session={self.session_metrics.session_id}")
         return self.session_metrics
 
+    async def _signaling_listener(self):
+        try:
+            while not self._bye_close_event.is_set():
+                if self.pc and self.pc.connectionState in ["closed", "failed"]:
+                    break
+                try:
+                    obj = await asyncio.wait_for(self.signaling.receive(), timeout=1.0)
+                except asyncio.TimeoutError:
+                    continue
+                except (ConnectionError, OSError) as e:
+                    logger.info(f"[Client] Signaling closed: {e}")
+                    break
+
+                if isinstance(obj, RTCSessionDescription):
+                    if obj.type == "answer":
+                        try:
+                            await self.pc.setRemoteDescription(obj)
+                            logger.info("[Client] Applied late/renegotiated answer")
+                        except Exception as e:
+                            logger.warning(f"[Client] setRemoteDescription failed: {e}")
+                elif isinstance(obj, RTCIceCandidate):
+                    try:
+                        await self.pc.addIceCandidate(obj)
+                        self.session_metrics.ice_candidates_received += 1
+                    except Exception as e:
+                        logger.warning(f"[Client] addIceCandidate failed: {e}")
+                elif obj is BYE:
+                    logger.info("[Signaling] Received bye from server")
+                    self._bye_close_event.set()
+                    break
+        except asyncio.CancelledError:
+            pass
+
     def _strip_nack(self, sdp):
+        """Remove rtx payload mappings without corrupting other lines.
+
+        Only drops lines that define/enable rtx:
+          - a=rtpmap:<pt> rtx/...
+          - a=fmtp:<pt> apt=<...>   (rtx points back at its associated payload)
+        Generic lines merely containing the substring "rtx"/"apt=" are kept.
+        """
         lines = sdp.splitlines()
-        new_lines = [line for line in lines if "rtx" not in line.lower() and "apt=" not in line.lower()]
+        new_lines = []
+        for line in lines:
+            low = line.lower()
+            if low.startswith("a=rtpmap:") and " rtx/" in low + " ":
+                continue
+            if low.startswith("a=fmtp:") and "apt=" in low:
+                continue
+            new_lines.append(line)
         return "\n".join(new_lines) + "\n"
 
     def _on_data_channel_message(self, message):
         try:
-            header_size = 4
+            # Normalize: aiortc delivers str for text frames, bytes for binary
             if isinstance(message, bytes):
+                if message == b"ping":
+                    return
                 try:
-                    token_number = unpack_from("!H", message[header_size:header_size+2])
-                    text_data = message[header_size+2:].decode('utf-8', errors='ignore')
-                    # print(f"token_number: {token_number}")
-                    self.current_turn_metrics.token_count += token_number[0]
-                except:
+                    text_data = message.decode('utf-8')
+                except UnicodeDecodeError:
                     text_data = message.decode('utf-8', errors='ignore')
+                is_binary = True
+            elif isinstance(message, str):
+                if message in ("ping", "pong"):
+                    return
+                text_data = message
+                is_binary = False
             else:
-                text_data = str(message)
+                return
 
-            try:
-                if text_data.startswith('{'):
+            # Control messages first: must not pollute token/byte metrics.
+            # Check the FULL payload for JSON before stripping the 6-byte header.
+            if text_data.startswith('{'):
+                try:
                     data = json.loads(text_data)
-                    if data.get("type") == "VIDEO_ANALYSIS_COMPLETE":
-                        print(f"[Client] Received VIDEO_ANALYSIS_COMPLETE from server: {data}")
+                    if isinstance(data, dict) and data.get("type") == "VIDEO_ANALYSIS_COMPLETE":
+                        logger.info(f"[Client] Received VIDEO_ANALYSIS_COMPLETE from server: {data}")
                         self._server_analysis_complete = True
                         self._inference_complete = True
-                        if self.current_turn_metrics:
-                            self.current_turn_metrics.t_inference_done = time.time()
+                        # do not overwrite t_inference_done: the per-question
+                        # [DONE] sentinel already recorded the real end of
+                        # generation; only fall back if nothing was received
+                        if self.current_turn_metrics and self.current_turn_metrics.t_inference_done is None:
+                            if self.current_turn_metrics.t_last_token:
+                                self.current_turn_metrics.t_inference_done = self.current_turn_metrics.t_last_token
+                            else:
+                                self.current_turn_metrics.t_inference_done = time.time()
                         return
-            except json.JSONDecodeError:
-                pass  
+                except json.JSONDecodeError:
+                    pass
+
+            # End-of-stream sentinel: marks inference end, never counts as text
+            if text_data == "[DONE]":
+                if self.current_turn_metrics:
+                    if self.current_turn_metrics.t_inference_done is None and self.current_turn_metrics.t_last_token:
+                        self.current_turn_metrics.t_inference_done = self.current_turn_metrics.t_last_token
+                print(">", end="", flush=True)
+                return
+
+            # Token stream chunk: 4-byte pts header + 2-byte token count + text.
+            # Strip the 6-byte header BEFORE text handling so
+            # output_text/bytes_received stay clean.
+            if is_binary and len(message) >= 7:
+                try:
+                    token_number = unpack_from("!H", message, 4)
+                    if self.current_turn_metrics:
+                        self.current_turn_metrics.token_count += token_number[0]
+                except Exception:
+                    pass
+                message = message[6:]
+                try:
+                    text_data = message.decode('utf-8')
+                except UnicodeDecodeError:
+                    text_data = message.decode('utf-8', errors='ignore')
 
             if self.current_turn_metrics:
                 if not self._first_token_received:
@@ -589,15 +761,6 @@ class RealtimeWebRTCVLMClient:
                 self.current_turn_metrics.output_text += text_data
                 self.current_turn_metrics.text_bytes_received += chunk.bytes_received
                 self.current_turn_metrics.t_last_token = chunk.timestamp
-
-                if "[DONE]" in text_data:
-                    print(">", end="", flush=True)
-
-                # if "[DONE]" in text_data:
-                #     print("-"*30)
-                # else:
-                #     print(text_data, end="", flush=True)
-
 
         except Exception as e:
             logger.error(f"[DataChannel] Parse error: {e}")
@@ -651,11 +814,19 @@ class RealtimeWebRTCVLMClient:
 		
         self._video_send_complete = False
         self._video_send_complete_time = None
-        self._server_analysis_complete = False  
+        self._server_analysis_complete = False
+
+        # keep pts monotonic across turns on the same sender: continue from
+        # the last pts of the previous track so downstream timestamp mappers
+        # and question matching don't see time going backwards
+        prev_last_pts = 0
+        if self.video_track is not None:
+            prev_last_pts = self.video_track.last_pts or 0
 
         self.video_track = realtimeVideoStreamTrack(
             video_path,
-            self.target_fps
+            self.target_fps,
+            pts_offset=prev_last_pts,
         )
 
         self.video_sender.replaceTrack(self.video_track)
@@ -736,6 +907,14 @@ class RealtimeWebRTCVLMClient:
     async def disconnect(self):
         if self.session_metrics:
             self.session_metrics.t_session_end = time.time()
+
+        # stop the background signaling listener first
+        if self._signaling_task and not self._signaling_task.done():
+            self._signaling_task.cancel()
+            try:
+                await asyncio.wait_for(self._signaling_task, timeout=2.0)
+            except (asyncio.TimeoutError, asyncio.CancelledError):
+                pass
 
         if self.signaling:
             try:

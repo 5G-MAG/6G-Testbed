@@ -1,0 +1,184 @@
+# Scenarios config (encoder-placement CONCURRENT variant, Qwen3.6) for
+# the 6G AI Traffic Testbed.
+#
+# Standalone sibling of scenarios_encoder_placement_concurrent.yaml
+# (the Qwen3-VL concurrent config) for the Qwen3.6 experiment — zero
+# changes to that file, the same pattern scenarios_qwen36.yaml
+# established for the serial arm.
+#
+# Run via the standalone runner (does NOT touch orchestrator.py):
+#   python aitestbed/run_encoder_placement_concurrent_qwen36.py --help
+#
+# ALL knobs are CLI flags on the runner. Precedence: CLI flag > yaml
+# key below > built-in default. Keys not overridden here fall back to
+# the runner's defaults. Mode additionally honors env ENC_MODE_QWEN36
+# (falls back to ENC_MODE) inside the scenario — same precedence as
+# the serial Qwen3.6 arm.
+#
+# Server pairing (REQUIRED — the bootstrap script loads the sglang
+# host patches the edge mode needs; do not launch the server module
+# directly):
+#   bash start_sidecar_concurrent_qwen36.sh --port 8014
+#   The serial Qwen3.6 sidecar also works as a queueing-attribution
+#   baseline (concurrent users serialize on its engine_lock):
+#   bash start_sidecar_qwen36.sh --port 8004
+
+defaults:
+  retry_count: 0
+  retry_backoff_sec: 1.0
+  retry_backoff_multiplier: 2.0
+
+scenarios:
+  # =============================================================================
+  # Encoder Placement Concurrent, Qwen3.6 (lock-free SGLang sidecar,
+  # N users/wave, 35B-A3B fp8 MoE)
+  # =============================================================================
+  encoder_placement_concurrent_qwen36:
+    type: "encoder_placement_concurrent_qwen36"
+    inter_prompt_delay_sec: 0  # sec between waves; 0 = back-to-back
+    description: "Encoder placement (Qwen3.6-35B-A3B BF16) under concurrency: N barrier-aligned terminal users per wave, server-side ViT (video upload) vs terminal-side ViT (precomputed single-segment [N, 2048] embedding bundle — no deepstack), lock-free SGLang engine sidecar on port 8014"
+    provider: "sglang-engine"
+    # "../aicodec/..." is a sibling of aitestbed/; the scenario anchors
+    # relatives to its own dir's parent before the client sees them
+    # (cwd-independent).
+    model: "../aicodec/aicodec/models/Qwen3.6-35B-A3B"
+    network_interface: "lo"
+    # mode: "server" uploads the original video and the server runs the
+    # full pipeline; "edge" runs decode+processor+ViT on the terminal
+    # and uploads the precomputed_embedding bundle. Runner flag: --mode.
+    # Env ENC_MODE_QWEN36 (falls back to ENC_MODE) wins over this key.
+    mode: "server"
+    # Wave size N: how many concurrent terminal users share each wave.
+    # Runner flag: --users. Keep <= the server's --max-bundles (default
+    # 64) so one wave's uploads never evict each other before their
+    # chat requests pop them.
+    concurrent_users: 2
+    # Drop the SGLang radix + multimodal-preprocess caches before every
+    # WAVE (not every request — N users race one endpoint) so each wave
+    # measures a cold prefix. Runner flag: --no-flush-cache disables.
+    flush_cache: true
+    # Vision-tower-only edge load (edge mode only) — DEFAULT TRUE on
+    # Qwen3.6 (unlike the Qwen3-VL concurrent config): the fp8 35B full
+    # load costs ~35 GB VRAM per edge terminal just to obtain the
+    # ~0.5 GB tower, and in --enable-multi-processes mode N full loads
+    # would not fit; the standalone tower (~1 GB per terminal) is the
+    # only sane bench default. Ignored with a warning in server mode.
+    # Runner flags: --vision-only / --no-vision-only.
+    vision_only: true
+    # Attention backend for the terminal-side ViT (edge mode only):
+    # sdpa (default) / flash_attention_4 / eager. Backends are not
+    # bit-identical — compare across them with a tolerance and keep
+    # them in separate DBs. Runner flag: --attn-impl (yaml also accepts
+    # aliases like 'fa4' — they are normalized by the client).
+    attn_impl: "sdpa"
+    # Arm topology (either mode): true (default) = run each of the N
+    # users as an OS PROCESS (own interpreter/GIL/connection; edge mode
+    # also own ViT — truly independent terminals; heavy setup happens
+    # before the timing window via a ready/barrier protocol). false =
+    # threads sharing one process (edge: one global ViT; server:
+    # uploads serialize on the shared GIL). VRAM budget in edge
+    # process mode: one model copy per process (vision_only ~1GB
+    # each; full 35B model ~35GB each — do NOT combine full load
+    # with process mode on a single GPU).
+    # Runner flags: --enable-multi-processes (explicit on) /
+    # --no-multi-processes (thread mode).
+    edge_processes: true
+    max_frames: 768
+    max_tokens: 256
+    # Ratio-of-native frame sampling (v3 semantics): keep
+    # floor(total_frames * R) frames (multiple of 2, min 4, capped by
+    # max_frames) instead of sglang's default 2fps x duration. In
+    # (0, 1]; absent/0 = off. Edge mode samples locally (patched
+    # smart_nframes; canary-verified per request). Server mode: the
+    # ENGINE samples with its STARTUP config — start the sidecar with
+    # the SAME --frame-ratio. Runner flag: --frame-ratio.
+    # frame_ratio: 0.25
+    # Optional VidCom2 token compression of the edge bundle (edge mode
+    # only): prune to retention_ratio of the video tokens per user.
+    # Runner flags: --compressor / --retention-ratio.
+    # compressor: "vidcom2"
+    # retention_ratio: 0.25
+    # Two-tier retention split (edge + vidcom2 only): optional_ratio
+    # carves the least-critical tail out of the RETAINED set; the must
+    # tier (retention - optional) rides the reliable first wave, the
+    # optional tier streams best-effort over UDP (E2U datagrams)
+    # BETWEEN the must PUT and the chat POST (late parts dropped,
+    # never retransmitted). 0 = single-tier legacy path. Requires the
+    # concurrent sidecar started with --opt-udp-port (default 8015).
+    # Per-user (same value for every user). Runner flag and env TBD
+    # per-runner wiring: --optional-ratio / ENCPL_OPTIONAL_RATIO.
+    # optional_ratio: 0.10
+    # Best-effort part granularity: tokens per UDP part
+    # (packaging-only knob; server merges per-token).
+    # opt_tokens_per_packet: 64
+    # UDP second-wave timing: opt_send_gap_ms sleeps between ADJACENT
+    # datagrams (default 0.05 ms; 0 = blast, only safe with a raised
+    # receiver SO_RCVBUF); opt_chat_delay_ms sleeps after the wave,
+    # before the chat POST (trades opt-token arrival rate against
+    # TTFT).
+    # opt_send_gap_ms: 0.05
+    # opt_chat_delay_ms: 0.0
+    # Optional fp8 (e4m3, per-tensor scale) quantization of the pruned
+    # feature tensor — halves the uploaded feature bytes; requires
+    # compressor=vidcom2 + edge mode. Runner flag: --bundle-quant.
+    # bundle_quant: "fp8"
+    # video asset lives under aitestbed/examples/ (NOT repo-root
+    # examples/); base_dir "." is re-anchored to the aitestbed dir by
+    # the runner so it works from any cwd (same sentinel convention
+    # as scenarios_qwen36.yaml).
+    video_base_dir: "."
+    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    # OPTIONAL per-user videos (list): user i uses entry i. STRICT —
+    # len(video_paths) must equal concurrent_users; a miscount aborts
+    # the run. Distinct files are the point; N copies of one path is
+    # the caller's mistake to make explicitly. Absent/empty falls back
+    # to the shared video_path above. Runner flag: --video-paths.
+    # video_paths:
+    #   - "examples/assets/dataset_real/sample_1/video.mp4"
+    #   - "examples/assets/dataset_real/sample_2/video.mp4"
+    # decord/torchcodec decode-thread cap (edge mode, BOTH thread and
+    # process users; the env name SGLANG_DECORD_NUM_THREADS is
+    # historical — caps BOTH backends). decord sizes its pool by HOST
+    # core count and is NOT covered by torch thread knobs. SERVER
+    # mode: this key is edge-only (scenario warns); the ENGINE-side
+    # cap is the sidecar's own --decode-threads flag (restart it with
+    # the same value). Runner flag: --decode-threads.
+    # decode_threads: 2
+    # torch/OMP intra-op thread cap for the terminals' CPU-side
+    # preprocessing AFTER decode (torchvision resize / HF processor;
+    # edge mode only — server mode warns and ignores). Thread mode:
+    # exported once in the parent (all N users inherit). Process mode:
+    # each worker clamps it to its edge-cpu pin (min(N, K)); values
+    # below the pin simulate weaker terminals. Same knob as the
+    # sidecar's --preprocess-threads flag (restart it with the same
+    # value for symmetric server-vs-edge comparisons). absent/null/'' =
+    # derive from the pin (historical behaviour). Runner flag:
+    # --preprocess-threads.
+    preprocess_threads: null
+    # OPTIONAL dataset-bench mode: replace the prompts/video_path with
+    # a QA test set — each WAVE answers the next N questions (user i
+    # gets question wave*N+i; the final partial wave pads with the
+    # last question, padded duplicates are logged with metadata.bench.
+    # padded=true and NOT scored). Per-user records carry metadata.bench
+    # (question/answer/model_answer/correct); a summary line prints at
+    # the end. A failed user does not abort the bench. Env
+    # ENCPL_DATASET_DIR wins over dataset_dir. MLVU: json/ + video/
+    # layout (e.g. /data01/MLVU); tasks: null/'' = MCQ tasks 1-7,
+    # 'all' = every task (8/9 generation tasks recorded unscored), or
+    # a stem list like [1_plotQA, 8_sub_scene]. Video-MME: full set
+    # (test-*.parquet + videozip/, e.g. /data01/Video-MME). limit:
+    # 0/null = all questions; set small for smoke runs. sample:
+    # null/'' = stratified (per-task/duration quota); 'head' = first N
+    # rows in file order. dataset: null means the historical
+    # shared-prompt waves. Runner flags: --dataset/--dataset-dir/
+    # --limit/--tasks/--sample. Examples:
+    #   dataset: "mlvu"
+    #   dataset_dir: "/data01/MLVU"
+    #   limit: 20
+    dataset: null
+    dataset_dir: null
+    limit: null
+    tasks: null
+    sample: null
+    prompts:
+      - "Describe this video in detail."
