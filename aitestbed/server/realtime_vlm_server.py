@@ -9,10 +9,22 @@ import os
 import time
 from pathlib import Path
 from typing import Optional, Set, Any, Dict
+
+# Bootstrap the sibling aicodec package relative to this file's location,
+# so the server runs without pip-installing it and without PYTHONPATH.
+# Works from any CWD (this file lives in <repo>/aitestbed/server/).
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+_AICODEC_PATH = _REPO_ROOT / "aicodec"
+if str(_AICODEC_PATH) not in sys.path:
+    sys.path.insert(0, str(_AICODEC_PATH))
+
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, MediaStreamError
 from aiortc.contrib.signaling import BYE
-from aiortc.codecs.tokenId import AsyncTokenIdDecoder
-import aiortc.shared as shared
+import aicodec
+from aicodec.codec import AsyncTokenIdDecoder
+from aicodec import shared
+
+aicodec.register()
 import yaml
 
 
@@ -90,6 +102,8 @@ class TcpSignalingServer:
             )
         elif obj_type == "bye":
             return BYE
+        elif obj_type == "model":
+            return {"type": "model", "model": data.get("model", "")}
         else:
             return data
 
@@ -191,11 +205,12 @@ class TcpSignalingServer:
 # Main Server
 # ======================
 class VlmServer:
-    def __init__(self, host: str, port: int, persistent: bool, preload_bridge: bool):
+    def __init__(self, host: str, port: int, persistent: bool, preload_bridge: bool, model: str = "liquid"):
         self.host = host
         self.port = port
         self.persistent_mode = persistent
         self.preload_bridge = preload_bridge
+        self.default_model = model  # used when a client does not negotiate a model
         self.stop_event = asyncio.Event()
         self.background_tasks: Set[asyncio.Task] = set()
         self.signaling: Optional[TcpSignalingServer] = None
@@ -272,12 +287,12 @@ class VlmServer:
         logger.info("=== Program cleanup completed ===")
 
     async def run(self):
-        if self.preload_bridge:
-            AsyncTokenIdDecoder.preload_bridge()
-            logger.info("vlm model preloaded")
+        # model loading is deferred to session negotiation: the client tells
+        # us which model it needs ({"type": "model", ...}) before the SDP
+        # exchange; --model / default_model is the fallback.
         task_class = self.load_task_config()
         AsyncTokenIdDecoder.task_class = task_class
-        AsyncTokenIdDecoder.reset_decoder_state(model_name="liquid")
+        AsyncTokenIdDecoder.reset_decoder_state(model_name=self.default_model)
 
         self.signaling = TcpSignalingServer(self.host, self.port, persistent=self.persistent_mode)
         logger.info(f"[Answer] Initialized Signaling Server on {self.host}:{self.port}")
@@ -307,21 +322,23 @@ class VlmServer:
                             logger.info(f"[Answer] Session #{self.session_count} completed normally")
                         else:
                             logger.warning(f"[Answer] Session #{self.session_count} ended early")
-                        await session.cleanup()
-                        logger.info(f"\n[Answer] Waiting for next client connection...\n")
-                        await asyncio.sleep(1.0)
                     except Exception as e:
                         logger.error(f"[Answer] Session #{self.session_count} error: {e}")
                         logger.exception("Session error traceback")
+                    finally:
+                        try:
+                            await session.cleanup()
+                        except Exception as e:
+                            logger.error(f"[Answer] Session #{self.session_count} cleanup error: {e}")
+                    logger.info(f"\n[Answer] Waiting for next client connection...\n")
+                    await asyncio.sleep(1.0)
             else:
                 pc = RTCPeerConnection()
                 session = Session(pc, self.signaling, self)
                 try:
                     await session.run()
-                    await  session.cleanup()
-                except Exception as e:
-                    logger.error(f"[Answer] Session error: {e}")
-                    logger.exception("Session error traceback")
+                finally:
+                    await session.cleanup()
         except asyncio.CancelledError:
             logger.info("Main task cancelled by signal")
         finally:
@@ -342,6 +359,7 @@ class Session:
         self._is_clean_up = False
         self._session_tasks: Set[asyncio.Task] = set()
         self._close_session_reason: str = "normal"
+        self._pending_offer = None  # legacy client: SDP received before/during model negotiation
 
     def reset_video_state(self):
         self.video_state = {
@@ -352,6 +370,68 @@ class Session:
             "analysis_complete": False
         }
 
+    async def _negotiate_model(self) -> Optional[str]:
+        """Model negotiation: wait for {"type": "model"} and ACK/reject it.
+
+        Returns the negotiated model name, or None if the session must be
+        aborted (client rejected/unknown model or disconnected).  Once the
+        model is known it is applied to the decoder (deferred loading).
+        """
+        from aicodec import available_models
+
+        model_name = None
+        deadline = time.time() + 30.0
+        while time.time() < deadline:
+            if self.server_ref.stop_event.is_set() or self._session_stop_event.is_set():
+                return None
+            try:
+                obj = await asyncio.wait_for(self.signaling.receive(), timeout=5.0)
+            except asyncio.TimeoutError:
+                continue
+            except (ConnectionError, Exception) as e:
+                logger.error(f"[Model] Signaling error: {e}")
+                return None
+
+            if isinstance(obj, dict) and obj.get("type") == "model":
+                model_name = obj.get("model", "")
+                break
+            elif isinstance(obj, RTCSessionDescription):
+                # legacy client without negotiation: fall back to default model
+                logger.info(f"[Model] Client sent SDP without model negotiation, "
+                            f"using default '{self.server_ref.default_model}'")
+                model_name = self.server_ref.default_model
+                # put the message back by handling it via a pending-offer stash
+                self._pending_offer = obj
+                break
+            elif obj is BYE:
+                logger.info("[Model] Peer left before negotiation")
+                return None
+
+        if model_name is None:
+            logger.error("[Model] Negotiation timeout")
+            await self.signaling.send({
+                "type": "model_ack", "ok": False,
+                "message": "model negotiation timeout",
+            })
+            return None
+
+        if model_name not in available_models():
+            msg = (f"unknown model '{model_name}'; "
+                   f"available: {available_models()}")
+            logger.error(f"[Model] {msg}")
+            await self.signaling.send({
+                "type": "model_ack", "ok": False, "message": msg,
+            })
+            return None
+
+        # apply model + load bridge (deferred load happens here)
+        AsyncTokenIdDecoder.reset_decoder_state(model_name=model_name)
+        if self.server_ref.preload_bridge:
+            AsyncTokenIdDecoder.preload_bridge()
+            logger.info(f"[Model] vlm model preloaded ({model_name})")
+        await self.signaling.send({"type": "model_ack", "ok": True})
+        logger.info(f"[Model] Negotiated model: {model_name}")
+        return model_name
 
     async def on_video_analysis_complete(self):
         if self.video_state["analysis_complete"]:
@@ -402,6 +482,8 @@ class Session:
                         except Exception as e:
                             logger.error(f"[Heartbeat] Send error: {e}")
                             break
+                    elif channel.readyState == "closed":
+                        break
                     await asyncio.sleep(5)
             except asyncio.CancelledError:
                 pass
@@ -411,11 +493,15 @@ class Session:
 
         @self.pc.on("datachannel")
         def on_datachannel(channel):
+            # bind the channel to this session only; a stale channel from a
+            # previous session must not receive this session's inference output
+            if AsyncTokenIdDecoder.data_channel is not None and AsyncTokenIdDecoder.data_channel is not channel:
+                logger.warning("[Server] Replacing stale data channel from a previous session")
             AsyncTokenIdDecoder.data_channel = channel
 
             @channel.on("open")
             def on_open():
-                logger.info(f"Data_channel status: {AsyncTokenIdDecoder.data_channel.readyState}")
+                logger.info(f"Data_channel status: {channel.readyState}")
                 hb_task = asyncio.create_task(heartbeat_loop(self.pc, channel))
                 track_task(hb_task)
 
@@ -501,18 +587,26 @@ class Session:
             logger.error(f"[Server] Signaling connect failed: {e}")
             return False
 
-        logger.info("[Answer] Waiting for offer from client...")
-        while not (self.server_ref.stop_event.is_set() or self._session_stop_event.is_set()) and not self._is_clean_up:
-            try:
-                obj = await asyncio.wait_for(self.signaling.receive(), timeout=5.0)
-            except asyncio.TimeoutError:
-                continue
-            except ConnectionError as e:
-                logger.error(f"[Answer] Client disconnected: {e}")
-                return False
-            except Exception as e:
-                logger.error(f"[Answer] Signaling receive error: {e}")
-                return False
+        # ---- model negotiation: client announces its model before the offer ----
+        negotiated_model = await self._negotiate_model()
+        if negotiated_model is None:
+            return False
+
+        # legacy client path: SDP arrived without negotiation, handle stashed offer
+        obj = self._pending_offer
+        self._pending_offer = None
+        while obj is not None or not (self.server_ref.stop_event.is_set() or self._session_stop_event.is_set()) and not self._is_clean_up:
+            if obj is None:
+                try:
+                    obj = await asyncio.wait_for(self.signaling.receive(), timeout=5.0)
+                except asyncio.TimeoutError:
+                    continue
+                except ConnectionError as e:
+                    logger.error(f"[Answer] Client disconnected: {e}")
+                    return False
+                except Exception as e:
+                    logger.error(f"[Answer] Signaling receive error: {e}")
+                    return False
 
             if isinstance(obj, RTCSessionDescription) and obj.type == "offer":
                 logger.info("[Answer] Received offer, processing...")
@@ -526,6 +620,7 @@ class Session:
             elif obj is BYE:
                 logger.info("Peer left")
                 return False
+            obj = None  # consumed non-offer message, fetch the next one
 
         @self.pc.on("connectionstatechange")
         async def on_connectionstatechange():
@@ -555,9 +650,19 @@ class Session:
 
 
             if isinstance(obj, RTCSessionDescription):
-                await self.pc.setRemoteDescription(obj)
+                if obj.type == "offer":
+                    # ICE restart offer: renegotiate and send a fresh answer
+                    logger.info("[Server] Received offer (ICE restart), answering...")
+                    await self.pc.setRemoteDescription(obj)
+                    await self.pc.setLocalDescription(await self.pc.createAnswer())
+                    await self.signaling.send(self.pc.localDescription)
+                else:
+                    await self.pc.setRemoteDescription(obj)
             elif isinstance(obj, RTCIceCandidate):
-                await self.pc.addIceCandidate(obj)
+                try:
+                    await self.pc.addIceCandidate(obj)
+                except Exception as e:
+                    logger.warning(f"[Server] addIceCandidate failed: {e}")
             elif obj is BYE:
                 logger.info("Peer left")
                 return False
@@ -568,6 +673,21 @@ class Session:
         logger.info(f"\n === Session cleanup ===")
         self._session_stop_event.set()
         self._is_clean_up = True
+
+        # drain pending inference work before saving: the last question's
+        # answer is written into bench_config by the inference worker, which
+        # may still be generating when the connection drops
+        try:
+            from aicodec.shared import get_inference_queue
+            queue = get_inference_queue()
+            deadline = time.time() + 30.0
+            while not queue.empty() and time.time() < deadline:
+                await asyncio.sleep(0.5)
+            # extra grace for an in-flight generation
+            await asyncio.sleep(1.0)
+        except Exception as e:
+            logger.warning(f"[Cleanup] Inference queue drain failed: {e}")
+
         logger.info("[Server] Connection closed, saving benchmark results...")
         self.server_ref.save_results()
 
@@ -630,15 +750,29 @@ async def main():
     parser = argparse.ArgumentParser(description="RTP Data Transport")
     parser.add_argument("--signaling-host", default="127.0.0.1")
     parser.add_argument("--signaling-port", type=int, default=1234)
-    parser.add_argument("--persistent", action="store_true", default=True, help="for TCP signaling server")
-    parser.add_argument("--preload-bridge", action="store_true", default=True, help="preload vlm model")
+    parser.add_argument("--persistent", action=argparse.BooleanOptionalAction, default=True,
+                        help="keep serving multiple clients after a session ends (use --no-persistent for a single session)")
+    parser.add_argument("--preload-bridge", action=argparse.BooleanOptionalAction, default=True,
+                        help="preload the VLM model bridge (use --no-preload-bridge to load lazily)")
+    parser.add_argument("--model", default="liquid",
+                        help="default VLM model (used when the client does not negotiate one)")
+    parser.add_argument("--ice-interface", default=None,
+                        help="restrict ICE host candidates to this network interface (e.g. 'lo'); "
+                             "default gathers on all interfaces (stock behaviour)")
     args = parser.parse_args()
+
+    # apply the ICE interface filter before any RTCPeerConnection is created
+    if args.ice_interface:
+        from aicodec.register import set_ice_interface
+        set_ice_interface(args.ice_interface)
+        logger.info(f"[Server] ICE host candidates restricted to {args.ice_interface!r}")
 
     server = VlmServer(
         host = args.signaling_host,
         port = args.signaling_port,
         persistent=args.persistent,
-        preload_bridge=args.preload_bridge
+        preload_bridge=args.preload_bridge,
+        model=args.model,
     )
 
     try:
@@ -646,9 +780,9 @@ async def main():
     except Exception as e:
         logger.error(f"Main Exception: {e}")
         logger.exception("Main exception traceback")
+        raise
     finally:
         logger.info("Event loop closed. Exit.")
-        sys.exit(0)
 
 if __name__ == "__main__":
     try:
@@ -656,3 +790,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("\nKeyboardInterrupt received")
         sys.exit(0)
+    except Exception:
+        sys.exit(1)

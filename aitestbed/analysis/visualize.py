@@ -67,8 +67,8 @@ class TrafficVisualizer:
         fig, ax = plt.subplots(figsize=(10, 6))
 
         profiles = [m.network_profile for m in metrics_list]
-        means = [m.latency_mean * 1000 for m in metrics_list]  # Convert to ms
-        p95s = [m.latency_p95 * 1000 for m in metrics_list]
+        means = [(m.latency_mean or 0) * 1000 for m in metrics_list]  # Convert to ms
+        p95s = [(m.latency_p95 or 0) * 1000 for m in metrics_list]
 
         x = range(len(profiles))
         width = 0.35
@@ -303,9 +303,11 @@ class TrafficVisualizer:
 
         for m in metrics_list:
             ttft = f"{m.ttft_mean * 1000:.0f}" if m.ttft_mean else "N/A"
+            lat_mean = f"{m.latency_mean * 1000:.0f}" if m.latency_mean is not None else "N/A"
+            lat_p95 = f"{m.latency_p95 * 1000:.0f}" if m.latency_p95 is not None else "N/A"
             lines.append(
                 f"| {m.scenario_id} | {m.network_profile} | {ttft} | "
-                f"{m.latency_mean * 1000:.0f} | {m.latency_p95 * 1000:.0f} | "
+                f"{lat_mean} | {lat_p95} | "
                 f"{m.success_rate:.1f} |"
             )
 
@@ -319,10 +321,12 @@ class TrafficVisualizer:
 
         for m in metrics_list:
             token_rate = f"{m.token_rate_mean:.1f}" if m.token_rate_mean else "N/A"
+            ul_bytes = f"{m.request_bytes_mean:.0f}" if m.request_bytes_mean is not None else "N/A"
+            dl_bytes = f"{m.response_bytes_mean:.0f}" if m.response_bytes_mean is not None else "N/A"
+            ul_dl = f"{m.ul_dl_ratio_mean:.3f}" if m.ul_dl_ratio_mean is not None else "N/A"
             lines.append(
                 f"| {m.scenario_id} | {m.network_profile} | "
-                f"{m.request_bytes_mean:.0f} | {m.response_bytes_mean:.0f} | "
-                f"{m.ul_dl_ratio_mean:.3f} | {token_rate} |"
+                f"{ul_bytes} | {dl_bytes} | {ul_dl} | {token_rate} |"
             )
 
         # Agent metrics section

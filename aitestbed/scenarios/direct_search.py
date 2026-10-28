@@ -571,7 +571,15 @@ class DirectWebSearchScenario(BaseScenario):
                 # Check if streaming is requested
                 if self.config.get("stream", False):
                     response = self.client.chat_streaming(messages, model=model)
-                    result.ttft_sec = response.ttft
+                    # Same anchor as the LogRecord below (t_llm_start,
+                    # pre-request-build): the client's response.ttft is
+                    # relative to its own post-serialization anchor, and
+                    # mixing it into ScenarioResult.ttft_sec would put a
+                    # chat-only caliber next to the E2E caliber other
+                    # scenarios report to the orchestrator.
+                    result.ttft_sec = (
+                        response.t_first_chunk - t_llm_start
+                        if response.t_first_chunk is not None else None)
                     result.ttlt_sec = response.ttlt
                     request_bytes = response.request_bytes or (
                         sum(len(m.content.encode()) for m in messages) + 100

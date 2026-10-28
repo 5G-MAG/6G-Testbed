@@ -65,6 +65,9 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
         target_fps = self.config.get("target_fps", 10)
         max_frames = self.config.get("max_frames_per_video")
         task_config = self.config.get("task_config", {})
+        # interface for ICE candidate filtering; injected by the orchestrator
+        # from --interface so media traffic stays on the shaped/captured NIC
+        ice_iface = self.config.get("network_interface")
         dataset_dir = task_config.get("video_paths", "data/videos")
         video_paths = []
         if dataset_dir and Path(dataset_dir).exists():
@@ -98,6 +101,7 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
             target_fps=target_fps,
             model=model,
             network_profile=network_profile, # for result saving
+            ice_iface=ice_iface,
         )
 
         try:
