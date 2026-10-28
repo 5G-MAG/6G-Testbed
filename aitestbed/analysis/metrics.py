@@ -8,7 +8,7 @@ import json
 import statistics
 from typing import Optional
 from dataclasses import dataclass, field
-
+import os, glob, re
 
 @dataclass
 class ScenarioMetrics:
@@ -21,14 +21,18 @@ class ScenarioMetrics:
     network_profile: str
     sample_count: int = 0
 
-    # Latency metrics (seconds)
-    latency_mean: float = 0.0
-    latency_median: float = 0.0
-    latency_p95: float = 0.0
-    latency_p99: float = 0.0
-    latency_min: float = 0.0
-    latency_max: float = 0.0
-    latency_std: float = 0.0
+    # Latency metrics (seconds) — Optional: None until at least one
+    # record with a truthy latency_sec exists (0.0-latency empty
+    # completions are filtered); 0.0 is NOT a sentinel for "no data"
+    # on these fields anymore.
+    latency_mean: Optional[float] = None
+    latency_median: Optional[float] = None
+    latency_p50: Optional[float] = None
+    latency_p95: Optional[float] = None
+    latency_p99: Optional[float] = None
+    latency_min: Optional[float] = None
+    latency_max: Optional[float] = None
+    latency_std: Optional[float] = None
 
     # Time to First Token (TTFT) - seconds
     ttft_mean: Optional[float] = None
@@ -44,13 +48,14 @@ class ScenarioMetrics:
     ttlt_p99: Optional[float] = None
     ttlt_p50: Optional[float] = None
 
-    # Traffic volume (bytes)
-    request_bytes_mean: float = 0.0
-    response_bytes_mean: float = 0.0
-    total_bytes_mean: float = 0.0
+    # Traffic volume (bytes) — Optional: None until a record with the
+    # field exists (0.0 is NOT a sentinel for "no data").
+    request_bytes_mean: Optional[float] = None
+    response_bytes_mean: Optional[float] = None
+    total_bytes_mean: Optional[float] = None
 
-    # UL/DL ratio (3GPP Section b)
-    ul_dl_ratio_mean: float = 0.0
+    # UL/DL ratio (3GPP Section b) — Optional for the same reason.
+    ul_dl_ratio_mean: Optional[float] = None
 
     # Token metrics
     tokens_in_mean: Optional[float] = None
@@ -100,6 +105,27 @@ class ScenarioMetrics:
     burst_off_gap_mean_sec: Optional[float] = None
     burst_on_gap_count: int = 0
     burst_off_gap_count: int = 0
+
+    # task metrics (proactive task in VLM video understanding)
+    task_total: int = 0
+    task_time_correct: int = 0
+    task_answer_correct: int = 0
+    task_time_accuracy: float = 0.0
+    task_answer_accuracy: float = 0.0
+    real_total: int = 0
+    real_correct: int = 0
+    real_accuracy: float = 0.0
+
+    # encoder-placement dataset-bench availability & quality flags
+    # (filled by the orchestrator from aggregate_bench_accuracy; the
+    # real_* fields above are zero-defaulted, so real_accuracy:0 alone
+    # is indistinguishable from "no bench data" without bench_available)
+    bench_available: bool = False
+    bench_scored: int = 0
+    bench_parse_ok: int = 0
+    bench_parse_fail: int = 0
+    bench_runs: int = 0
+    bench_empty_runs: int = 0
 
 
 class MetricsCalculator:
@@ -221,6 +247,7 @@ class MetricsCalculator:
             metrics.latency_max = max(latencies)
             if len(latencies) > 1:
                 metrics.latency_std = statistics.stdev(latencies)
+            metrics.latency_p50 = MetricsCalculator._percentile(latencies, 50)
             metrics.latency_p95 = MetricsCalculator._percentile(latencies, 95)
             metrics.latency_p99 = MetricsCalculator._percentile(latencies, 99)
 
@@ -245,10 +272,16 @@ class MetricsCalculator:
             metrics.request_bytes_mean = statistics.mean(request_bytes)
         if response_bytes:
             metrics.response_bytes_mean = statistics.mean(response_bytes)
-        metrics.total_bytes_mean = metrics.request_bytes_mean + metrics.response_bytes_mean
+        # None (no data at all) propagates; a single-sided dataset
+        # still yields a one-sided sum.
+        if (metrics.request_bytes_mean is not None
+                or metrics.response_bytes_mean is not None):
+            metrics.total_bytes_mean = (
+                (metrics.request_bytes_mean or 0.0)
+                + (metrics.response_bytes_mean or 0.0))
 
         # UL/DL ratio
-        if metrics.response_bytes_mean > 0:
+        if metrics.response_bytes_mean and metrics.request_bytes_mean is not None:
             metrics.ul_dl_ratio_mean = metrics.request_bytes_mean / metrics.response_bytes_mean
 
         # Token statistics
@@ -436,6 +469,274 @@ class MetricsCalculator:
         return metrics
 
     @staticmethod
+    # def load_task_results(src: str, ) -> list[dict]:
+    def load_task_results(src: str, network_profile: str) -> list[dict]:
+        """
+        Load proactive task results from JSON file.
+        Args:
+            src: Path to the data file or directory containing questions_results.json files
+        Returns:
+            List of all question result entries
+        """
+        data = []
+        if os.path.isdir(src):
+            # pattern = os.path.join(src, '**', 'questions_results.json')
+            pattern = os.path.join(src, '**', f'questions_results_{network_profile}.json')
+            json_files = glob.glob(pattern, recursive=True)
+            print(f"Found {len(json_files)} questions_results.json files in {src}")
+            
+            for file_path in json_files:
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        file_data = json.load(f)
+                        if isinstance(file_data, list):
+                            data.extend(file_data)
+                        else:
+                            data.append(file_data)
+                except Exception as e:
+                    print(f"Error loading {file_path}: {e}")
+        else:
+            with open(src, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+        
+        return data
+
+    @staticmethod
+    def extract_answer(text):
+        if not text:
+            return None
+        try:
+            data = json.loads(text)
+            if isinstance(data, dict) and 'answer' in data:
+                return str(data['answer']).strip().upper()
+        except (json.JSONDecodeError, TypeError):
+            pass
+        match = re.search(r'"answer"\s*:\s*"?([A-D])"?', text, re.IGNORECASE)
+        if match:
+            return match.group(1).upper()
+        match = re.search(r'answer is:\s*([A-D])', text, re.IGNORECASE)
+        if match:
+            return match.group(1).upper()
+        stripped = text.strip()
+        if len(stripped) <= 2 and stripped and stripped[0] in "ABCD":
+            return stripped[0]
+        letters = re.findall(r'(?<![\w])([A-D])(?![\w])', stripped)
+        if letters:
+            return letters[-1]
+        return None
+
+    @staticmethod
+    def calculate_task_accuracy(
+        data: list[dict],
+        model: str,
+        po_thd: int,
+        task_class: str,
+        verbose: bool = False,
+    ) -> dict[str, dict[str, int | float]]:
+        """
+        Calculate task metrics from VLM video understanding results.      
+        Args:
+            data: List of question result entries (each entry contains 'questions' list)
+            model: Model name to identify the model's answer key
+            po_thd: Proactive output time threshold (in seconds)
+        Returns:
+            Dictionary with stats per task_type containing:
+            - total: Total number of questions
+            - time_correct: Number of time-accurate responses
+            - answer_correct: Number of answer-accurate responses
+            - time_accuracy: Time accuracy ratio (0.0-1.0)
+            - answer_accuracy: Answer accuracy ratio (0.0-1.0)
+        """
+        from collections import defaultdict
+        
+        stats = defaultdict(lambda: defaultdict(int))
+        total = 0
+        
+        for entry in data:
+            questions_list = entry.get("questions", [])
+            if not questions_list and isinstance(entry, list):
+                questions_list = entry
+                
+            for question in questions_list:
+                # Find model key
+                model_key = model if model in question else None
+                if not model_key:
+                    for k in question.keys():
+                        if k.lower() == model.lower():
+                            model_key = k
+                            break
+
+                if task_class == "proactive_output":
+                    if "ground_truth_time_stamp" not in question:
+                        continue
+
+                    ground_truth_timestamp = question["ground_truth_time_stamp"]
+
+                    try:
+                        ground_truth_time = sum(int(x) * 60 ** i for i, x in enumerate(reversed(ground_truth_timestamp.split(":"))))
+                    except:
+                        continue
+
+                    task_type = "proactive_output"
+                    model_answer = question.get(model_key, None)
+
+                    if not model_answer or "dialog_history" not in model_answer:
+                        continue
+
+                    history = model_answer["dialog_history"]
+                    if not history:
+                        continue
+
+                    last_time = history[-1]["time"]
+                    last_answer = history[-1]["content"]
+
+                    total += 1
+                    stats[f'{task_type}']["total"] += 1
+
+                    if -po_thd <= last_time - ground_truth_time <= po_thd:
+                        stats[f'{task_type}']["time_correct"] += 1
+                        if "ground_truth_output" in question and question["ground_truth_output"] in last_answer:
+                            stats[f'{task_type}']["answer_correct"] += 1
+
+                elif task_class == "real":
+                    if verbose:
+                        print(f"question: {question}")
+                    model_answer_text = question.get(model_key, "") if model_key else ""
+                    model_answer = MetricsCalculator.extract_answer(model_answer_text)
+                    correct_answer = question["answer"]
+                    if verbose:
+                        print(f"correct_answer: {correct_answer}, model answer: {model_answer}")
+                    task_type = question["task_type"]
+                    if model_answer:
+                        total += 1
+                        stats[task_type]["total"] += 1
+                        stats["total"]["total"] += 1
+                        if model_answer == correct_answer:
+                            stats[task_type]["correct"] += 1
+                            stats["total"]["correct"] += 1
+
+
+        # Calculate accuracy ratios
+        if task_class == "proactive_output":
+            for task_type, counts in stats.items():
+                counts["time_accuracy"] = counts["time_correct"] / counts["total"] if counts["total"] > 0 else 0
+                counts["answer_accuracy"] = counts["answer_correct"] / counts["total"] if counts["total"] > 0 else 0
+        elif task_class == "real":
+            for task_type, counts in stats.items():
+                counts["accuracy"] = counts["correct"] / counts["total"] if counts["total"] > 0 else 0
+                if verbose:
+                    print(f"task_type: {task_type}, counts: {counts}")
+        
+        return dict(stats)
+
+    @staticmethod
+    def aggregate_bench_accuracy(entries: list[tuple[str, dict]]) -> Optional[dict]:
+        """
+        Aggregate encoder-placement dataset-bench accuracy from DB bench
+        metadata entries.
+
+        Args:
+            entries: List of (run_key, bench_dict) tuples, where run_key
+                identifies a single run (e.g. session_id — one run = one
+                session) and bench_dict is the parsed `metadata.bench`
+                object stored per log record by the encoder_placement*
+                scenarios in dataset mode.
+
+        Returns:
+            dict with pooled and per-run-mean statistics:
+            - total / correct / parse_fail / parse_ok: pooled counts over
+              all non-padded scored entries
+            - accuracy: mean of per-run accuracies (runs with total>0;
+              "run-mean" semantics — a failed question is not diluted by
+              other runs re-asking the same question)
+            - runs: number of runs contributing to the mean
+            - empty_runs: runs with zero scored entries (all-failed).
+              NOTE: a run only appears in `entries` if it produced at
+              least one scored bench row — an all-failed run emits NO
+              bench metadata at all (failed turns carry no bench
+              object), so it is invisible here and empty_runs stays 0
+              in practice. All-failed runs are surfaced instead by the
+              run-level result.success=False (the scenarios'
+              all-failed guard) and the orchestrator's WARNING when no
+              entries are collected. The field is kept for schema
+              compatibility with historical rows.
+            None if no scored entries at all.
+        """
+        from collections import defaultdict
+
+        if not entries:
+            return None
+
+        per_run = defaultdict(lambda: {"total": 0, "correct": 0})
+        pooled = {"total": 0, "correct": 0, "parse_fail": 0, "parse_ok": 0}
+
+        for _run_key, bench in entries:
+            if not isinstance(bench, dict):
+                continue
+            # Padded entries are barrier filler duplicates of an already
+            # scored question — multiply-counting them would inflate
+            # accuracy. Logged for diagnostics only.
+            if bench.get("padded"):
+                continue
+            answer = (bench.get("answer") or "").strip().upper()
+            if answer not in ("A", "B", "C", "D"):
+                continue
+            pooled["total"] += 1
+            per_run[_run_key]["total"] += 1
+            if bench.get("model_answer"):
+                pooled["parse_ok"] += 1
+                if bench.get("correct") is None:
+                    # correct is None when extract_answer failed —
+                    # recompute for robustness against older rows
+                    correct = bench.get("model_answer") == answer
+                else:
+                    correct = bool(bench.get("correct"))
+                if correct:
+                    pooled["correct"] += 1
+                    per_run[_run_key]["correct"] += 1
+            else:
+                pooled["parse_fail"] += 1
+
+        if pooled["total"] == 0:
+            return None
+
+        accs = [r["correct"] / r["total"] for r in per_run.values()
+                if r["total"] > 0]
+        empty_runs = sum(1 for r in per_run.values() if r["total"] == 0)
+
+        return {
+            "total": pooled["total"],
+            "correct": pooled["correct"],
+            "parse_ok": pooled["parse_ok"],
+            "parse_fail": pooled["parse_fail"],
+            "accuracy": (sum(accs) / len(accs)) if accs else 0.0,
+            "runs": len(accs),
+            "empty_runs": empty_runs,
+        }
+
+    @staticmethod
+    def update_task_metrics(metrics: ScenarioMetrics, task_state: dict[str, dict[str, int | float]]) -> None:
+        """
+        Update proactive task metrics in the ScenarioMetrics object.
+        """
+        if not task_state:
+            return
+        
+        task_type = "proactive_output"
+        stats = task_state.get(task_type, {})
+        metrics.task_total = stats.get("total", 0)
+        metrics.task_time_correct = stats.get("time_correct", 0)
+        metrics.task_answer_correct = stats.get("answer_correct", 0)
+        metrics.task_time_accuracy = stats.get("time_accuracy", 0.0)
+        metrics.task_answer_accuracy = stats.get("answer_accuracy", 0.0)
+        task_type = "real"
+        stats = task_state.get('total', {})
+        metrics.real_total = stats.get("total", 0)
+        metrics.real_correct = stats.get("correct", 0)
+        metrics.real_accuracy = stats.get("accuracy", 0.0)
+       
+
+    @staticmethod
     def _percentile(values: list[float], p: int) -> float:
         """Calculate percentile value."""
         if not values:
@@ -481,7 +782,7 @@ class MetricsCalculator:
         # Calculate deltas from baseline (first profile)
         baseline = metrics_list[0]
         for m in metrics_list[1:]:
-            if baseline.latency_mean > 0:
+            if baseline.latency_mean:
                 latency_delta = ((m.latency_mean - baseline.latency_mean) / baseline.latency_mean) * 100
             else:
                 latency_delta = 0
@@ -508,8 +809,8 @@ class MetricsCalculator:
                 "time_to_first_token_p50_ms": (metrics.ttft_p50 or 0) * 1000,
                 "time_to_last_token_ms": (metrics.ttlt_mean or 0) * 1000,
                 "time_to_last_token_p50_ms": (metrics.ttlt_p50 or 0) * 1000,
-                "response_latency_ms": metrics.latency_mean * 1000,
-                "response_latency_p95_ms": metrics.latency_p95 * 1000,
+                "response_latency_ms": (metrics.latency_mean or 0) * 1000,
+                "response_latency_p95_ms": (metrics.latency_p95 or 0) * 1000,
                 "time_to_first_token_p95_ms": (metrics.ttft_p95 or 0) * 1000,
                 "time_to_first_token_p99_ms": (metrics.ttft_p99 or 0) * 1000,
                 "time_to_last_token_p95_ms": (metrics.ttlt_p95 or 0) * 1000,
@@ -520,6 +821,7 @@ class MetricsCalculator:
                 "uplink_bytes_avg": metrics.request_bytes_mean,
                 "downlink_bytes_avg": metrics.response_bytes_mean,
                 "ul_dl_ratio": metrics.ul_dl_ratio_mean,
+                "total_bytes_avg": metrics.total_bytes_mean,
                 "token_rate_per_sec": metrics.token_rate_mean,
             },
             "ai_service_metrics": {
@@ -532,7 +834,7 @@ class MetricsCalculator:
             },
             "computer_use_metrics": {
                 "actions_avg": metrics.computer_actions_mean,
-                "action_latency_ms": metrics.computer_action_latency_mean * 1000,
+                "action_latency_ms": (metrics.computer_action_latency_mean or 0) * 1000,
                 "action_latency_p95_ms": (metrics.computer_action_latency_p95 or 0) * 1000,
                 "screenshot_bytes_avg": metrics.computer_screenshot_bytes_mean,
                 "steps_avg": metrics.computer_steps_mean,
@@ -555,5 +857,21 @@ class MetricsCalculator:
                 "off_gap_mean_ms": (metrics.burst_off_gap_mean_sec or 0) * 1000,
                 "on_gap_count": metrics.burst_on_gap_count,
                 "off_gap_count": metrics.burst_off_gap_count,
+            },
+            "task_accuracy": {
+                "total": metrics.task_total,
+                "time_correct": metrics.task_time_correct,
+                "answer_correct": metrics.task_answer_correct,
+                "time_accuracy": metrics.task_time_accuracy,
+                "answer_accuracy": metrics.task_answer_accuracy,
+                "real_total": metrics.real_total,
+                "real_correct": metrics.real_correct,
+                "real_accuracy": metrics.real_accuracy,
+                "bench_available": metrics.bench_available,
+                "bench_scored": metrics.bench_scored,
+                "bench_parse_ok": metrics.bench_parse_ok,
+                "bench_parse_fail": metrics.bench_parse_fail,
+                "bench_runs": metrics.bench_runs,
+                "bench_empty_runs": metrics.bench_empty_runs,
             }
         }

@@ -1,0 +1,71 @@
+This software contains dependencies with the following open-source projects.
+
+This version of the testbed focuses on Qwen3-VL / Qwen3.6 visual tokenizer
+down-placement (terminal-side video decode + processor + ViT, uploading a
+precomputed embedding bundle), dynamic token pruning (VidCom2 retention
+ratio), fp8 bundle-feature quantization, and concurrent multi-user test
+scenarios (barrier-aligned waves over lock-free SGLang engine sidecars).
+The retired split-inference, Mage-VL and One-D-Piece links have been
+removed. The third-party components listed below remain in use.
+
+Vendored code
+-------------
+
+- VidCom2 token compressor (vendored under
+  aicodec/aicodec/models/VidCom2/)
+  available at https://github.com/xuyang-liu16/VidCom2
+  Licensed under Apache License 2.0
+  (https://github.com/xuyang-liu16/VidCom2/blob/main/LICENSE)
+
+- Liquid model inference code (assets downloaded per aitestbed/README.md;
+  Chameleon inference code originates from
+  https://github.com/facebookresearch/chameleon, Chameleon License)
+  available at https://github.com/FoundationVision/Liquid
+  Licensed under MIT License (https://github.com/FoundationVision/Liquid/blob/main/LICENSE)
+
+Model weights
+-------------
+
+- Qwen3-VL models (qwen3_vl_4B, Qwen3-VL-30B-A3B-Instruct,
+  Qwen3-VL-8B-Instruct) and Qwen3.6 models (Qwen3.6-27B,
+  Qwen3.6-35B-A3B), downloaded from the Hugging Face Qwen organization
+  (https://huggingface.co/Qwen)
+  Licensed under the Qwen Community License / Qwen Research License
+  (non-OSI custom terms; research use). Redistribution and commercial use
+  of the weights must comply with the license accompanying each model card.
+
+Datasets
+--------
+
+- StreamingBench (Proactive Output / Real-Time Visual Understanding tasks)
+  available at https://github.com/THUNLP-MT/StreamingBench/
+  Licensed under MIT License (https://github.com/THUNLP-MT/StreamingBench/blob/main/LICENSE)
+
+- Video-MME (loaded by aitestbed/tools/videomme_eval.py)
+  available at https://huggingface.co/lmms-lab/VideoMME
+  Licensed under CC BY-NC 4.0 (non-commercial)
+  (https://huggingface.co/datasets/lmms-lab/VideoMME)
+
+- MLVU (benchmark for long video understanding)
+  available at https://github.com/BradyFU/Video-MMLU
+  Licensed under CC BY-NC 4.0 (non-commercial)
+  (https://github.com/BradyFU/Video-MMLU)
+
+Runtime dependencies
+--------------------
+
+- aiortc - library for WebRTC and ORTC in Python (stock upstream dependency)
+  available at https://github.com/aiortc/aiortc
+  Licensed under BSD 3-Clause "New" or "Revised" License (https://github.com/aiortc/aiortc/blob/main/LICENSE)
+
+- SGLang (SGLang engine sidecars for the encoder_placement scenarios)
+  available at https://github.com/sgl-project/sglang
+  Licensed under Apache License 2.0 (https://github.com/sgl-project/sglang/blob/main/LICENSE)
+
+- flash-attention (attention kernels used by the model serving stack)
+  available at https://github.com/Dao-AILab/flash-attention
+  Licensed under BSD 3-Clause "New" or "Revised" License (https://github.com/Dao-AILab/flash-attention/blob/main/LICENSE)
+
+- mitmproxy (L7 HTTP/HTTPS capture)
+  available at https://github.com/mitmproxy/mitmproxy
+  Licensed under MIT License (https://github.com/mitmproxy/mitmproxy/blob/main/LICENSE)

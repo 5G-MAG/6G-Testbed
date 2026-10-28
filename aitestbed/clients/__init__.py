@@ -34,6 +34,10 @@ from .realtime_client import (
     Voice,
 )
 from .realtime_webrtc_client import RealtimeWebRTCClient
+from .realtime_webrtc_vlm_client import RealtimeWebRTCVLMClient
+from .openai_token_client import OpenAITokenClient
+from .encoder_placement_client import EncoderPlacementClient
+from .encoder_placement_client_qwen36 import EncoderPlacementQwen36Client
 
 __all__ = [
     "LLMClient",
@@ -67,4 +71,12 @@ __all__ = [
     "RealtimeEventType",
     "Modality",
     "Voice",
+    # Real-time VLM
+    "RealtimeWebRTCVLMClient",
+    # chat with token ID
+    "OpenAITokenClient",
+    # Encoder placement (server-side vs terminal-side visual encoder)
+    "EncoderPlacementClient",
+    # Encoder placement, Qwen3.6 sibling (serial sidecar 8004)
+    "EncoderPlacementQwen36Client",
 ]

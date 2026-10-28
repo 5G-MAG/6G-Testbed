@@ -807,17 +807,25 @@ class NetworkEmulator:
             return False
 
     def apply_profile_to_loopback(
-        self, profile_name: str, dest_port: int
+        self, profile_name: str, dest_port: int, udp_port: Optional[int] = None
     ) -> bool:
-        """Apply a netem profile to the loopback interface for a specific port.
+        """Apply a netem profile to the loopback interface for specific ports.
 
         Uses ``tc prio`` + ``tc filter`` + ``iptables`` mark so that only
-        traffic to/from *dest_port* is shaped, leaving all other loopback
-        traffic unaffected.
+        traffic to/from *dest_port* (TCP) is shaped, leaving all other
+        loopback traffic unaffected.
 
         Args:
             profile_name: Name of the profile to apply.
             dest_port: TCP port to filter on.
+            udp_port: Optional UDP port to filter on as well (both
+                directions, mirroring the TCP filter pair). Traffic to/
+                from this UDP port joins the SAME netem band as the TCP
+                pair. Used by two-tier (optional retention) edge runs
+                whose optional tier rides best-effort UDP datagrams
+                (E2U); without this filter pair those datagrams bypass
+                netem entirely on single-host loopback runs. None/0
+                (default) preserves the legacy TCP-only behavior.
 
         Returns:
             True if successful.
@@ -884,9 +892,34 @@ class NetworkEmulator:
         ):
             return False
 
+        # 3b) Optional UDP filter pair → same band 3 (netem). Added as a
+        #     PAIR (dport + sport) to mirror the TCP filter semantics
+        #     above: both directions of the port are impaired. Today's
+        #     E2U optional-tier wave is pure uplink (terminal → sidecar
+        #     dport), so the sport rule is dormant; the pair costs
+        #     nothing when unmatched and means any future downlink UDP
+        #     tier is shaped automatically with zero further changes.
+        #     IP protocol 17 = UDP; same header offsets as TCP.
+        if udp_port:
+            if not self._run_tc_command(
+                f"sudo tc filter add dev lo parent 1:0 protocol ip prio 1 u32 "
+                f"match ip protocol 17 0xff "
+                f"match ip dport {int(udp_port)} 0xffff flowid 1:3"
+            ):
+                return False
+            if not self._run_tc_command(
+                f"sudo tc filter add dev lo parent 1:0 protocol ip prio 1 u32 "
+                f"match ip protocol 17 0xff "
+                f"match ip sport {int(udp_port)} 0xffff flowid 1:3"
+            ):
+                return False
+
         self._lo_port = dest_port
         logger.info(
-            f"Applied {profile_name} to lo (port {dest_port}): {netem_str}"
+            f"Applied {profile_name} to lo "
+            f"(tcp port {dest_port}"
+            + (f", udp port {int(udp_port)}" if udp_port else "")
+            + f"): {netem_str}"
         )
         return True
 
