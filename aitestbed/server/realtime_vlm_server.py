@@ -752,8 +752,7 @@ async def main():
     parser.add_argument("--signaling-port", type=int, default=1234)
     parser.add_argument("--persistent", action=argparse.BooleanOptionalAction, default=True,
                         help="keep serving multiple clients after a session ends (use --no-persistent for a single session)")
-    parser.add_argument("--preload-bridge", action=argparse.BooleanOptionalAction, default=True,
-                        help="preload the VLM model bridge (use --no-preload-bridge to load lazily)")
+    parser.add_argument("--preload-bridge", action="store_true", default=True, help="preload vlm model")
     parser.add_argument("--model", default="liquid",
                         help="default VLM model (used when the client does not negotiate one)")
     parser.add_argument("--ice-interface", default=None,
