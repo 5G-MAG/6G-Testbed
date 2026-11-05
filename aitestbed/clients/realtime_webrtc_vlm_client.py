@@ -297,7 +297,7 @@ TOKEN_HEADER_BYTES = 14
 
 class realtimeVideoStreamTrack(VideoStreamTrack):
     # kind = "video"
-    def __init__(self, path, target_fps, pts_offset=0):
+    def __init__(self, path, target_fps):
         super().__init__()
         self.kind = "video"
         self.path = path
@@ -306,8 +306,8 @@ class realtimeVideoStreamTrack(VideoStreamTrack):
         self.fps = self.stream.average_rate
         if self.fps is None:
             self.fps = target_fps
-        self.pts_offset = pts_offset
-        self.last_pts = pts_offset
+        self.pts_offset = 0
+        self.last_pts = 0
         self.resample_ratio = max(int(self.fps // target_fps), 1)
         self.frame_count_origin = -1
         self.frame_count = 0
@@ -816,17 +816,9 @@ class RealtimeWebRTCVLMClient:
         self._video_send_complete_time = None
         self._server_analysis_complete = False
 
-        # keep pts monotonic across turns on the same sender: continue from
-        # the last pts of the previous track so downstream timestamp mappers
-        # and question matching don't see time going backwards
-        prev_last_pts = 0
-        if self.video_track is not None:
-            prev_last_pts = self.video_track.last_pts or 0
-
         self.video_track = realtimeVideoStreamTrack(
             video_path,
             self.target_fps,
-            pts_offset=prev_last_pts,
         )
 
         self.video_sender.replaceTrack(self.video_track)
