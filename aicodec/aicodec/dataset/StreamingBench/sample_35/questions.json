@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:01]: A man in a dark shirt stands in front of a kitchen counter with a marble top. He holds up a smartphone with his right hand. On the counter behind him are various kitchen appliances, including a mixer, toaster, and instant pot. The cabinets have glass doors showing plates and glassware inside; [0:03:02]: The man has started to walk away from the counter and heads towards the open door of a refrigerator, which stands adjacent to the marble countertop. A faucet is visible on the island in the foreground, and steam is emanating from two pots on the stove; [0:03:02 - 0:03:03]: The scene shifts to a new room with light wooden flooring. A person is seated on the floor in front of a fireplace and beside a small child who is playing. Toys and miniature furniture are scattered around; [0:03:04]: The same individual, who appears to be a woman, smiles and looks down at the child. They are both situated near a white cabinet housing various small toys and objects; [0:03:05]: A close-up of a small child who is playing with the person sitting next to them. The child is reaching for something near their feet; [0:03:06]: The child is now sitting on the floor close to the person in the floral dress. There is a wooden miniature kitchen playset behind them; [0:03:07]: A small white dog comes into view and is lying on the floor beside the person in the floral dress; [0:03:08]: A close-up of the small white dog staring at the camera. It is sitting on the wooden floor, partially leaning against the person in the floral dress; [0:03:09]: The camera begins to shift quickly, causing a blurred, disoriented image. A white wall and a part of the previous room are faintly visible as the camera moves; [0:03:10]: The scene changes back to the wooden floored hallway as the small white dog scurries down the corridor towards another room. The walls are white, and there is a wooden trim at the bottom; [0:03:11]: The camera angle shifts upwards, showing a dining area with windows in the background. There are large pendant lights hanging from the ceiling, providing illumination to the space; [0:03:12]: The direction shifts again, a rapid movement through a hallway towards another part of the kitchen. Some elements of the previously seen kitchen come back into view, including dark cabinets and a light-colored countertop; [0:03:13]: The scene is back in the kitchen. The man in a dark shirt is once again in the view, standing next to the stovetop. Pots are boiling, with steam rising from them; [0:03:14]: The man continues to prepare food as he stands before the stovetop. The countertop shows different ingredients and utensils for the cooking process; [0:03:15]: The camera angle shifts slightly to the right. The man begins handling meat and potatoes that are placed on the counter. A chopping board and a kitchen knife are close by; [0:03:16]: A close-up of the man, now facing the camera, possibly taking instructions from his phone, as he looks at it intently. Various cooking ingredients lie neatly arranged on the counter beside him; [0:03:17]: The man appears to focus on his phone, typing or reading from it while standing in the kitchen. Some utensils and ingredients are clearly visible in front of him; [0:03:18]: The scene catches the man in mid-motion, as he possibly transitions from interacting with his phone back to focusing on the cooking tasks at hand; [0:03:19]: The man energetically raises his arms, displaying enthusiasm, while continuing to work in the kitchen. His posture suggests he is deeply engaged in his cooking activity.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man holding in his right hand?",
+                "time_stamp": "0:03:16",
+                "answer": "C",
+                "options": [
+                    "A. A pen.",
+                    "B. A spatula.",
+                    "C. An olive oil bottle.",
+                    "D. A remote."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_35_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:01]: A person wearing a dark shirt and a towel draped over their shoulder is standing in a kitchen. They are holding a knife and a piece of garlic over a wooden cutting board. To the right, a bowl filled with peas can be seen, and a plate with various vegetables is in the lower right corner. The countertop is made of marble.  [0:06:01 - 0:06:02]: The person adjusts their grip on the knife, preparing to cut the garlic. The garlic cloves are positioned on the wooden cutting board, and the man is standing with their right hand ready to slice. [0:06:02 - 0:06:03]: The person starts to chop the garlic while keeping their left hand steady on the board. A portion of the garlic has been sliced, and the left hand hovers just above the pieces. [0:06:03 - 0:06:04]: The person continues to chop the garlic into smaller pieces with precision. The left hand has moved away slightly to give space for the knife to work. [0:06:04 - 0:06:05]: After chopping the garlic, the person motions over to the right of the cutting board, preparing to move the chopped garlic. The bowl of peas remains in the background. [0:06:05 - 0:06:06]: The person now moves the chopped garlic to the side with the flat side of the knife. More detailed parts of the kitchen can be seen in the background, including drawers and utensils. [0:06:06 - 0:06:07]: A close-up view of the person holding the freshly chopped garlic. They spread the chopped pieces with the flat part of the knife to further mince them on the wooden cutting board. [0:06:07 - 0:06:08]: The remaining garlic clove lies on the cutting board, with minced pieces around. The person then lifts the mince garlic pieces using the knife. [0:06:08 - 0:06:09]: Moving over to the stove, the person holds the minced garlic on the knife near a hot skillet with steaks sizzling on it. The person appears ready to add the garlic to the pan. [0:06:09 - 0:06:10]: The perspective shifts to a close-up view of the skillet containing multiple steaks, slightly seared and cooking on a gas burner. The red utensils and sizzling steaks make this the focal point. [0:06:10 - 0:06:11]: The camera retreats slightly and shows the cutting board now empty, except for some residual garlic left behind. The pan with the steaks is still evident in the capture, with a broader look at the kitchen setup. [0:06:11 - 0:06:12]: The person shifts focus back to the pan with steaks, which can be seen cooking actively on a gas stove. The person prepares to flip or stir the steaks. [0:06:12 - 0:06:13]: The camera zooms out to show the person attending to the cooking steaks. The kitchen background reveals more details, including spice containers and cooking appliances on countertops. [0:06:13 - 0:06:14]: The person, holding a towel, stands next to the counter with cooking ingredients arranged orderly. The person continues to focus on the hot skillet with steaks. [0:06:14 - 0:06:15]: After briefly attending to the steaks, the person moves back to the cutting board, readying to continue food preparation with the various ingredients. [0:06:15 - 0:06:16]: With the towel now off to the side, the person stands near the wooden cutting board. Various kitchen utensils, a blender, and food containers are visible behind the person. [0:06:16 - 0:06:17]: The person begins arranging the trimmed garlic cloves on the cutting board. The kitchen equipment, such as an immersion blender and containers, are also in sight. [0:06:17 - 0:06:18]: The camera angle changes, revealing more of the kitchen, including two toasters, spices, and other preparations. The person adjusts their focus back to slicing vegetables on the cutting board. [0:06:18 - 0:06:19]: The person's attention remains on the cutting board, with more intense chopping activity in progress. The arranged onions and potatoes are prepared for further chopping.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding in his hand right now?",
+                "time_stamp": "0:06:00",
+                "answer": "B",
+                "options": [
+                    "A. A spoon and a piece of ginger.",
+                    "B. A knife and a towel.",
+                    "C. A fork and a piece of onion.",
+                    "D. A spatula and a piece of pepper."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What action is the person performing right now?",
+                "time_stamp": "0:06:09",
+                "answer": "C",
+                "options": [
+                    "A. Stirring a pot.",
+                    "B. Slicing an onion.",
+                    "C. Chopping garlic.",
+                    "D. Peeling potatoes."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_35_real.mp4"
+    },
+    {
+        "time": "[0:09:00 - 0:10:00]",
+        "captions": "[0:09:00 - 0:09:20] [0:09:00 - 0:09:01]: The scene shows a close-up shot of a frying pan on a stovetop. The pan contains several pieces of meat, likely chops, searing with a few small vegetables around them. The handle of the pan is red, and to the side is another pan partially visible with other food cooking in it. The person's hand holding a cloth is situated above the frying pan. [0:09:01 - 0:09:13]: The camera pulls back to reveal a broader kitchen setting. The person cooking is wearing a dark shirt and holding a pair of tongs in their right hand and a cloth in their left. The stovetop has multiple burners with different pans cooking various ingredients. The environment is well-organized, with kitchen utensils and gadgets arranged on the countertop behind. A pot with a glass lid is also visible, with green vegetables being cooked inside. [0:09:13 - 0:09:15]: The camera captures a woman in a floral dress holding a child while standing beside the stove. The woman is observing the cooking process, and the child is also watching intently. The background shows a clean and neatly arranged kitchen, with white tiles on the backsplash and dark-colored cabinets. [0:09:15 - 0:09:17]: The scene continues with the person cooking making an adjustment to the pan with the tongs. They are standing to the right of the stove, wearing a cloth over their shoulder. The woman is still holding the child and watching the person cook.  [0:09:17 - 0:09:18]: The cook reaches into the second pan to adjust the vegetables cooking there. The woman and child remain watching. The kitchen is busy and filled with different cooking activities. [0:09:18]: Finally, the person cooking adds a piece of butter to the center of the pan with the chops and vegetables, ensuring proper seasoning as the cooking continues.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What color is the handle of the frying pan that contains meat inside?",
+                "time_stamp": "00:09:01",
+                "answer": "C",
+                "options": [
+                    "A. Black.",
+                    "B. Silver.",
+                    "C. Red.",
+                    "D. Blue."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_35_real.mp4"
+    },
+    {
+        "time": "[0:12:00 - 0:13:00]",
+        "captions": "[0:12:00 - 0:12:20] [0:12:00 - 0:12:01]: The video begins with a first-person perspective focusing on a black pot placed on a gas stove, with blue flames visible beneath it. A person is holding a copper colander in one hand and a kitchen towel in the other.  [0:12:01 - 0:12:02]: In the next moment, the person begins to pour green vegetables from the colander into the black pot on the stove, with steam rising from the hot contents.  [0:12:02 - 0:12:03]: The colander is almost empty now, and the green vegetables are mostly inside the pot, with just a few remaining in the colander.  [0:12:03 - 0:12:04]: The colander is fully emptied into the pot, and the person's hand moves away.  [0:12:04 - 0:12:05]: The person places the empty copper colander into the sink and steps away, leaving the pot on the flaming stove with green vegetables inside. [0:12:05 - 0:12:06]: The scene shifts to show a kitchen counter with various cooking items and ingredients, including a cutting board, knife, and a pan with cooked food.  [0:12:06 - 0:12:07]: The person moves toward the stove area, reaching for a small item on the counter, as the cooking pot and ingredients are in the foreground.  [0:12:07 - 0:12:08]: The person shifts slightly to the right side of the kitchen, reaching into a dish with some grated yellow substance.  [0:12:08 - 0:12:09]: The person adds the grated yellow substance into the pot with the green vegetables, holding a container and using a utensil.  [0:12:09 - 0:12:10]: The person begins mixing the contents of the pot with a spoon, while another person in the background holds a phone, possibly recording or viewing the process. [0:12:10 - 0:12:11]: The camera angle briefly focuses on the stove burner, with the visible blue flames indicating that the heat is still on. [0:12:11 - 0:12:12]: The person shifts back to the stove, pot in hand, places it on the counter, and reaches for a lid. [0:12:12 - 0:12:13]: The person uses a spoon to stir the contents of the pot, with the rest of the kitchen counter visible, including colorful ingredients and kitchen tools.  [0:12:13 - 0:12:14]: The focus shifts to a plate on the counter as the person moves items and prepares other ingredients, including placing dishes and containers. [0:12:14 - 0:12:15]: The person opens a tin of seasoning or sauce, holding it over the pot containing the green vegetables. [0:12:15 - 0:12:16]: The person spoon feeds some of the seasoning from the tin into the pot. [0:12:16 - 0:12:17]: The person continues to add more seasoning into the pot, carefully measuring each portion. [0:12:17 - 0:12:18]: The person begins to stir the ingredients in the pot, ensuring the seasoning is well mixed with the green vegetables. [0:12:18 - 0:12:19]: The person reaches for an item on the counter, possibly to add more ingredients into the pot, with other kitchen items visibly organized around the workspace.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the person do after adding yogurt into the pot?",
+                "time_stamp": "0:12:09",
+                "answer": "B",
+                "options": [
+                    "A. Turns off the stove.",
+                    "B. Begins mixing the contents of the pot.",
+                    "C. Places a lid on the pot.",
+                    "D. Adds more green vegetables."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_35_real.mp4"
+    }
+]

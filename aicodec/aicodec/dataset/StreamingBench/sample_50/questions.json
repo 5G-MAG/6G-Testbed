@@ -1,0 +1,107 @@
+[
+    {
+        "time": "0:00:00 - 0:00:20",
+        "captions": "[0:00:00 - 0:00:20] [0:00:02 - 0:00:08]: A close-up view reveals four circular keychains held in a hand. Each keychain features an intricately designed acrylic disc attached to a metal ring, which is further connected to a metal cap and a colored tassel. The design on each disc is detailed and unique: the first keychain has a teal background with a geometric pattern and a decorative name \"Kayla\" written in white. The second keychain has a pink background with a chevron pattern and a monogram \"L\" in a fancy script. The third keychain has a purple background with a quatrefoil pattern, featuring the name \"Natalie\" in white alongside a heart and a monogram \"N\" in black with a heart. The tassels for the first, second, and third keychains are teal, pink, and lavender, respectively. The four keychains are neatly arranged in the hand, providing a clear view of each decorative element. [0:00:09 - 0:00:13]: The screen goes black, and the text \"Vinyl on Acrylic Key Chains\" appears, centered and in white font. [0:00:14]: The screen remains black. [0:00:15 - 0:00:17]: Another set of white text appears, reading \"How to personalized them in Cricut Design Space,” centered and in the same white font. [0:00:18 - 0:00:19]: The text changes to \"To watch the assembly skip to 2:08,\" maintaining the same centered, white font.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What was shown just now?",
+                "time_stamp": "00:00:08",
+                "answer": "A",
+                "options": [
+                    "A. A detailed view of three circular keychains held in a hand.",
+                    "B. A person assembling a keychain.",
+                    "C. A tutorial on Cricut Design Space.",
+                    "D. A black screen with white text."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_50_real.mp4"
+    },
+    {
+        "time": "0:02:00 - 0:02:20",
+        "captions": "[0:02:00 - 0:02:20] [0:00:00 - 0:00:05]: The video begins with a selection interface on a screen, presenting options for how to load materials for a project. The screen features a white background with black and grey text, and four icons in blue outlines, associated with options: \"Without Mat,\" \"On Mat,\" \"On Card Mat,\" and \"Multiple Ways.\" [0:00:06 - 0:00:05]: The interface remains on the screen, with no changes in the selection. Below the options, instructions in black font urge to \"Choose settings according to your Vinyl type and cut out.\" [0:00:06 - 0:00:09]: The video transitions to a table with a dark grid pattern as the backdrop. At the center of the frame is a teal-colored Cricut device with the word \"Cricut\" engraved prominently on its front. Positioned beneath it is a standard green Cricut mat with a grid layout for aligning materials. [0:00:10 - 0:00:12]: A pair of hands, assumed to be the viewer’s, come into view. They hold a small piece of teal vinyl. The viewer positions the vinyl on the green Cricut mat, aligning it within the grid. [0:00:13 - 0:00:14]: With careful placement, the hands smooth out the teal vinyl on the mat, ensuring it sticks properly without any bubbles or creases. The hands then gently press down to secure it. [0:00:15 - 0:00:16]: The viewer lifts the mat slightly and adjusts it, preparing to insert it into the Cricut device. [0:00:17 - 0:00:15]: The hands move the Cricut mat towards the Cricut device and align it with the machine's entrance. [0:00:16 - 0:00:18]: The viewer carefully inserts the mat into the open slot of the Cricut machine, ensuring it is correctly aligned and ready for cutting. [0:00:19]: The video ends with the Cricut mat fully loaded into the machine, with the vinyl piece visible and ready for the cutting process to commence.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the person doing right now?",
+                "time_stamp": "00:02:20",
+                "answer": "D",
+                "options": [
+                    "A. Arranging a selection of materials on a screen.",
+                    "B. Smoothing out the vinyl on the mat.",
+                    "C. Pressing down the teal vinyl to secure it.",
+                    "D. Inserting the mat into the machine named \"Cricutjoy \"."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_50_real.mp4"
+    },
+    {
+        "time": "0:04:00 - 0:04:20",
+        "captions": "[0:04:00 - 0:04:20] [0:00:00 - 0:00:01]: Two keychains with tassels attached lie at the top of the frame on a grid-patterned surface. One keychain is purple with the name \"Natalie\" written on it, and the other is pink with a design resembling a knot. Below the keychains is a small white card. A pair of hands, wearing a purple sweater, are positioned at the bottom center of the frame, holding a semicircular piece of transparent paper with a teal design. [0:00:01 - 0:00:02]: The hands move the transparent paper with the teal design upwards, closer to the white card. The hands still hold the paper gently with their fingers on either side of the paper. [0:00:02 - 0:00:03]: The transparent paper with the teal design is now almost touching the white card. The detailed teal design on the paper becomes more apparent against the white background. [0:00:03 - 0:00:04]: The hands are now adjusting the position of the transparent paper over the white card. Both hands have fingers positioned symmetrically, ensuring careful alignment. [0:00:04 - 0:00:05]: The hands continue to adjust the transparent paper over the white card, ensuring it is perfectly aligned. The teal design, now fully visible, fits neatly over the white card. [0:00:05 - 0:00:06]: Once the transparent paper is aligned, the hands gently press down on it. The fingertips make sure the paper is secured onto the white card without any creases. [0:00:06 - 0:00:07]: The hands maintain their position as they apply even pressure across the entire surface of the transparent paper to ensure it sticks properly to the white card. [0:00:07 - 0:00:08]: The hands slowly begin to release the pressure, having successfully affixed the transparent paper to the white card.  [0:00:08 - 0:00:09]: The hands are now lifting slightly away from the card to inspect if the transparent paper with the teal design has properly adhered. [0:00:09 - 0:00:10]: The hands move the now-secured transparent paper and white card slightly sideways for further inspection. [0:00:10]: The hands continue adjusting the position of the teal design on the white card to ensure accuracy and avoid any misalignment. [0:00:11]: The hands continue to secure the transparent paper while slightly adjusting and pressing where needed.  [0:00:12]: With the card and transparent paper now firmly in place, the hands carefully move away, indicating that adjustments are complete. [0:00:13]: The hands return to the card, holding a new piece of transparent paper with a purple design, getting ready to repeat the process. [0:00:14]: The hands position the new paper over the white card. The delicate purple design contrasts against the teal design. [0:00:15]: The hands closely align this new transparent paper over the previously affixed teal design, ensuring it layers correctly. [0:00:16]: The hands press down gently again, ensuring the new layer of transparent paper adheres neatly over the first design. [0:00:17]: The hands work to remove any air bubbles and secure the new layer firmly, making sure the design remains intact. [0:00:18]: With both layers now firmly attached, the hands lift away for a final inspection, ensuring everything is smooth and aligned. [0:00:19]: The hands make minor adjustments to ensure the designs align perfectly, before taking a step back, revealing the completed layered design on the white card.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the hands doing right now?",
+                "time_stamp": "0:04:07",
+                "answer": "B",
+                "options": [
+                    "A. Move the hands closer to the white card.",
+                    "B. Lift slightly away from the card to inspect the adhesion.",
+                    "C. Secure the paper by pressing down firmly.",
+                    "D. Place a new piece of transparent paper with a purple design."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_50_real.mp4"
+    },
+    {
+        "time": "0:06:00 - 0:06:20",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:07]: In the first sequence, a hand is shown holding a set of keychains with tassels. There are four keychains in total, each with a different name: \"Holly,\" \"Katie,\" \"Millie,\" and \"Elby.\" The keychains are circular with transparent edges and are held together by metal rings. Each keychain has a unique background color behind the name: \"Holly\" has a light pink background, \"Katie\" has a purple background, \"Millie\" has a light blue background, and \"Elby\" has a mint green background. A small heart graphic is displayed beneath each name. The tassels attached to the keychains match the respective background colors and hang in an organized fashion. [0:06:08]: The scene transitions to show a Cricut cutting machine with a green Cricut mat positioned below it on a grey grid background. The focus is on the setting, suggesting preparation for a crafting task. [0:06:09]: A pair of hands in a purple sweater begins placing a small piece of mint green material at the top right corner of the green Cricut mat, aligning it carefully with the grid lines. [0:06:10]: The hands position the mint green piece precisely on the mat, ensuring alignment within the grid. [0:06:11]: A piece of pink material is now being positioned in the grid’s bottom right section, following the same careful alignment process. [0:06:12 - 0:06:13]: The hands place a purple piece of material at the bottom left section of the mat, ensuring it sticks properly to the adhesive mat surface. Alignment follows the grid lines meticulously to avoid any overlap. [0:06:14]: A blue piece of material is added above the purple piece, completing the arrangement on the mat. The green mat now displays four different colored pieces in each quadrant: mint green in the top right, blue in the top left, pink in the bottom right, and purple in the bottom left. [0:06:15]: The hands make final touches to the blue piece to ensure it is securely adhered to the mat. The overall arrangement shows a well-organized pattern, suggesting an upcoming multi-color crafting project. [0:06:16]: The hands pick up the mat and start guiding it into the Cricut cutting machine's opening slot, preparing it for the cutting process. [0:06:17 - 0:06:18]: The green mat with the four pieces of colored material is now partially inserted into the machine's slot, ready for the cutting operation. [0:06:19]: The mat is fully inserted into the machine, with the four pieces of material perfectly aligned, indicating readiness for the Cricut to begin the cutting task. The setup is complete, transitioning into the crafting action phase.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What did the person do just now?",
+                "time_stamp": "00:06:12",
+                "answer": "B",
+                "options": [
+                    "A. Arrange a pink material at the top right.",
+                    "B. Place a purple piece of material at the bottom left.",
+                    "C. Position a blue piece of material at the bottom right.",
+                    "D. Set a mint green piece at the top left."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_50_real.mp4"
+    },
+    {
+        "time": "0:08:00 - 0:08:20",
+        "captions": "[0:08:00 - 0:08:20] [0:08:07 - 0:08:09]: Several square and circular pieces of translucent material, each bearing a spot of color, are arranged on a grid-patterned work surface. The squares display hues of pink, blue, and other pastels, while the circles remain plain. A pair of hands, one holding a circular piece with a purple design and the other using a small tool, are positioned in the lower half of the frame. The fingers precisely apply pressure to attach or adjust a piece of strip tape onto the circular material. [0:08:09 - 0:08:13]: The hands continue their meticulous work by placing the purple-colored circle onto the work surface. Then, with the tool in one hand, they apply a white rectangular label to one of the squares, ensuring the label's edges align perfectly with the square's grid pattern. [0:08:13 - 0:08:21]: The hands adjust the position of the purple circlular piece, verifying its attachment. Concentrated efforts are directed towards affixing the purple circle further, ensuring its adherence to the surface. Subsequently, the focus shifts from the purple circle to a blue-colored piece. With deliberate movements, they peel off the label from the blue square, securing it onto another transparent circular material. The process demonstrates a methodical approach to applying the materials for a precise finish.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What did the person do just now?",
+                "time_stamp": "00:08:19",
+                "answer": "B",
+                "options": [
+                    "A. Attach a purple circular piece with a strip tape.",
+                    "B. Apply a blue pattern to a square.",
+                    "C. Arrange pieces of pastel colors on the grid-patterned surface.",
+                    "D. Hold a tool to adjust the position of the purple circle."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_50_real.mp4"
+    }
+]

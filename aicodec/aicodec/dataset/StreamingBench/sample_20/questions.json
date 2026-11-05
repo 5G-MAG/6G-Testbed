@@ -1,0 +1,107 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:15]: The video begins with a man standing against a backdrop of a modern kitchen. The kitchen has a white tiled wall with a large metallic refrigerator in the center and a window on the right side, allowing daylight to illuminate the interior. The man is wearing a dark navy blue t-shirt and has light-colored hair. He stands with his hands clasped in front, occasionally gesturing with one hand while speaking. His facial expressions vary as he talks, sometimes looking directly into the camera, emphasizing his points by moving his hands. The refrigerator behind him has a sleek, reflective surface, and to its right, some kitchen appliances are faintly visible along with a plant near the window. [0:00:16]: The scene transitions to an animated graphic featuring a white plate with a spoon and a large number \"10\" beside it against a blue background. [0:00:17 - 0:00:19]: The screen is dominated by the text \"RAMSAY in 10\" in bold red letters. The animation also shows a white plate with a knife and fork positioned to resemble a clock, enhancing the concept of time. A man wearing a white chef's uniform, arms crossed and with a watch on his left wrist, is positioned on the right side of the screen. The blue background remains consistent in these frames.\n[0:00:20 - 0:00:40] \n[0:00:40 - 0:01:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is the color of the man's t-shirt in the initial video?",
+                "time_stamp": "0:00:51",
+                "answer": "B",
+                "options": [
+                    "A. Light blue.",
+                    "B. Dark navy blue.",
+                    "C. White.",
+                    "D. Green."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_20_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] [0:01:00 - 0:01:03]: A woman in a white sleeveless top stands in a kitchen. She is holding a can and using a spoon to scoop its contents. On the counter, there are various ingredients and utensils: a small saucepan, measuring cups, and several bags of dry ingredients. The setting is well-lit, showing modern, white cabinets in the background. [0:01:04 - 0:01:05]: The woman reaches for a green container on the counter, which sits between bags of dry ingredients. She grasps the container and lifts it towards a white bowl positioned in front of her. [0:01:06 - 0:01:09]: She holds up the green container, facing the white bowl. She tilts the container and uses a spoon to measure its contents into the bowl, which already has a whisk inside it. The saucepan remains on the stove in the background, and a small cup is nearby on the counter. [0:01:10 - 0:01:13]: The woman's attention is focused as she continues to measure from the green container. Afterward, she sets the container down and appears to be concentrating on her next step, occasionally looking downward with a thoughtful expression. [0:01:14 - 0:01:15]: The woman resumes using the whisk, mixing the ingredients inside the white bowl. Her movements indicate precision and familiarity with the action. Her right hand whisks the mixture, creating a rhythmical motion. [0:01:16 - 0:01:19]: A close-up view reveals the contents of the bowl as the woman continues to whisk. The dry mixture inside begins to blend smoothly, changing its texture under the whisk's motion.\n[0:01:20 - 0:01:40] \n[0:01:40 - 0:02:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is the woman initially holding in her left hand right now?",
+                "time_stamp": "0:01:00",
+                "answer": "D",
+                "options": [
+                    "A. A green container.",
+                    "B. A small saucepan.",
+                    "C. A white bowl.",
+                    "D. A can."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_20_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:01]: A woman with long dark hair tied back is in a kitchen positioned in front of a metallic, double-door refrigerator. In front of her on the counter are various kitchen items including a carton of eggs, several small canned goods, a whisk, a measuring cup, and a set of measuring spoons. She holds a white mixing bowl in her left hand and is using a whisk with her right hand. Her attire consists of a light-colored top.  [0:02:01 - 0:02:02]: The woman is mid-motion, transitioning to place the white mixing bowl she was holding with her left hand down on the counter. Her focus appears to be on the bowl. [0:02:02 - 0:02:03]: The woman continues to adjust the bowl on the counter while holding the whisk. The eggs, measuring cups, and several other items remain in the same positions on the counter. [0:02:03 - 0:02:04]: A close-up of the woman’s hands shows her placing the whisk down into one of the two large bowls, which is now seen from an overhead view to be empty and beside another bowl containing some yellow mixture. Some kitchen product packaging is partially visible in the foreground. [0:02:04 - 0:02:05]: The camera focuses on the woman's face as she looks down, concentrating on what she is doing. Her lips are slightly pursed and she appears to be working carefully. [0:02:05 - 0:02:06]: The woman stands at the counter again, now with a spoon in her right hand. She scoops a substance into a small white bowl she is holding in her left hand. The items on the counter remain unchanged. [0:02:06 - 0:02:07]: The woman continues to scoop ingredients into the small white bowl, still holding it steady with her left hand. Her eyes and attention are focused on the task. [0:02:07 - 0:02:09]: The camera shifts to show a close-up of her hands as she uses a small metal measuring spoon to scoop a brown substance, which is likely a spice or powder, from the small white bowl into one of the large mixing bowls in front of her. There is a whisk resting inside the large bowl. [0:02:10]: The woman looks up from her task, possibly in response to something off-camera. She is holding the whisk in her right hand. The arrangement of kitchen items on the counter remains the same. [0:02:11 - 0:02:12]: The woman returns her focus to the bowls in front of her, placing the whisk into one of the mixing bowls.  [0:02:12 - 0:02:13]: She starts to whisk the contents of the bowl, her right hand making rotational movements with the whisk as she does so. [0:02:13 - 0:02:14]: She continues to whisk, her concentration evident as she thoroughly mixes the ingredients in the bowl. [0:02:14 - 0:02:15]: Her whisking movements become more vigorous, blending the ingredients more intensely. [0:02:16 - 0:02:18]: The camera zooms in on the bowl as her hands whisk the contents. The mixture is becoming more uniform with each whisk.  [0:02:19]: Finally, the woman looks up again, continuing to whisk. She appears to be speaking or explaining something, judging by her open mouth and expressive hand gestures.\n[0:02:20 - 0:02:40] \n[0:02:40 - 0:03:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is the woman holding in her left hand right now?",
+                "time_stamp": "0:02:01",
+                "answer": "B",
+                "options": [
+                    "A. A carton of eggs.",
+                    "B. A white mixing bowl.",
+                    "C. A whisk.",
+                    "D. A small white bowl."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_20_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00] A thick yellow batter is being poured from a measuring jug onto a hot griddle. The batter forms a mound as it spreads out on the surface. [0:03:01 - 0:03:02] A person with long brown hair, wearing a white tank top, holds the container of batter and a red spatula above the griddle. They have just started to pour the batter, creating a round shape on the hot surface. [0:03:03 - 0:03:06] The person continues to pour the batter onto the griddle, forming two similarly sized mounds of batter next to each other. The batter is thick and slowly spreads out as it hits the hot surface. [0:03:07 - 0:03:15] The person steadily pours more batter onto the griddle, forming another round shape close to the first two. A pot with a handle is on the left side of the griddle, and various kitchen items like a spray can and bottles are positioned on the right side of the counter.  [0:03:16] A close-up view shows the person using the red spatula to assist in pouring the batter from the measuring jug. Three round mounds of batter are now on the griddle, starting to cook and develop bubbles on their surfaces. [0:03:17] A focused view of the person's hands, emphasizing the careful action of using the red spatula to scrape the remaining batter from the jug. The batter is thick and slightly lumpy as it falls from the jug. [0:03:18] The person continues to manage the batter on the griddle, making sure all the batter is poured out evenly. Two cooked mounds are clearly formed on the griddle. [0:03:19] The person is now finishing the process, using the spatula to scrape the remainder of the batter from the jug, ensuring it is all used. The kitchen background includes a countertop with a shiny marble finish, a spray can, and bottles.\n[0:03:20 - 0:03:40] \n[0:03:40 - 0:04:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the fluid being poured onto the griddle?",
+                "time_stamp": "0:03:01",
+                "answer": "B",
+                "options": [
+                    "A. White.",
+                    "B. Yellow.",
+                    "C. Brown.",
+                    "D. Red."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_20_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:00 - 0:05:20] \n[0:05:20 - 0:05:40] \n[0:05:40 - 0:06:00] ",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What has this woman just done?",
+                "time_stamp": "0:05:22",
+                "answer": "B",
+                "options": [
+                    "A. Pour the cooked seasonings from the pot onto the chicken wings on the grill.",
+                    "B. Pour the seasonings from the pot onto the panca.",
+                    "C. Pour the prepared sauce from the pot onto the roasted fish.",
+                    "D. Pour the mixed spices from the pot onto the steak being seared."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_20_real.mp4"
+    }
+]

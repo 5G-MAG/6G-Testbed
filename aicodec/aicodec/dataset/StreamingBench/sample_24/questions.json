@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] \n[0:01:20 - 0:01:40] [0:01:20 - 0:01:24]: The scene begins with a woman standing in a modern kitchen. She's facing the camera wearing a white sleeveless top with black polka dots. In front of her on a light wooden cutting board, there's an array of ingredients including a zucchini, some chopped garlic, and a large white bowl. She holds a small glass jar of a red spice and a spoon in her hands, poised above the bowl. The kitchen background features stainless steel appliances and white subway tiles. [0:01:25 - 0:01:28]: The woman continues to spoon the red spice into the bowl, her hands moving steadily. The bowl contains a mixture of green and red ingredients. She holds the spice jar above the bowl, her left hand controlling the spoon. [0:01:29 - 0:01:30]: The camera zooms out slightly, showing the woman talking and making a gesture with her right hand while still holding the spoon and jar in her left hand. She appears to be explaining something. [0:01:31 - 0:01:32]: The woman continues speaking, gesturing with both hands for emphasis. Her expression seems engaged as she communicates with the viewer. [0:01:33 - 0:01:34]: The shot remains steady as the woman continues her explanation. She occasionally looks down at the ingredients on the cutting board. [0:01:35 - 0:01:36]: The scene continues with a similar setup, as the woman makes more gestures and movements while speaking. Her facial expressions remain animated. [0:01:37]: The woman glances to the side briefly while still continuing her explanation. Her right hand is now extended towards the side as she speaks. [0:01:38 - 0:01:39]: The camera cuts to a close-up of the bowl with the ingredients, showing her hands moving towards a green cup. Other utensils and appliances in the background become slightly blurred.\n[0:01:40 - 0:02:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the woman wearing?",
+                "time_stamp": "0:01:00",
+                "answer": "D",
+                "options": [
+                    "A. A red dress with white dots.",
+                    "B. A blue blouse with yellow stripes.",
+                    "C. A green apron with floral patterns.",
+                    "D. A white sleeveless top with black polka dots."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What action is the woman performing with the spice jar?",
+                "time_stamp": "0:01:24",
+                "answer": "C",
+                "options": [
+                    "A. She is shaking the spice jar over the ingredients.",
+                    "B. She is pouring the spice directly into the bowl.",
+                    "C. She is spooning the spice into the bowl.",
+                    "D. She is closing the lid of the spice jar."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_24_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] \n[0:02:20 - 0:02:40] \n[0:02:40 - 0:03:00] [0:02:40 - 0:02:42]: Hands are pressing a raw hamburger patty flat on a black griddle. The countertop and stove setup indicates a kitchen environment. The patty is maintaining a roughly circular shape, with small droplets of moisture visible on its surface. [0:02:43 - 0:02:47]: In a modern kitchen with clean, white tiled walls and a large stainless steel refrigerator in the background, a woman wearing a white, polka-dot sleeveless top is preparing ingredients on a countertop. Various objects such as a wooden pepper grinder, a bottle of oil, a green mug, and a white bowl are arranged on the counter. [0:02:48 - 0:02:53]: The woman continues to prepare food, speaking actively as she gestures with her hands. There is a sense of movement and engagement in her actions as she organizes the ingredients and utensils around her. [0:02:54 - 0:02:57]: The camera shifts back to the hamburger patty cooking on the black griddle. The patty remains stationary as it continues to cook, with text appearing on the screen reading, \"RECIPE IS IN THE DESCRIPTION BELOW.\" [0:02:58 - 0:02:59]: The scene returns to the woman in the kitchen, pointing and conversing as she reaches for a lemon on the countertop among the various cooking items.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What text appeared on the just now?",
+                "time_stamp": "00:02:57",
+                "answer": "D",
+                "options": [
+                    "A. \"Cooking Time: 10 minutes\".",
+                    "B. \"Season to Taste\".",
+                    "C. \"Ingredients: Beef, Salt, Pepper\".",
+                    "D. \"Recipe is in the description below\"."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_24_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:02]: The video begins with a close-up of hands squeezing a lemon over a white bowl. The person wears a ring on one finger, and there is a bit of pulp visible in the bowl as the juice drips down. The person wears a white, polka-dotted top, and a spoon rests on the left side of the bowl on the wooden countertop. [0:04:03 - 0:04:04]: The scene shifts to show a wider view of the kitchen. The person, a woman with a ponytail, stands behind a kitchen island with various items, including a large bowl, lemons, and an olive oil bottle. The kitchen has stainless steel appliances, white subway tiles, and green plants around the window. [0:04:05 - 0:04:06]: The woman starts to reach for something on the counter. A closer shot shows her adjusting the bowl on the wooden board before grabbing a bottle of olive oil. [0:04:07 - 0:04:08]: She pours olive oil into the white bowl containing the lemon and other ingredients. The light reflects off the bottle as the golden liquid flows, showing her concentrated expression as she performs the action. [0:04:09 - 0:04:10]: The shot switches to a medium close-up of her vigorously mixing the ingredients in the bowl with a fork or similar utensil. She looks focused as she blends everything. [0:04:11 - 0:04:12]: A close-up image shows the mixture inside the bowl as it is being stirred. The green contents, likely avocado or a similar ingredient, are becoming well-mixed as the fork moves around. [0:04:13 - 0:04:14]: The camera returns to a medium shot of the woman standing behind the counter, continuing to mix the ingredients in the bowl. Various items such as lemons, a pepper mill, and a small green cup are visible on the counter. [0:04:15]: She steps to the right side of the frame to grab a green bottle of olive oil before moving toward the stove area. [0:04:16 - 0:04:17]: Over at the stove, she begins to drizzle olive oil onto a pan that contains a patty or similar item. The kitchen remains consistent in appearance, exuding a clean and modern feel with white cabinetry and a large window in the background. [0:04:18 - 0:04:19]: The final close-up shows the patty on the grill now glistening with olive oil. The surface of the patty appears slightly rough, likely indicating that it is a homemade preparation. The video captures the detail of the patty being cooked thoroughly.\n[0:04:20 - 0:04:40] \n[0:04:40 - 0:05:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the woman holding right now?",
+                "time_stamp": "0:04:06",
+                "answer": "D",
+                "options": [
+                    "A. A spoon.",
+                    "B. A white bowl.",
+                    "C. A pepper mill.",
+                    "D. A green bottle of olive oil."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_24_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:00 - 0:05:20] \n[0:05:20 - 0:05:40] [0:05:20 - 0:05:23]: In a bright and modern kitchen, a person wearing a white, polka-dotted sleeveless top and dark pants is tending to food on a large countertop. On the counter, there are bottles of olive oil, pepper grinder, a small green ceramic bowl, and a plate with lettuce. They use a spatula to flip a burger patty on the griddle while a hamburger bun is also warming nearby. [0:05:24]: The focus shifts to a close-up of the griddle where the person lifts the cooked burger patty with a spatula. The hamburger bun is toasted brown on the griddle. [0:05:25]: The scene transitions to a cutting board on the counter, which has slices of tomato, pickles, and lettuce prepared for assembly. The image is slightly out of focus. [0:05:26 - 0:05:28]: The person places a piece of lettuce on the bottom half of the hamburger bun on the cutting board and then places the burger patty on top of the lettuce using a black spatula. Slices of tomato are nearby. [0:05:29 - 0:05:30]: The person focuses on assembling the burger. They are carefully positioning the lettuce and burger patty on the bottom half of the bun. The kitchen setup in the background includes marble countertops, a refrigerator, and kitchen cabinets. [0:05:31 - 0:05:33]: The next few frames show the person continuing to assemble the burger, adjusting the ingredients to ensure they are well placed. Their hair is tied back, allowing a clear view of their focused expression. [0:05:34 - 0:05:35]: The camera briefly zooms in on the assembling process. The top half of the bun is about to be placed on the burger, which now has layers of lettuce and a patty. [0:05:36 - 0:05:37]: The viewpoint momentarily moves back to show an olive oil bottle in the foreground. The forming of the burger continues as the person reaches for ingredients.  [0:05:38 - 0:05:39]: Finally, the person retrieves the fully assembled burger and starts to step away from the counter, holding the burger with some satisfaction. The kitchen counter remains filled with various ingredients and cooking utensils, signifying an active cooking environment.\n[0:05:40 - 0:06:00] ",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "How much time does this person have left now??",
+                "time_stamp": "0:05:49",
+                "answer": "D",
+                "options": [
+                    "A. 10s.",
+                    "B. More than ten seconds.",
+                    "C. 20s.",
+                    "D. Less than ten seconds."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_24_real.mp4"
+    }
+]

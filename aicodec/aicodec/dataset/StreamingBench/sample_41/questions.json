@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:09]: A man with blonde hair and a serious expression stands in front of a stainless steel refrigerator, wearing a navy blue T-shirt. The background consists of white subway tiles on the wall. He begins speaking to the camera with his hands clasped in front of him and occasionally gestures while talking. A window is visible to his right side, showing an outdoor scene with greenery. [0:00:10 - 0:00:15]: The man continues to speak, gesturing with his hands to emphasize his points. His expression occasionally changes to a smile. [0:00:16]: The scene changes to a graphic with the number 10 and an image of a spoon, all displayed on a blue background. [0:00:17 - 0:00:19]: A new scene shows the man from the previous frames dressed in a white chef's coat, arms crossed, standing in front of the text \"RAMSAY in 10\" with a similar blue background.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man standing in front of in the initial video?",
+                "time_stamp": "00:00:20",
+                "answer": "D",
+                "options": [
+                    "A. A wooden cabinet.",
+                    "B. A glass door.",
+                    "C. A blackboard.",
+                    "D. A stainless steel refrigerator."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_41_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] [0:01:00 - 0:01:00]: An arm is moving across a white bowl, partially blocking the view. The bowl contains a white substance, possibly a batter or sauce, situated on a kitchen counter. There are other kitchen items situated near the bowl, but their details are unclear due to the arm's obstruction. [0:01:01 - 0:01:02]: A woman with long brown hair, wearing a black sleeveless top, is holding a jar in her right hand while her left hand is near a white bowl on the counter. There is a loaf of bread, a carton of eggs, a carton of milk, and various kitchen utensils spread out on the marble countertop. Behind the woman is a stainless steel refrigerator, a tiled white wall with a window showing greenery outside, and a cabinet with potted plants. [0:01:02 - 0:01:03]: The woman opens the jar she is holding and looks down at the countertop. She is positioned slightly to the left of the refrigerator doors. A black frying pan is seen next to the bowl on top of a stove. [0:01:03 - 0:01:04]: A close-up view of the white bowl displays two cracked eggs with yolks visible, resting in the white substance. The background reveals parts of the stove and a dark object, possibly a piece of cloth, next to the bowl. [0:01:04 - 0:01:04]: The woman's hand, with neatly manicured nails, is holding a jar of seasoning above the bowl. The seasoning appears to be about to be sprinkled onto the eggs and white substance in the bowl. [0:01:05 - 0:01:06]: The woman begins to scoop some seasoning from the jar with a metal spoon. The ridged surface of the countertop and part of the stove can be seen in the background.  [0:01:06 - 0:01:07]: The woman’s hands are shown holding the jar and the spoon, preparing to sprinkle the seasoning onto the eggs. The white bowl remains stationary on the counter. [0:01:07 - 0:01:08]: Close-up of the woman’s hands sprinkling the seasoning directly into the bowl over the eggs. The black stove and its components are visible in the background. [0:01:08 - 0:01:09]: A close-up view of the bowl reveals the sprinkled seasoning on top of the egg yolks and whites. The substance mixture surrounds the eggs in the bowl. [0:01:09 - 0:01:10]: The eggs and seasoning in the bowl are clearly shown. The detailed texture of the stove surface next to the countertop is visible. [0:01:11 - 0:01:12]: The woman turns to her left, reaching towards an unseen object. The countertop still displays a loaf of bread, egg carton, and other items, while the refrigerator and tiled wall remain in the background. [0:01:12 - 0:01:13]: The woman is seen holding a lemon in her right hand as she looks down towards the countertop. Her left hand reaches towards the items on the marble counter. [0:01:13 - 0:01:14]: The woman begins to zest the lemon over the bowl with a zester held in her left hand. Her focus is directed towards the bowl. [0:01:14 - 0:01:15]: The woman continues zesting the lemon over the bowl, and the yellow zest starts to fall onto the egg mixture. The surrounding kitchen items maintain their positions on the counter. [0:01:15 - 0:01:16]: Close-up view of the lemon being zested, with yellow lemon zest visible over the egg mixture in the bowl. The setup of the kitchen counter and the stove surface remains the same. [0:01:16 - 0:01:17]: More lemon zest falls into the bowl as the woman continues to zest the lemon. The lemon zest starts to accumulate on top of the egg mixture. [0:01:17 - 0:01:18]: The woman continues to zest the lemon while looking intently at the bowl. Her left hand holds the zester firmly, and she is focused on grating more zest. [0:01:18 - 0:01:19]: The woman briefly pauses, still holding the lemon and zester. She turns her head to the left as if to glance at something off-camera. The kitchen counter, tools, and stove are in their original positions.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the woman holding in her left hand?",
+                "time_stamp": "0:01:04",
+                "answer": "D",
+                "options": [
+                    "A. A loaf of bread.",
+                    "B. A carton of milk.",
+                    "C. A frying pan.",
+                    "D. A jar."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the woman do after opening the jar?",
+                "time_stamp": "0:01:03",
+                "answer": "A",
+                "options": [
+                    "A. Pour the seasoning inside it into the white bowl with eggs.",
+                    "B. Looks out the window.",
+                    "C. Moves to the refrigerator.",
+                    "D. Picks up a loaf of bread."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_41_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00]: A woman with long dark hair, wearing a sleeveless black top, stands in a kitchen holding a white shaker bottle with a black top. The background features stainless steel appliances and white tiles on the walls. [0:02:01 - 0:02:05]: The woman is in front of a marble kitchen counter full of ingredients: a large white bowl, a smaller bowl, a loaf of bread, an egg carton, some butter, a brown plate, and various containers. She is reaching for a box of cereal. [0:02:05 - 0:02:07]: She starts opening the cereal box, holding it with both hands, and situating it in front of her. Various ingredients remained spread across the counter. [0:02:07 - 0:02:08]: She opens the cereal box and prepares to pour its contents. Next to the ingredients on the counter are a large white bowl, butter, eggs, spices, and other containers. [0:02:09 - 0:02:14]: She pours the cereal from the box into a clear shaker bottle held by her left hand. The camera captures her movements in front of the stainless steel fridge and kitchen cabinets.  [0:02:15 - 0:02:19]: The woman continues pouring cereal into the shaker bottle until it is filled. Various kitchen items like a knife, a green lid, spices, and butter are on the counter next to her.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the woman doing right now?",
+                "time_stamp": "0:02:00",
+                "answer": "A",
+                "options": [
+                    "A. Pour the cereal from the box into a transparent glass of water.",
+                    "B. Pour the sugar from the jar into a cup of hot tea.",
+                    "C. Pour the pasta from the bag into a pot of boiling water.",
+                    "D. Pour the flour from the container into a bowl of milk."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_41_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:01]: A close-up of a hand holding a slice of bread, dipping it into a bowl filled with a yellow custard-like mixture. The bread is slightly submerged, and the hand is positioned on the right side of the bowl, guiding the bread in with careful precision. [0:04:01 - 0:04:02]: The hand continues to dip the slice of bread into the mixture, covering it thoroughly. The fingers are slightly spread to maintain a firm grip on the bread, and the bowl is white with a ribbed texture on the outside. [0:04:02 - 0:04:03]: The camera zooms out to reveal a woman standing in a modern, well-lit kitchen. She is placing the bowl with the dipped bread on the counter while focusing on the task at hand. There are two slices of bread, a carton of eggs, and a mixing bowl on the countertop. [0:04:03 - 0:04:04]: The woman continues to focus on preparing the bread, now using a spatula to ensure the bread is evenly coated with the mixture. The stainless steel refrigerator and the white subway tile backsplash are visible in the background.  [0:04:04 - 0:04:05]: The woman shifts her attention to the bowl, lifting the soaked bread with the spatula. The bread is visibly soaked in the yellow mixture, and she is careful to let any excess drip back into the bowl before moving it. [0:04:05 - 0:04:06]: She holds the bread over the bowl, allowing any extra liquid to drip off before moving it to the hot surface. Her movements are precise and deliberate, ensuring minimal mess. [0:04:06 - 0:04:07]: As she continues holding the bread, she maintains a steady grip with her left hand, slightly tilting the bowl to prevent spills. The kitchen is bright, with natural light illuminating the space through a large window. [0:04:07 - 0:04:08]: She places the soaked bread back into the bowl briefly, possibly to adjust or soak the other side evenly. The other kitchen items remain in their original positions on the counter. [0:04:08 - 0:04:09]: She gently shakes the bread to ensure it is thoroughly coated, preparing to move it to the cooking surface. The woman’s focus remains on her task, showing a methodical approach to her cooking. [0:04:09 - 0:04:10]: The bread is then carefully transferred to another container or surface, outside the current frame, likely for cooking. Her hands are steady, and the countertop remains clean and organized. [0:04:10 - 0:04:11]: Another close-up shows the bread being dipped into a different mixture, potentially for another coating. The texture of the mixture appears consistent and smooth. [0:04:11 - 0:04:12]: The bread receives another thorough coating, with the hands ensuring all sides are covered uniformly. The white bowl used earlier is still present and filled with the mixture. [0:04:12 - 0:04:13]: The camera zooms out to reveal the woman back at the counter, focusing on preparing the next piece of bread. The kitchen’s modern appliances and decor, including the potted plant by the window, are visible in the background. [0:04:13 - 0:04:14]: She sets down the coated bread, possibly on a cooking surface, and prepares to reach for another slice. Her attention to detail is evident as she maintains the workspace. [0:04:14 - 0:04:15]: The woman momentarily pauses, perhaps to adjust an item or check the progress of the cooking bread. The kitchen remains brightly lit, showcasing its clean and modern design. [0:04:15 - 0:04:16]: She reaches towards the left side of the counter, picking up another kitchen tool or ingredient. The focus remains on her consistent and deliberate actions. [0:04:16 - 0:04:17]: She prepares another slice of bread for dipping, ensuring it's evenly sliced and ready for the mixture. The countertop reflects the bright lighting of the kitchen. [0:04:17 - 0:04:18]: The bread is being sliced carefully, with a knife held in her right hand. She continues to maintain a methodical approach to the preparation. [0:04:18 - 0:04:19]: A close-up of the bread being dipped into the mixture again shows careful attention to even coating. The yellow mixture appears thick and smooth.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What does the woman use to ensure the bread is evenly coated with the mixture?",
+                "time_stamp": "0:04:04",
+                "answer": "D",
+                "options": [
+                    "A. A spoon.",
+                    "B. Her fingers.",
+                    "C. A fork.",
+                    "D. A spatula."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_41_real.mp4"
+    }
+]

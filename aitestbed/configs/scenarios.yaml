@@ -1046,8 +1046,8 @@ scenarios:
     task_config:
       task_class: "real"
       po_thd: 3
-      results_dir: "examples/assets/dataset_real/"
-      video_paths: "examples/assets/dataset_real/"
+      results_dir: "../aicodec/aicodec/dataset/StreamingBench/"
+      video_paths: "../aicodec/aicodec/dataset/StreamingBench/"
     prompts:
       - "What is in the video? Answer directly!"
 

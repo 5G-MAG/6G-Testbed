@@ -1,0 +1,107 @@
+[
+    {
+        "time": "0:00:00 - 0:00:20",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:03]: Several Christmas ornaments are showcased closely. The first ornament, prominently in the foreground, is a vivid blend of pink, blue, and gold hues with the text \"JINGLE bells\" inscribed in white. Surrounding it are other ornaments partially visible, with similarly vibrant mixtures of colors. The background is decorated with festive greenery. [0:00:04 - 0:00:06]: The view expands to show three ornaments fully. Positioned in the center is the \"JINGLE bells\" design, while to its left, an ornament reads \"Joyeux Noel\" in white cursive against a dark blue and gold mix. To the right, an ornament reads \"Merry Christmas\" in white cursive with a blue and purple base highlighted with gold. These ornaments are arranged among green pine branches adorned with red berries and golden ribbons. [0:00:07 - 0:00:08]: The frame becomes darker and transitions to a title screen. The text \"ALCOHOL INK ORNAMENTS\" appears in white on a solid black background. [0:00:09 - 0:00:10]: The title screen remains the same, with \"ALCOHOL INK ORNAMENTS\" still displayed. [0:00:11 - 0:00:13]: A new text appears against a soft pink background, stating, \"Templates and Materials used are listed in the description.\" [0:00:14]: A pair of hands wearing black gloves is seen holding a can of Cabot's Cabothane Clear. The text \"For this project you will need:\" appears at the bottom of the frame. [0:00:15]: The hands firmly grasp the top and bottom of the can, showcasing it to the camera. The design of the can prominently features yellow and blue colors with detailed text and branding. [0:00:16 - 0:00:19]: The hands continue holding the can as the text \"Water based Polyurethane\" appears below the can image.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What are the prominent colors of the ornament in the middle of the video?",
+                "time_stamp": "00:00:03",
+                "answer": "A",
+                "options": [
+                    "A. Pink, blue, and gold.",
+                    "B. Red, green, and silver.",
+                    "C. Black, white, and blue.",
+                    "D. Yellow, orange, and purple."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_48_real.mp4"
+    },
+    {
+        "time": "0:01:40 - 0:02:00",
+        "captions": "[0:01:40 - 0:02:00] [0:01:40 - 0:01:50]: A pair of hands wearing black gloves is holding a translucent, spherical ornament with a matte, slightly cloudy surface. The ornament is being held above a small, clear plastic cup that is situated on top of an open tin containing a golden rim. The background is a blue grid mat.  [0:01:50 - 0:01:56]: The hands continue to hold the ornament as it is being tilted slightly to one side, aligning the opening of the ornament with the cup in the tin below, suggesting the intention to pour out excess liquid from the ornament.  [0:01:56 - 0:01:58]: The view remains the same, with the ornament's opening now directly above the cup, continuing to suggest the pouring action without any visible liquid. The text on the frame reads \"Pour excess liquid back into the tin.\" [0:01:58 - 0:02:00]: The ornament remains in the same position, held steadily above the cup, ensuring that any residual liquid drains out completely. [0:02:00 - 0:02:05]: The process of pouring continues as the text changes to \"Let the ornament drain for 10 minutes,\" indicating that the ornament is to be left in this position for proper drainage. The hands maintain their grip on the ornament to prevent any movement.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What are the black-gloved hands doing right now?",
+                "time_stamp": "0:02:00",
+                "answer": "A",
+                "options": [
+                    "A. Holding the ornament steadily above the cup for drainage.",
+                    "B. Placing the ornament on a table.",
+                    "C. Shaking the ornament to remove excess liquid.",
+                    "D. Filling the ornament with a new liquid."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_48_real.mp4"
+    },
+    {
+        "time": "0:03:20 - 0:03:40",
+        "captions": "[0:03:20 - 0:03:40] [0:03:20 - 0:03:22]: A person wearing black gloves holds a round glass ornament, decorated with vibrant swirls of blue, purple, pink, and gold. On a white cloth beneath the ornament, several small bottles of different colors are placed alongside some bottle caps. [0:03:22 - 0:03:24]: The gloved hands position the ornament closer to the camera while also holding a small bottle. [0:03:24 - 0:03:26]: The person starts applying the contents of the small bottle to the opening of the ornament. [0:03:26 - 0:03:28]: The hands carefully manipulate the ornament and the small bottle, spreading the liquid inside. [0:03:28 - 0:03:30]: The person closely examines the ornament, ensuring that the liquid inside it is evenly distributed. [0:03:30 - 0:03:32]: The ornament is placed back onto the white cloth while the person retrieves a blue funnel. [0:03:32 - 0:03:34]: The funnel is inserted into the ornament's opening. [0:03:34 - 0:03:35]: The person adjusts the funnel and prepares to use it. [0:03:35 - 0:03:40]: The person holds a pink container labeled “Glitter,” and begins pouring fine white glitter into the funnel. The glitter fills the gaps inside the ornament, adding a sparkling effect.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the person doing right now with the pink container labeled \"Glitter\"?",
+                "time_stamp": "0:03:38",
+                "answer": "A",
+                "options": [
+                    "A. Pouring fine white glitter into the funnel.",
+                    "B. Sprinkling glitter on the white cloth.",
+                    "C. Decorating the ornament with paint.",
+                    "D. Mixing different colored liquids inside the ornament."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_48_real.mp4"
+    },
+    {
+        "time": "0:05:00 - 0:05:20",
+        "captions": "[0:05:00 - 0:05:20] [0:05:00 - 0:05:01]: Two black-gloved hands are holding a spherical object. The sphere has various colorful patterns, including blue, purple, and gold. One hand holds a bottle with a metallic cap, currently applying a golden liquid to the sphere's opening. The sphere is positioned above a white cloth on a blue surface, with a couple of other small bottles and a white container nearby. There is a grid visible on the blue surface in the background. [0:05:01 - 0:05:02]: The hands are continuing to apply the golden liquid from the bottle to the opening of the colorful sphere. The sphere has distinctive patterns that include areas of blue, purple, teal, and golden shades blending together. The white cloth underneath, on a grid-patterned blue background, remains in place. The additional bottles and a white container are still visible on the right side of the frame. [0:05:02 - 0:05:03]: The right hand is now holding the liquid bottle away from the sphere, which the left hand is rotating slightly, showing a full view of the colorful design, including patches of gold, blue, and purple colors. The white cloth below is still visible, laying on the blue grid-patterned background. The additional materials from the previous frames are placed to the right. [0:05:03 - 0:05:04]: Holding the sphere steady, the right hand tilts the bottle, with the golden cap still attached, closer to the opening of the sphere. The colors on the sphere, including blues, purples, and gold, remain vivid and intricate. The white cloth remains spread on the blue grid-patterned background, with additional items still in their previous positions. [0:05:04 - 0:05:05]: The right hand is pouring the golden liquid into the opening of the colorful sphere. The sphere's patterns are clear, with swirling blue, purple, and gold designs. The white cloth underneath continues to lie on the blue grid background. The surrounding objects remain unaltered, positioned slightly right of the sphere. [0:05:05 - 0:05:06]: The hands hold the sphere and the bottle in a similar manner to the previous frames. The golden liquid continues to be applied to the opening of the sphere. The intricate colorful patterns, including blue, purple, and gold, are clear on the sphere. The white cloth on the blue grid-patterned surface and the surrounding bottles maintain their positions. [0:05:06 - 0:05:07]: The hands slightly rotate the sphere while continuing to apply the golden liquid from the bottle into the opening. The sphere’s colorful design remains prominent, showcasing swirls of blue, purple, and gold. The white cloth still lies on the blue grid background, with additional items on the right remaining in place. [0:05:07 - 0:05:08]: The right hand holds the liquid bottle slightly away from the sphere, which is being rotated by the left hand. The colorful patterns of the sphere, consisting of blue, purple, and gold, are still visible. The white cloth on the blue grid-pattern background and the nearby small bottles and container remain unchanged. [0:05:08 - 0:05:09]: The right hand brings the liquid bottle closer to the sphere's opening, continuing to pour the golden liquid. The left hand holds and slightly rotates the colorful sphere, showcasing the various shades of blue, purple, and gold. The white cloth under the sphere lies on the blue grid background, with the additional items standing to the right. [0:05:09 - 0:05:10]: The sphere is held steady, with the right hand positioning the bottle close to its opening. The intricate patterns of blue, purple, and gold on the sphere remain visible. The white cloth on the blue grid background and the surrounding bottles and container are still present in the same arrangement. [0:05:10 - 0:05:11]: The right hand continues to pour the golden liquid into the opening of the sphere, while the left hand holds it securely. The colorful patterns, blending blue, purple, and gold, are clear. The white cloth on the blue grid background, with the additional bottles and container to the right, remain in place. [0:05:11 - 0:05:12]: The hands rotate the sphere slightly while applying the golden liquid around its opening. The colorful patterns of the sphere, featuring blue, purple, and gold hues, are visible. The white cloth, spread on the blue grid-patterned surface, and the nearby bottles and container maintain their positions. [0:05:12 - 0:05:13]: The right hand tilts the bottle, applying more golden liquid near the sphere’s opening. The colorful sphere, with",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What are the hands doing right now?",
+                "time_stamp": "0:05:07",
+                "answer": "A",
+                "options": [
+                    "A. Rotating the sphere while applying golden liquid.",
+                    "B. Placing the sphere on a white cloth.",
+                    "C. Cleaning the sphere with a cloth.",
+                    "D. Removing the golden liquid bottle."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_48_real.mp4"
+    },
+    {
+        "time": "0:06:40 - 0:07:00",
+        "captions": "[0:06:40 - 0:07:00] [0:06:40 - 0:06:50]: A pair of gloved hands is seen holding a circular ornament in the left hand and a bottle of metallic-colored paint in the right hand. The ornament, predominantly pink and purple with a glossy finish, has two white spots near its surface. The background is a blue, grid-patterned work mat with several bottles of colored paints arranged neatly to the right side of the frame. A small transparent plastic cup is positioned between the hands, just below the ornament. The metallic-colored paint bottle is tilted towards the ornament, and some paint is applied on its surface.  [0:06:51 - 0:06:59]: The ornament is set down on the work mat, its colorful surface now adorned with additional paint. The pair of hands then picks up a bottle containing blue-colored paint. The bottle is held close to the ornament, and its cap is being unscrewed. The scene includes the same components, such as the work mat, the paint bottles, and the small plastic cup remaining in their positions on the right side of the frame.  [0:06:53 - 0:06:56]: The gloved hands begin to apply the blue paint to the ornament, introducing new streaks and patches of color. The ornament is rotated to ensure even coverage. The background layout remains the same, with the ornament taking center stage and the paint bottle being handled with precision. [0:06:57 - 0:06:59]: The paint bottle is set back on the work mat, and the ornament, now displaying a vibrant mixture of pink, purple, and blue hues, is closely examined. The focus is on the painted ornament, while the bottles of paint and the small plastic cup stay positioned to the right of the frame. The created design on the ornament becomes more intricate and defined with each application of paint.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What did the person do just now with the metallic-colored paint bottle?",
+                "time_stamp": "00:06:50",
+                "answer": "A",
+                "options": [
+                    "A. Applied paint to the ornament.",
+                    "B. Shook the bottle vigorously.",
+                    "C. Poured paint into a plastic cup.",
+                    "D. Closed the bottle's cap."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "handcraft",
+        "video_path": "./videos/sample_48_real.mp4"
+    }
+]

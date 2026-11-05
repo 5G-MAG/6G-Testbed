@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:01]: A person is standing in a kitchen by a large countertop. They are stirring food in a black frying pan with a red spatula. Various ingredients and utensils are spread out on the counter, including a lemon and some herbs. The background includes a refrigerator and cabinets. [0:02:01 - 0:02:02]: The person continues to stir the contents of the frying pan, which appears to contain sliced onions. They are holding the pan with their left hand and the spatula with their right hand. [0:02:02 - 0:02:03]: A close-up view of the frying pan shows the sliced onions being stirred and sautéed. The person is using the spatula to mix the onions while holding the pan over the stove. [0:02:03 - 0:02:04]: The person continues stirring the onions in the frying pan. The camera remains focused on the pan and their hands, showing a controlled and steady stirring motion. [0:02:04 - 0:02:05]: The person gestures with their left hand while holding the red spatula upright in their right hand. They seem to be explaining something while maintaining eye contact, with the frying pan still on the stove. [0:02:05 - 0:02:06]: The person continues using the spatula in the frying pan with their right hand, looking down at the pan. The countertop and objects on it remain visible. [0:02:06 - 0:02:07]: The person continues stirring the contents in the frying pan. The background, including the cabinets and window, remains unchanged. [0:02:07 - 0:02:08]: The person steps away from the stove, moving towards the counter. They reach for something on the counter while the pan remains on the stove. [0:02:08 - 0:02:09]: The person picks up a utensil from the counter, holding it with their left hand. The frying pan remains on the stove while they prepare to use the utensil. [0:02:09 - 0:02:10]: A close-up of the person sharpening a knife. They hold the sharpening tool with their left hand and the knife with their right hand, moving it steadily across the tool. [0:02:10 - 0:02:11]: The person holds the sharpened knife up, displaying it. They appear to be explaining something, with their attention focused ahead. [0:02:11 - 0:02:12]: The person begins to gesture with their left hand while still holding the knife. The green cup and the bottle of oil on the counter remain in their positions. [0:02:12 - 0:02:13]: The person continues to gesture with their left hand, appearing to explain further. The countertop with the various ingredients and utensils is visible behind them. [0:02:13 - 0:02:14]: The person reaches towards the counter with their left hand, appearing to pick up one of the ingredients. The pan is still on the stove. [0:02:14 - 0:02:15]: The person picks up an ingredient from a small bowl on the counter. They continue to explain something while holding the ingredient. [0:02:15 - 0:02:16]: The person moves back towards the stove with the ingredient in their left hand. They are preparing to add it to the frying pan. [0:02:16 - 0:02:17]: The person adds the ingredient to the frying pan with a precise motion. The green cup and bottle of oil are still visible on the counter. [0:02:17 - 0:02:18]: The person continues to focus on the frying pan, stirring the contents with the red spatula. [0:02:18 - 0:02:19]: The person continues stirring the frying pan’s contents with the added ingredient, ensuring it mixes well. Their attention is fully on the frying pan.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person using to stir the contents in the frying pan?",
+                "time_stamp": "00:02:01",
+                "answer": "C",
+                "options": [
+                    "A. A wooden spoon.",
+                    "B. A metal spatula.",
+                    "C. A red spatula.",
+                    "D. A plastic spoon."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_27_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:02]: A man stands in a modern, brightly lit kitchen in front of a stainless steel refrigerator and white subway-tiled wall. He places a bottle of white wine on the marble countertop, next to a variety of ingredients, including a lemon, fresh herbs, and a plate of prawns. [0:04:02 - 0:04:04]: The man picks up the bottle of white wine and begins pouring it into a frying pan on the stove. The pan contains a mixture of ingredients, including cherry tomatoes and herbs, which begin to sizzle as the wine is added. [0:04:04 - 0:04:06]: He continues to pour wine into the frying pan while stirring the contents with a red spatula. The contents in the pan are a vibrant mix of colors, primarily red and yellow from the cherry tomatoes. [0:04:06 - 0:04:08]: The camera zooms in to show a close-up of the pan. As the wine is added, steam rises, and the tomatoes and other ingredients continue to cook, releasing more aroma. [0:04:08 - 0:04:10]: The man briefly stops pouring wine and places the bottle back on the countertop. He then stirs the ingredients in the pan with a red spatula, ensuring even cooking and mixing. [0:04:10 - 0:04:12]: He continues to stir the contents of the frying pan, which now have a rich, simmering texture. Steam continues to rise from the pan, indicating the heat and ongoing cooking process. [0:04:12 - 0:04:13]: The camera shows a closer view of the frying pan, focusing on the tomatoes and other ingredients as they simmer and combine with the wine, creating a bubbling effect. [0:04:13 - 0:04:15]: The man stirs the mixture with the red spatula, ensuring that all ingredients are well-combined and cooked evenly. The sizzling sound intensifies, and more steam rises as the mixture cooks down. [0:04:15 - 0:04:17]: The man continues stirring and then briefly gestures with his free hand. He speaks, possibly explaining what he’s doing or offering cooking tips. The background remains consistent, with a well-organized kitchen and natural light streaming in from a window. [0:04:17 - 0:04:19]: The man then moves away from the stove, briefly placing the spatula down. He reaches out to grab another ingredient from the countertop, preparing to add it to the frying pan. The assortment of kitchen tools and ingredients spread out on the counter reflects a well-prepared cooking setup.",
+        "questions": [
+            {
+                "task_type": "Prospective Reasoning",
+                "question": "What is the man likely to do next after reaching out to grab another ingredient from the countertop?",
+                "time_stamp": "0:04:19",
+                "answer": "B",
+                "options": [
+                    "A. Serve the dish immediately.",
+                    "B. Add the new ingredient to the frying pan.",
+                    "C. Clean the countertop.",
+                    "D. Turn off the stove."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_27_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:01]: The video opens with a kitchen scene where a man in a navy blue shirt is preparing ingredients on a wooden cutting board placed on a marble countertop. Several items, including lemons, mushrooms, a green ceramic container, and a bowl, are placed on the counter. Stainless steel appliances and white tiled walls are visible in the background. The man is focused on chopping or arranging something on the board. [0:06:01 - 0:06:02]: The man reaches towards the bowl on his left and starts to move it closer to him, positioning it better for the next step of his preparation. His attention seems to be fully on the bowl and its contents. [0:06:02 - 0:06:03]: He uses both hands to handle the bowl, ensuring it is steady. Meanwhile, the countertop with the various ingredients and utensils remains organized, aiding in a smooth cooking process. [0:06:03 - 0:06:04]: Concentration remains high as he adjusts the position of the bowl. The lemons and other ingredients on the counter stay intact but await their purpose in the recipe. Natural light from the window nearby illuminates the scene, indicating it's daytime. [0:06:04 - 0:06:05]: After adjusting the bowl, the man resumes his focus on the cutting board, this time seemingly ready to incorporate the contents of the bowl into his preparation. The hand movements are deliberate and precise. [0:06:05 - 0:06:06]: His attention shifts as he places a piece from the bowl onto the cutting board, maintaining the cleanliness and order of his workspace. The bright natural light from outside continues to light up the kitchen. [0:06:06 - 0:06:07]: With the bowl properly positioned, the man retrieves another ingredient or utensil from the side, perhaps preparing to add it to what he was handling previously. His movements are calm and measured, highlighting his experience. [0:06:07 - 0:06:08]: Next, he begins seasoning the food item on the board with a pepper mill, suggesting that the preparation is nearing the cooking stage. The countertop remains organized, with ingredients lying in wait for further use. [0:06:08 - 0:06:09]: A close-up view zooms in on the shrimp on the cutting board as it starts getting seasoned with black pepper. The detail of the pepper falling onto the shrimp is clearly visible, indicating careful seasoning. [0:06:09 - 0:06:10]: The hand holding the pepper mill is shown up close while peppering the shrimp, emphasizing the action and detail involved in ensuring even seasoning across all pieces. [0:06:10 - 0:06:11]: Back to the wider kitchen view, the man places the pepper mill back on the counter and reaches for another ingredient, perhaps salt, as he continues the seasoning process. [0:06:11 - 0:06:12]: He picks up a container of salt and starts sprinkling it onto the shrimp, ensuring they are properly seasoned. His meticulous attention to detail is evident. [0:06:12 - 0:06:13]: The camera focuses closely again on the shrimp being seasoned with salt. The granules are visible as they land on the seafood, adding to the flavoring process. [0:06:13 - 0:06:14]: A pile of seasoned shrimp on the cutting board is shown up close, with the mix of black pepper and salt visible on them. The man's fingers slightly adjust the shrimp to ensure even coverage of spices. [0:06:14 - 0:06:15]: The man continues to handle the shrimp, giving them one last adjustment to ensure they are evenly coated with the pepper and salt. Each movement is purposeful and controlled. [0:06:15 - 0:06:16]: The man adjusts the shrimp one last time to make sure the seasoning is spread well, readying the seafood for cooking.  [0:06:16 - 0:06:17]: Another close-up shows the shrimp resting on the cutting board with seasoning all around, ready for the next step in preparation. The man's fingers are visible, indicating his preparedness for subsequent actions. [0:06:17 - 0:06:18]: Returning to the broader kitchen view, the man might be discussing or considering the next steps in the recipe. His hands rest on the cutting board near the shrimp, indicating a brief pause before continuing. [0:06:18 - 0:06:19]: The man resumes a more involved stance, appearing to talk or explain while pointing towards something near the shrimp. The kitchen remains orderly, with ingredients and utensils ready for further use.",
+        "questions": [
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the main activity the man is engaged in right now?",
+                "time_stamp": "00:06:24",
+                "answer": "A",
+                "options": [
+                    "A. Cooking shrimp.",
+                    "B. Preparing a salad.",
+                    "C. Washing vegetables.",
+                    "D. Baking bread."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_27_real.mp4"
+    },
+    {
+        "time": "[0:08:00 - 0:09:00]",
+        "captions": "[0:08:00 - 0:08:20] [0:08:00 - 0:08:01]: In a bright kitchen with white tiled walls and cabinets, there is a large stainless steel refrigerator on the left side. A chef in a navy blue shirt stands behind a marble kitchen island. Various cooking utensils and ingredients are placed on the countertop and stoves. He gestures with his hands above a pot on the stove, which has steam rising from it. Two pans and a bottle of olive oil are also on the stove.  [0:08:01 - 0:08:02]: The chef bends slightly toward the pot, stirring it with a spoon. His left hand rests on the counter. The stainless steel refrigerator and kitchen counters are visible in the background. [0:08:02 - 0:08:03]: The chef's right hand continues stirring the pot while his left hand is now raised, possibly gesturing for emphasis. The countertops surround the cooking area with another stove containing a metal bowl and bottle of olive oil. [0:08:03 - 0:08:04]: The chef leans forward, focusing on the pot he is stirring. The kitchen behind him remains orderly, featuring various kitchen tools. He reaches over the pot positioned on the stove. [0:08:04 - 0:08:05]: With his right hand, the chef raises a utensil from the pot, inspecting its contents. His left hand is now positioned on the countertop for support. [0:08:05 - 0:08:06]: The chef looks toward the small pan on his left, and his hand reaches toward it. Olive oil bottles and metal bowls are still on the counter. [0:08:06 - 0:08:07]: The chef picks up the small pan and carefully flips the food inside. Behind him, natural light streams in from the window, illuminating the space. [0:08:07 - 0:08:08]: He continues to flip the food in the pan, ensuring even cooking. The kitchen's neat and organized setup with essential utensils and ingredients is visible around. [0:08:08 - 0:08:09]: The chef places the flipped food back onto the burner, adjusting its position on the stovetop. The kitchen background remains consistent, with the window and cabinets well designed. [0:08:09 - 0:08:10]: The chef's focus remains on the small pan as he continuously flips the food inside, ensuring it's perfectly cooked. The pot, utensils, and other cooking items are orderly on the countertop. [0:08:10 - 0:08:11]: As he flips the food inside the pan, the chef checks its cooking progress. His movements are precise and controlled, indicative of his professional expertise. [0:08:11 - 0:08:12]: A close-up shot of a different pan reveals shrimp and vegetables sizzling inside, releasing steam upward. [0:08:12 - 0:08:13]: The close-up continues, showing the sizzling shrimp and vegetables, with bits of green and red indicating spices and herbs. [0:08:14 - 0:08:15]: The chef steps back, holding a white cloth, gesturing toward the cooking food. The kitchen's clean and organized setup with essential implements remains visible. [0:08:15 - 0:08:16]: The chef picks up the pan, the white cloth in his left hand, focused on maintaining the food's presentation. Kitchen elements like the refrigerator and cabinets remain in the frame. [0:08:16 - 0:08:17]: He adjusts the position of the pan with the white cloth, ensuring that the food cooks evenly, maintaining the neat setting of the kitchen. [0:08:17 - 0:08:18]: Another close-up shot of the sizzling shrimp and vegetables in the pan on the stovetop, continuing to cook. [0:08:18 - 0:08:19]: The continuing close-up shows the same pan angle, highlighting the intense cooking action and rich colors of the shrimp and vegetables. [0:08:19 - 0:08:20]: The chef leans over a pot on the stove, using a pair of tongs to handle the food inside, with the kitchen in the background.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the chef stirring in the pot?",
+                "time_stamp": "0:08:02",
+                "answer": "C",
+                "options": [
+                    "A. A sauce.",
+                    "B. Vegetables.",
+                    "C. noodles.",
+                    "D. Shrimp."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is used by the chef to handle the food inside the pot?",
+                "time_stamp": "0:08:25",
+                "answer": "C",
+                "options": [
+                    "A. A spoon.",
+                    "B. A spatula.",
+                    "C. A pair of tongs.",
+                    "D. A fork."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_27_real.mp4"
+    }
+]

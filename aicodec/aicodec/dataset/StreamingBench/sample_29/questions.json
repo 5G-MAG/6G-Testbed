@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:01]: A person in a green t-shirt stands in a kitchen with white brick walls. There are shelves in the background filled with plates, cups, and various kitchen utensils, including knives and cutting boards. [0:00:01 - 0:00:06]: The individual starts speaking, changing facial expressions and gestures. They clasp their hands and use expressive hand movements while talking. Shelves, filled with more kitchen items in organized arrangements, are visible behind them. [0:00:06 - 0:00:11]: The person's hands come together in front of them as they continue their animated speech. Their facial expressions and hand gestures suggest an enthusiastic or instructional tone. The background remains the same. [0:00:11 - 0:00:13]: The individual continues to speak while changing facial expressions and hand gestures. The setting stays consistent with the kitchen in the background. [0:00:14 - 0:00:14]: A graphic screen appears featuring the number \"10\" and a stylized fork and knife, set against a blue background. [0:00:15 - 0:00:17]: The same person, now wearing a different dark-colored t-shirt, appears in front of a blue background with the words \"RAMSAY in 10\" prominently displayed. The individual continues smiling, suggesting a positive and engaging expression. [0:00:18 - 0:00:18]: A transition effect partially obscures the scene showing white and blue shapes, preparing to reveal the next frame. [0:00:19 - 0:00:20]: The individual is now seen in a different setting, still within a kitchen environment but with a darker tone and different shirt. They continue to use hand gestures and speak as before, with neatly organized kitchen items and utensils visible in the background.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What objects can be seen on the shelves in the background of the kitchen?",
+                "time_stamp": "0:00:20",
+                "answer": "B",
+                "options": [
+                    "A. plants.",
+                    "B. Plates, cups, and kitchen utensils.",
+                    "C. Cans and jars.",
+                    "D. Pots and pans."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_29_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:01]: The video shows a kitchen scene, shot from a first-person perspective. A person is preparing a steak. On the countertop, there are various kitchen utensils, including a plate with raw steak and a mortar and pestle. The person takes a white plate from a stack on the counter. [0:02:01 - 0:02:02]: The camera angle changes slightly. The steak is marinated and resting on a wooden cutting board. The person places down the white plate and picks up a bottle of oil with their right hand. [0:02:02 - 0:02:03]: The individual continues to handle the oil bottle, moving it above a bowl placed next to the steak. [0:02:03 - 0:02:04]: The person pours oil from the bottle into the bowl. The steak is seen resting on the cutting board with its marinade. [0:02:04 - 0:02:06]: The top-down shot reveals the person's hand pouring a dark liquid over the steak. On the countertop are eggs in a bowl, a bottle of oil, and other ingredients laid out for cooking. [0:02:06]: The dark liquid is continuously being poured over the steak from the bottle. [0:02:07 - 0:02:08]: The scene shifts focus to the person moving around the kitchen. Behind them, the kitchen wall features white subway tiles and several shelves with bowls, plates, and jars. [0:02:08 - 0:02:09]: The individual picks up another container from the counter. Various kitchen components such as frying pans, knives, and more ingredients are present around them. [0:02:09 - 0:02:10]: Continuing from the previous action, the person opens the container, adding another ingredient to the steak preparation. [0:02:10 - 0:02:11]: The person appears to taste a small amount of seasoning with their hand. The kitchen background remains unchanged, displaying shelves and various kitchen items. [0:02:11]: The person makes a slight reaction, perhaps indicating their impression of the seasoning taste. [0:02:12 - 0:02:13]: The individual continues with the seasoning. The kitchen setup includes organized shelves and visible ingredients on the countertop. [0:02:13]: The camera angle returns to a close-up of the person pouring a purple sauce from a bottle into a bowl. The marinade process continues with various ingredients visible around. [0:02:14 - 0:02:15]: The person adds the purple sauce from a bottle into a small bowl next to the steak. The surrounding countertop area is cluttered with additional ingredients like cherry tomatoes, eggs, and oil. [0:02:15 - 0:02:16]: The focus zooms in on the steak while the person proceeds with the preparation steps, placing the sauce bottle on the counter. [0:02:17]: The person positions themselves to the right of the counter, indicating preparation to move forward with the cooking process. [0:02:18 - 0:02:19]: The camera's aerial view shows the workstation with two frying pans on a stove, a cutting board, and various cooking essentials prepped for the meal.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding in their right hand?",
+                "time_stamp": "0:02:05",
+                "answer": "A",
+                "options": [
+                    "A. A bottle of seasoning.",
+                    "B. A white plate.",
+                    "C. A mortar and pestle.",
+                    "D. A cutting board."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_29_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:03]: Several pans are positioned on a stovetop. A person's hands are seen picking up a small bowl with some ingredients in a kitchen surrounded by utensils, spices, and other cooking items. The person scoops some of the ingredients, which appear to be thinly sliced vegetables, from the bowl using black tongs and begins to place them into one of the heated pans. The stovetop has a mix of metal and nonstick pans arranged in a row. [0:04:04 - 0:04:07]: The person turns slightly, momentarily revealing a neatly arranged kitchen background with a white brick wall, shelves containing various kitchen items, and a prominent red \"COOK\" sign. They move back to the counter holding a white cloth. [0:04:08 - 0:04:10]: The person's hands are again seen as they neatly fold a white kitchen towel. The countertop is cluttered with more kitchen tools, bowls with ingredients, a bottle of olive oil, and a gray-colored root vegetable. [0:04:11 - 0:04:13]: The person uses the folded towel to lift more ingredients, potentially pieces of cooked food from the small bowl and transfers them into one of the pans on the stovetop. The other pans contain a piece of meat and what appears to be sautéed vegetables. [0:04:14 - 0:04:16]: Viewed from above, the three frying pans on the stovetop are clearly visible. One contains a piece of meat, another has some vegetable mixture, and the third is currently empty. The person's hand is seen holding the folded towel while they adjust the contents of the pan. [0:04:17 - 0:04:19]: The camera captures a close-up view of the pans on the stovetop with the person using a spoon to stir and flip the contents in one of the pans. The focus is on the cooking process, and steam rises from the pan, indicating heat.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the prominent \"COOK\" sign in the kitchen background?",
+                "time_stamp": "00:04:07",
+                "answer": "D",
+                "options": [
+                    "A. Blue.",
+                    "B. Green.",
+                    "C. Yellow.",
+                    "D. Red."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the person doing right now?",
+                "time_stamp": "00:04:07",
+                "answer": "B",
+                "options": [
+                    "A. Scooping ingredients from a bowl.",
+                    "B. Folding a white kitchen towel.",
+                    "C. Adjusting the heat on the stovetop.",
+                    "D. Washing their hands."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_29_real.mp4"
+    },
+    {
+        "time": "[0:08:00 - 0:09:00]",
+        "captions": "[0:08:00 - 0:08:20] [0:08:00 - 0:08:04]: A person is seen standing in a well-organized kitchen, which has a backsplash made up of white tiles and a light gray countertop. The person is wearing a dark gray T-shirt and is positioned behind a counter that is filled with various bowls, plates, and ingredients. In the background, there are shelves containing bottles, kitchen utensils, and decorative items such as a red sign that reads \"COOK.\"  [0:08:04 - 0:08:05]: The view changes to an overhead shot revealing three frying pans on the stove. The pan on the left contains a piece of meat that appears to be cooking, the middle pan is filled with rice mixed with green herbs, and the right pan has two sunny-side-up eggs. [0:08:05 - 0:08:08]: The person’s hands are visible from a top view, interacting with the food. Close attention is given to handling the food in the right pan, perhaps seasoning or adding ingredients to the eggs. [0:08:09 - 0:08:10]: The hands continue to work, refining the dishes in the pans. There is precise movement indicating experienced handling of cooking procedures. [0:08:11 - 0:08:12]: The camera perspective shifts back to the person standing behind the cooking station. The person is engaged, animatedly gesturing with their hands while explaining or talking about something presumably related to the cooking process. [0:08:13 - 0:08:14]: The person then moves towards the right side of the counter, appearing to reach for or place an item on the counter. [0:08:15 - 0:08:16]: The view returns to the aerial shot of the stovetop where the person is now moving the food in the pans, specifically tending to the eggs and adding finishing touches. [0:08:17 - 0:08:18]: The person is seen using a spatula to lift and possibly flip or arrange the food carefully, ensuring that everything is cooked properly and presented well. [0:08:19]: The attention to detail in handling the food is evident as the person continues to work on perfecting the dishes, the eggs being the focal point of this sequence.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What tool does the person use to handle the food in the pans?",
+                "time_stamp": "00:08:18",
+                "answer": "C",
+                "options": [
+                    "A. A spoon.",
+                    "B. A fork.",
+                    "C. A spatula.",
+                    "D. Tongs."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_29_real.mp4"
+    }
+]

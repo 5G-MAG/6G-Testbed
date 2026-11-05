@@ -1,0 +1,91 @@
+[
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] [0:01:00 - 0:01:01]: A person, wearing a white sleeveless top, is pouring a clear liquid from a green-bottled container into a silver pot placed on a stove. The person's left hand holds the bottle while the person unscrews the green cap with their right hand. [0:01:02]: The person turns to the left, placing the bottle on a counter that has a green container, a tall brown pepper mill, and a mug, next to which stands another pot with a ladle in it. [0:01:03]: The person, still looking to their left, reaches for the lid of the green container while holding the green bottle with their right hand. [0:01:04]: Facing forward, the person pours a small amount of a white substance from a glass bowl into the silver pot on the stove. [0:01:05 - 0:01:07]: The person remains focused on the task of adding the substance into the pot while holding the bowl by its rim with both hands. In the background, a white-tiled wall, a white cabinet, and a window with a green leafy plant can be seen. [0:01:08]: Close-up of the person's hand stirring the contents of the pot with a spoon. A black pan and another silver pot with a white ladle are placed nearby. [0:01:09]: The person continues stirring the contents of the pot, moving the spoon in a clockwise direction. [0:01:10 - 0:01:11]: The person shakes the spoon slightly, possibly to mix or dissolve the contents better. [0:01:12 - 0:01:13]: The person looks content while stirring the pot, and a smile forms on their face as they continue cooking. The person's surroundings include a pepper mill, green container, and another pot on the stove. [0:01:14 - 0:01:17]: The person stirs the pot with increased vigor, smiling and appearing to enjoy the activity. The background remains consistent, featuring a white-tiled wall, cabinets, and a window with greenery. [0:01:18 - 0:01:19]: The person continues stirring the pot, maintaining an expressive and joyful demeanor. Their focus remains on the pot as they engage in cooking.\n[0:01:20 - 0:01:40] \n[0:01:40 - 0:02:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the woman holding in her right hand right now?",
+                "time_stamp": "00:01:02",
+                "answer": "D",
+                "options": [
+                    "A. A silver pot.",
+                    "B. A green-bottled container.",
+                    "C. A glass bowl.",
+                    "D. A silver spoon."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the woman do after pouring a small amount of a white substance into the pot?",
+                "time_stamp": "00:01:15",
+                "answer": "D",
+                "options": [
+                    "A. Places the bowl on the counter.",
+                    "B. Looks out the window.",
+                    "C. Shakes the spoon.",
+                    "D. Stirs the contents of the pot with a spoon."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_22_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] [0:03:00 - 0:03:03]: A close-up shows hands chopping a piece of raw red meat on a wooden cutting board. The person uses a sharp knife, making precise cuts. There is a ring on the person's left hand, and pale nail polish is noticeable. The meat is being diced into small chunks, with pieces in various stages of being chopped and some already cut lying on the cutting board. [0:03:04 - 0:03:06]: Zooming out, the scene reveals a clean, modern kitchen setting. The person chopping the meat wears a white sleeveless top with a textured surface. On the counter are several kitchen items, including a green cup, a pepper grinder, a bottle of sauce, and a black avocado. A ceramic bowl and plate are also visible near the cutting board. [0:03:07 - 0:03:09]: The focus returns to a close-up of the chopping process. The person continues to dice the meat, and the knife blade is visible making swift, smooth motions. Their fingers are positioned carefully to avoid the blade. [0:03:10 - 0:03:12]: The person reaches for a white bowl and starts to transfer the diced meat into it using their hands. The bowl, now partially filled with diced meat, is placed on the cutting board adjacent to the chopping activity. [0:03:13 - 0:03:14]: The camera shows the white bowl with the diced meat sitting on the wooden cutting board. Nearby are the ceramic plate and knife, indicating a pause in the chopping activity. [0:03:15 - 0:03:17]: The perspective includes the person in the modern kitchen setting, now holding a jar with a spoon. The person scoops a white substance from the jar into the bowl containing the diced meat. The green cup and pepper grinder remain on the counter, and the person's actions suggest they are preparing a dish. [0:03:18 - 0:03:19]: With a close-up focus on the bowl, the person adds the white substance on top of the meat. The person uses a spoon to scoop from the jar, indicating a deliberate and measured addition to the ingredients in the bowl. The nearby plate on the cutting board shows readiness for the next preparation step.\n[0:03:20 - 0:03:40] \n[0:03:40 - 0:04:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the woman's nail polish?",
+                "time_stamp": "0:03:03",
+                "answer": "D",
+                "options": [
+                    "A. Red.",
+                    "B. Pink.",
+                    "C. Blue.",
+                    "D. Pale."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_22_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:04]: A frying pan is placed on a stove with a lid partially covering it. The hand holding the pan is moving it into position. Gradually, the hand begins to firmly secure the lid atop the pan, ensuring it is tightly in place over the bubbling contents within. [0:04:05 - 0:04:07]: The scene shifts to a kitchen where a woman in a white sleeveless dress is engaging in some cooking tasks. She lifts the pan and balances it while holding a white plate, positioning it to transfer the contents from the pan onto the plate. [0:04:08 - 0:04:10]: After successfully transferring the food, the woman partially turns her body, reaching for nearby condiments on the counter. The large stainless steel refrigerator and various kitchen tools on the counter, including a green mug and a pepper grinder, provide the kitchen backdrop. [0:04:11 - 0:04:14]: She proceeds to fetch a spoon and other preparing tools from the counter and adds a portion of an ingredient into a large pot on the stove while stirring it occasionally. She multitasks between the stove and the counter, ensuring everything is blended perfectly. [0:04:15 - 0:04:16]: The woman continues her cooking process as she turns back to the pot on the stove, adding more ingredients and checking the progress of her dish. The background remains consistent with the modern kitchen design, featuring a large window with visible greenery. [0:04:17 - 0:04:19]: She resumes focusing on the pot, using a spatula to stir and mix the contents. Her expression indicates concentration as she ensures everything is evenly cooked. The kitchen environment provides a clean and organized backdrop to her cooking activity.\n[0:04:20 - 0:04:40] \n[0:04:40 - 0:05:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What is one of the items visible on the kitchen counter along with the condiments?",
+                "time_stamp": "0:04:10",
+                "answer": "D",
+                "options": [
+                    "A. A red mug.",
+                    "B. A blue cup.",
+                    "C. A yellow bowl.",
+                    "D. A green mug."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What has this woman just done?",
+                "time_stamp": "0:04:36",
+                "answer": "D",
+                "options": [
+                    "A. She starts cleaning the pan.",
+                    "B. She begins to wash the plate.",
+                    "C. She opens the refrigerator.",
+                    "D. She chop the green onions on the cutting board."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_22_real.mp4"
+    }
+]

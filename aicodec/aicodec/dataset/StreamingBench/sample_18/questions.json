@@ -1,0 +1,107 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:01]: A man wearing a green t-shirt stands in a well-organized kitchen. Behind him, there are white brick walls, wooden shelves with neatly arranged dishes and cups, and a countertop with various items. Several knives are mounted on a magnetic strip on the right side. There are also glass jars containing various ingredients on the shelves. A red “COOK” sign decorates the upper left portion of the wall. [0:00:02]: The man raises his hands in front of him, spreading his fingers and gesturing slightly outward. He appears to be explaining or emphasizing something. [0:00:03]: The man points directly towards the camera with both hands, adding emphasis to the points he is making. His expression is engaged and animated. [0:00:04]: With his right hand touching his head, the man closes his eyes and makes a slightly exaggerated facial expression, as if he is trying to convey a strong point or emotion. [0:00:05]: The man stands with both hands clasped in front of his chest, gazing directly towards the camera with a neutral expression. [0:00:06]: He raises both hands again, fingers extended, continuing to speak passionately, emphasizing his speech with gestures. [0:00:07]: The man presses his palms together in front of him as if he is pleading or making a heartfelt point, maintaining eye contact with the camera. [0:00:08]: The camera angle shifts to a side view, showing the left side of the man's face. He continues speaking, hands still clasped together. There is a blue cabinet behind him. [0:00:09]: The man gestures with his hands again, palms upturned, as he continues to speak. His facial expression conveys enthusiasm. [0:00:10 - 0:00:11]: He holds his hands out with palms facing slightly upwards, continuing his speech. His facial expression is earnest as he engages with the viewer. [0:00:12]: The man’s mouth is open as he speaks forcefully, maintaining the same hand gesture. His head tilts slightly to the right. [0:00:13]: He gazes slightly upwards, appearing to conclude his statement. His hands remain extended outward. [0:00:14]: The camera returns to a front view. The man claps his hands together once as if signaling the conclusion or transitioning to a new point. [0:00:15]: He continues clapping his hands gently as he speaks, looking directly at the camera with an earnest expression. [0:00:16]: The man clasps his hands together again, holding them in front of his chest. He continues to speak with a serious expression. [0:00:17]: His right hand briefly moves away from the clasped position and he gestures outward with it. His expression remains focused. [0:00:18]: The man’s hands return to a clasped position in front of his chest. He looks down briefly, appearing thoughtful as he speaks slowly. [0:00:19]: The man flings his arms wide open, with palms facing the camera, and his expression shifts to a more welcoming demeanor. He stands confidently as he continues to engage the viewer.\n[0:00:20 - 0:00:40] \n[0:00:40 - 0:01:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What sign is decorating the upper left portion of the wall behind the man?",
+                "time_stamp": "00:00:40",
+                "answer": "C",
+                "options": [
+                    "A. A blue \"CHEF\" sign.",
+                    "B. A yellow \"COOK\" sign.",
+                    "C. A red \"COOK\" sign.",
+                    "D. A green \"CHEF\" sign."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_18_real.mp4"
+    },
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:00 - 0:01:20] \n[0:01:20 - 0:01:40] \n[0:01:40 - 0:02:00] [0:01:40 - 0:01:43]: A pair of hands is seen chopping garlic cloves on a wooden cutting board positioned in the center of a kitchen countertop. The left hand holds the garlic in place while the right hand maneuvers a knife to slice the cloves into small, even pieces. To the right, a white skillet is visible on the stove with a mix of melted butter and oil, creating a translucent sheen. Various ingredients such as leafy greens, jars with spices, and bowls are organized around the chopping board and pan. [0:01:44 - 0:01:46]: The hands continue chopping the garlic. The position of the knife and garlic remains consistent but is more clearly isolated on the board. In the background, more of the stovetop and the sizzling pan can be seen. [0:01:47]: The person uses the flat side of the knife to scoop up the chopped garlic from the board. [0:01:48 - 0:01:49]: The garlic is added to the white skillet on the stove, visibly mixing with the butter and oil, which starts to bubble gently. [0:01:50 - 0:01:52]: The remaining garlic on the cutting board is being gathered, and the hand starts making its way back to the skillet to add the rest. [0:01:53 - 0:01:56]: The garlic is stirred into the mixture using a wooden spoon, dispersing it evenly. Gentle, intentional movements suggest careful cooking, ensuring the garlic is not burned but lightly cooked. [0:01:57]: The camera angle shifts to show a man at the stove, wearing a dark T-shirt, reaching over to the left of the stove to grab another ingredient. [0:01:58]: The man sprinkles a pinch of salt into the bubbling mixture in the white skillet below. [0:01:59]: The man looks up and speaks while continuing to stir the contents of the skillet. The background shows a well-organized kitchen with a brick wall, shelves holding plates, jars, and various other kitchen items.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man at the stove wearing?",
+                "time_stamp": "00:01:57",
+                "answer": "C",
+                "options": [
+                    "A. A green T-shirt.",
+                    "B. A striped shirt.",
+                    "C. A dark T-shirt.",
+                    "D. A chef's hat."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_18_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:00 - 0:03:20] \n[0:03:20 - 0:03:40] [0:03:20]: The video opens with a close-up view of a wooden spoon stirring leafy greens in a white pan. The pan sits on a stovetop burner, heating the greens, while to the left, a stainless-steel pot is partially visible.  [0:03:21 - 0:03:23]: Next, the camera captures a broader scene showing the chef in the kitchen. He is stirring the contents of the pan with the wooden spoon. A person holding a camera rig stands to the right, recording the chef's actions. The backdrop features a white brick wall with shelves holding various kitchen items and the word “COOK” in large, red letters. [0:03:23 - 0:03:25]: The chef continues cooking, briefly looking towards the camera operator. Behind the chef, a variety of items are placed on the shelves, including plates, jars, and colorful bottles, giving a vibrant feel to the kitchen.  [0:03:25 - 0:03:26]: The chef momentarily looks down at his workspace and then reaches to his right to grab an item off-camera, while the pan is now settled on the stovetop. [0:03:26 - 0:03:27]: Now, the chef grabs a lid, preparing to cover the pot next to the pan on the stovetop.  [0:03:27 - 0:03:28]: The view transitions to an overhead shot of the workspace. The pan with leafy greens is on the left, and the stainless-steel pot, filled with a yellowish liquid, is on the right. Several seasonings are nearby. [0:03:28 - 0:03:31]: The overhead shot continues as the chef uses a ladle to pour liquid from the pot into the pan with leafy greens. The mixture appears to be heating up, with steam rising. [0:03:32 - 0:03:33]: The camera returns to a close-up side view of the chef as he lifts the lid and continues transferring the hot liquid into the pan, with steam continually rising. [0:03:34 - 0:03:35]: The chef's face is captured closer as he focuses on transferring the liquid. Steam and moisture from the hot concoctions are visible. [0:03:35 - 0:03:37]: The chef continues to pour with precision. As more steam rises, he exchanges a few words, appearing to be in a discussion with an off-screen individual. [0:03:37 - 0:03:39]: The chef moves back towards the counter space to adjust items on the counter. His expressions hint at concentration and urgency as he continues his culinary tasks.\n[0:03:40 - 0:04:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the chef holding while stirring the leafy greens in the pan?",
+                "time_stamp": "00:03:20",
+                "answer": "C",
+                "options": [
+                    "A. A metal spoon.",
+                    "B. A plastic spatula.",
+                    "C. A wooden spoon.",
+                    "D. A whisk."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_18_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] \n[0:06:20 - 0:06:40] \n[0:06:40 - 0:07:00] [0:06:40 - 0:06:41]: A man with short, light brown hair is seen in a kitchen setting, wearing a dark gray shirt. He is holding a small object in his hands, looking down at it while speaking. Behind him, there is a white tiled wall with a wooden shelf holding jars and plates. [0:06:41 - 0:06:43]: The man continues speaking and gesturing with his right hand. The background remains consistent, with a blue cupboard and a black oven visible on the left. [0:06:43 - 0:06:45]: He turns slightly to his right, reaching for something on the countertop. A large stainless steel pot with steam rising is situated on the stove in front of him, adjacent to a white bowl filled with green vegetables. [0:06:45 - 0:06:46]: The man uses tongs to lift yellow pasta from the pot, steam still rising. The setting remains the same, with the blue cupboard and white tiles prominent in the background. [0:06:46 - 0:06:47]: He transfers the pasta from the pot into the white bowl of vegetables on the stove. The stovetop arrangement with the pots and bowls remains unchanged. [0:06:47 - 0:06:48]: Turning slightly to his left, he continues adding pasta to the bowl of vegetables, still using the tongs. The background features remain constant, the shelf behind him displaying various jars and crockery. [0:06:48 - 0:06:50]: The man is seen gesticulating with his left hand while speaking, facing slightly towards the camera. The blue cupboard, oven, and other kitchen elements are clearly visible. [0:06:50 - 0:06:52]: He uses a slotted spoon to stir the contents of the pot on the stove, maintaining his focus on the cooking process. [0:06:52 - 0:06:54]: More pasta is being scooped with the slotted spoon and added into the bowl of vegetables. The countertop still displays various kitchen items, including a wooden cutting board to the left. [0:06:54 - 0:06:55]: He transitions from using the tongs to the slotted spoon, swirling the pasta in the pot. The same kitchen setup is depicted behind him. [0:06:55 - 0:06:56]: The man stirs the pasta and greens mixture in the bowl once more. Items on the countertop remain in their respective positions, including jars of spices and other condiments. [0:06:56 - 0:06:57]: He packages the cooked mixture, still narrating or explaining the process, looking into the pot as he works. The kitchen's clean and arranged setup stays evident in the background. [0:06:57 - 0:06:59]: The man, slightly angled to his right, appears focused on seasoning or adjusting the food, continuing his explanation. The backdrop continues to show the well-organized kitchen elements like cutting boards, crockery, and kitchen tools hanging on the wall.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the man doing right now?",
+                "time_stamp": "00:06:46",
+                "answer": "B",
+                "options": [
+                    "A. He chops vegetables.",
+                    "B. He uses spoon to lift yellow pasta from the pot.",
+                    "C. He pours sauce into the pot.",
+                    "D. He sets the table."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_18_real.mp4"
+    },
+    {
+        "time": "[0:09:00 - 0:09:40]",
+        "captions": "[0:09:00 - 0:09:20] \n[0:09:20 - 0:09:40] ",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "How much time does this person have left now??",
+                "time_stamp": "0:09:05",
+                "answer": "B",
+                "options": [
+                    "A. 01:53.",
+                    "B. 01:52.",
+                    "C. 01:51.",
+                    "D. 01:54."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_18_real.mp4"
+    }
+]

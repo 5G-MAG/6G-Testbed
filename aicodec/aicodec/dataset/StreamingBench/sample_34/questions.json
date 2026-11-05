@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:20 - 0:02:40] [0:02:20 - 0:02:31]: A person wearing a blue shirt stands at a kitchen counter made of wood, mixing ingredients in a transparent bowl using a wooden spoon. The kitchen wall is tiled with white bricks, and there are two shelves above the counter. The top shelf contains various decorative items, including a large red \"COOK\" sign, glass jars, and other kitchenware. On the lower shelf, there are more kitchen utensils and containers. A stainless steel pot is placed on a stove to the left of the person, and a wooden cutting board lies on the counter directly in front of them. Nearby, there are several small containers, one of which is blue. The person concentrates on mixing the ingredients while tilting the bowl slightly.  [0:02:32 - 0:02:37]: The camera angle shifts to show the entire counter from a distance, capturing a wider view of the kitchen. The person continues mixing in the glass bowl. The stove with the stainless steel pot is seen on the left side of the counter. A white bowl and a small container with some creamy substance are also visible on the counter. A voice, likely the producer’s, informs the person, \"you have 8 minutes 30 seconds.\" [0:02:38 - 0:02:39]: The camera transitions to an overhead shot, depicting the person continuing to mix the ingredients in the transparent bowl using a wooden spoon. The glass bowl is placed on the wooden cutting board, surrounded by other ingredient containers, including a small dish with butter and a bowl with a powdery substance. The camera captures the person's hands and the motion of mixing, emphasizing the ingredients inside the bowl. The stove with a griddle pan is clearly seen on the countertop beside the cutting board.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the shirt worn by the person mixing ingredients at the kitchen counter?",
+                "time_stamp": "0:02:31",
+                "answer": "B",
+                "options": [
+                    "A. Red.",
+                    "B. Blue.",
+                    "C. Green.",
+                    "D. Yellow."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "How much time does the person have left to complete their task according to the producer?",
+                "time_stamp": "0:02:50",
+                "answer": "C",
+                "options": [
+                    "A. 5 minutes 30 seconds.",
+                    "B. 7 minutes 30 seconds.",
+                    "C. 8 minutes 30 seconds.",
+                    "D. 9 minutes 30 seconds."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_34_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:40 - 0:05:00] [0:04:40 - 0:04:42]: A person in a blue shirt is in a kitchen with white brick walls and wooden shelves lined with dishes and utensils. The person is vigorously mixing a brown mixture in a glass bowl with a whisk. A measuring jug and a saucepan are placed on a countertop. [0:04:43 - 0:04:46]: The perspective shifts to a top-down view of the bowl with the brown mixture being whisked. Butter and brown sugar in small bowls are placed on the wooden cutting board, as well as a wooden spoon and a small frying pan. [0:04:47 - 0:04:50]: The scene changes back to the original angle, showing the person still whisking the mixture. The kitchen's background includes a large red sign that spells \"COOK\", a microwave, and various kitchen utensils on shelves. [0:04:48 - 0:04:51]: The person moves quickly towards the microwave, holding a small bowl, and begins to interact with the microwave. [0:04:52 - 0:04:54]: After adjusting the microwave, the person returns to the kitchen counter and starts to mix the contents of the small bowl with a spoon. [0:04:55 - 0:04:59]: The view switches back to the top-down perspective as the person continues spooning ingredients from the small bowl into the larger glass bowl, blending the mixture evenly. Butter and seasoning remain in their respective bowls on the cutting board.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person vigorously mixing in a glass bowl?",
+                "time_stamp": "0:04:42",
+                "answer": "B",
+                "options": [
+                    "A. A white creamy mixture.",
+                    "B. A brown mixture.",
+                    "C. A yellow batter.",
+                    "D. A green sauce."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_34_real.mp4"
+    },
+    {
+        "time": "[0:07:00 - 0:08:00]",
+        "captions": "[0:07:00 - 0:07:20] [0:07:00 - 0:07:02]: A person in a blue shirt stands in a bright kitchen with white brick walls and blue cabinets. They reach down with both hands, seemingly to pick up or adjust objects on the wooden countertop. [0:07:02 - 0:07:03]: The person begins to stir or mix a thick batter-like substance in a large clear mixing bowl using a wooden spoon. The bowl is held in their left hand, while their right hand stirs the mixture. [0:07:03 - 0:07:04]: The person continues to mix the substance, now holding the bowl at a higher level and closer to their torso. The wooden spoon is deeply immersed in the thick mixture. [0:07:04 - 0:07:08]: The person tilts the clear mixing bowl to the side, pouring the thick, brown batter into a small white bowl on the wooden countertop. They scrape the sides of the mixing bowl with the spoon to ensure all the contents are transferred. [0:07:09 - 0:07:12]: An overhead view shows the person using a red spatula to transfer more of the thick mixture into the white bowl. Various ingredients, including butter, chocolate powder, and what appears to be sugar, are arranged on the counter next to a stove with a frying pan. [0:07:13 - 0:07:14]: The overhead view shows the emptied mixing bowl placed to the side, and the thick mixture now settling in the white bowl in the center of the wooden countertop. The surrounding kitchen equipment remains in place. [0:07:15 - 0:07:17]: The person uses a white cloth to clean the edge of the white bowl containing the mixture. Their movements are careful and deliberate. Some of the ingredients and kitchen utensils are still visible on the wooden countertop. [0:07:18 - 0:07:19]: The person places the cleaned white bowl back onto the wooden countertop. The camera focuses closely on the bowl, showing the thick mixture inside and the smooth surface on top. The person's hands are adjusting the bowl's final position.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What does the person use to mix the batter-like substance?",
+                "time_stamp": "0:07:03",
+                "answer": "B",
+                "options": [
+                    "A. A metal whisk.",
+                    "B. A wooden spoon.",
+                    "C. A red spatula.",
+                    "D. A plastic fork."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_34_real.mp4"
+    },
+    {
+        "time": "[0:09:00 - 0:10:00]",
+        "captions": "[0:09:20 - 0:09:40] [0:09:20 - 0:09:22]: At the beginning of the video, a middle-aged man is seen in the kitchen wearing a blue t-shirt. He is walking toward a black microwave positioned on the left side of the kitchen counter. The kitchen has a white brick wall with shelves that hold glasses, plates, and various colorful bottles. Kitchen utensils and a wooden cutting board are placed on the counter along with a pot on the stove. [0:09:22 - 0:09:25]: The man continues his task by opening the microwave door with his left hand. He then places a small white bowl inside the microwave. On the counter, there are small kitchen tools and a stainless steel pot on the stove, which appears to be turned on. [0:09:25 - 0:09:27]: The man closes the microwave door and presses the buttons to set the time or temperature for cooking or heating. He focuses intently on the task, ensuring everything is set correctly. [0:09:27 - 0:09:30]: The scene transitions to the man stepping away from the microwave toward the stove. He is seen holding a white cloth in his right hand, wiping some utensils or the countertop as he moves. [0:09:30 - 0:09:32]: The man starts stirring the contents of the small stainless steel pot on the stove. He uses a wooden spoon to mix the ingredients in the pot. Various cooking utensils are placed on the countertop adjacent to him. [0:09:32]: The camera provides a top-down view of the stove and pot, where the man continues to stir the contents. The mixture inside the pot appears to be brownish as he carefully mixes it. [0:09:33 - 0:09:36]: The man uses his right hand to pour a liquid from a small dark container into the pot, continuing to stir the mixture with the wooden spoon. [0:09:36 - 0:09:38]: The camera angle changes back to a side view of the man, who is still carefully pouring the liquid into the pot while simultaneously stirring it. He makes sure no ingredients spill outside the pot while maintaining a steady hand to control the flow of the liquid.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What does the man place inside the microwave?",
+                "time_stamp": "0:09:25",
+                "answer": "A",
+                "options": [
+                    "A. A small white bowl.",
+                    "B. A silver pot.",
+                    "C. A glass jar.",
+                    "D. A blue plate."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_34_real.mp4"
+    }
+]

@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:03]: The video begins with an image of a white plate, fork, and knife arranged on a light blue surface. The knife and fork are positioned to mimic the hands of a clock, set to ten o'clock. On the left of the plate, there is a vertical rectangular shape, also white. The scene transitions to a man wearing a white short-sleeved coat standing in front of a blue background with the text “RAMSAY in 10” in large bold letters. The man has his arms crossed and is looking directly at the camera. [0:00:04 - 0:00:07]: The scene changes to a modern kitchen featuring white and dark cabinets, a light-colored countertop, and hanging glass-front cabinets with various dishes and glasses. A large black clock with white numerals is on the left wall. A man in a dark t-shirt and light-colored pants walks into the scene from the left, with people visible in the background through a doorway leading to another room.  [0:00:08 - 0:00:14]: The man moves towards a kitchen island with several stovetop burners and begins to speak animatedly. He faces the camera directly, later switching to a vertical video format while continuing his presentation. The text \"Previously Recorded Live\" appears at the top right. Several pots and a pan are on the burners, and a metal spoon and other cooking utensils lie on the countertop. The background shows more kitchen equipment and ingredients neatly arranged on the counter. [0:00:15 - 0:00:19]: As the video progresses, the man leans on the counter and gazes towards the camera, continuously engaging in his dialogue. The \"RAMSAY in 10 LIVE\" logo appears on the screen in the bottom left corner. The kitchen remains the central focus, with the man's actions centered around the kitchen island and the cookware displayed.\n[0:00:20 - 0:00:40] \n[0:00:40 - 0:01:00] ",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the coat worn by the man standing in front of the blue background with the text “RAMSAY in 10”?",
+                "time_stamp": "00:00:03",
+                "answer": "D",
+                "options": [
+                    "A. Black.",
+                    "B. Dark blue.",
+                    "C. Light grey.",
+                    "D. White."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_25_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] \n[0:02:20 - 0:02:40] \n[0:02:40 - 0:03:00] [0:02:40 - 0:02:42]: The recording starts in a bright kitchen. A person, wearing a dark navy blue shirt and dark pants, stands at a kitchen island. They are standing to the left of the stovetop, extending their right arm to hold the handle of a pot with a lid. The kitchen has white walls, and a well-lit window with a view of greenery is seen in the background. Several bottles and containers are arranged on the counter. [0:02:43 - 0:02:44]: The scene changes to a vertical frame showing the same person, now closer to the camera. They are holding the handle of a frying pan with their left hand and slightly lifting it from the stovetop. Behind them are white cabinets with glass doors displaying cups and bowls. [0:02:45 - 0:02:46]: The camera focuses on the person who lifts the frying pan to show it to the camera. The stovetop is visible with a pot on one burner and an empty burner next to it. The background continues to display the kitchen cabinets and countertops. [0:02:47 - 0:02:51]: The person places the frying pan back on the stovetop, reaches down to grab a utensil, and straightens up again. The camera captures the pots and pans on the stove, and the counter space behind them, which has a microwave, a fruit bowl, and a few kitchen utensils in holders. [0:02:52 - 0:02:55]: The person moves to the right side of the kitchen island, leaning over a wooden cutting board that holds various ingredients including a bowl of green peas, raw meat, and other chopped vegetables. Their right hand hovers above the ingredients as they appear to explain or demonstrate something to the camera. [0:02:56 - 0:02:58]: Close-up shots show more details of the ingredients on the cutting board. Explicitly, there are two bowls with green peas, a plate with what looks like raw meat slices, and a small bowl with an orange liquid, possibly beaten eggs. The person continues to move their hands and gestures as they talk. [0:02:59]: The recording ends with the person still standing by the cutting board, looking towards the camera while explaining or emphasizing a point, using hand gestures to indicate their message. The background maintains a consistent appearance with kitchen items and appliances in view.",
+        "questions": [
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color shirt is the person wearing right now?",
+                "time_stamp": "0:02:10",
+                "answer": "D",
+                "options": [
+                    "A. Light blue.",
+                    "B. White.",
+                    "C. Green.",
+                    "D. Dark navy blue."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person holding with his left hand right now?",
+                "time_stamp": "0:02:44",
+                "answer": "D",
+                "options": [
+                    "A. A pot lid.",
+                    "B. A wooden spoon.",
+                    "C. A bowl of peas.",
+                    "D. A frying pan handle."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_25_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:00 - 0:05:20] \n[0:05:20 - 0:05:40] [0:05:21 - 0:05:22]: A stovetop is visible with two black pans on an active gas burners. The left pan has water boiling over a high flame, with pasta being cooked inside, while the right pan contains some oil. The stovetop is set in a well-lit kitchen with dark cabinetry and a marble countertop. A person’s torso and arms in a blue shirt stand near the stove, preparing food;  [0:05:23 - 0:05:27]: The focus shifts to a man adding diced meat to the pan with oil, using his hands to drop the pieces in. The meat begins to sizzle as it contacts the heated oil. The man is working carefully, ensuring all the pieces are separated as they are added to the pan;  [0:05:28 - 0:05:31]: The man continues to brown the diced meat in the pan. His motions are deliberate, ensuring an even spread of the meat pieces for consistent cooking. The contents of the pan gradually become more prominent as the boiling pot of pasta is in the background;  [0:05:32 - 0:05:35]: The scene changes, revealing more of the kitchen. A wooden cutting board with some herbs in a bowl is visible on the marble counter. In the background, there is a dining area with a window letting in natural light. The man places the cutting board aside and picks up a white towel to wipe his hands;  [0:05:36]: The man, still holding the towel, appears to be checking or reaching for something on the stovetop near the boiling pot. The kitchen remains well-organized, with various kitchen items neatly arranged;  [0:05:37 - 0:05:38]: The man’s attention returns to the meat in the pan, stirring it with a wooden spoon to ensure even cooking. The sizzling sound of the browning meat and bubbling of the boiling water create a bustling atmosphere indicative of active cooking in progress.\n[0:05:40 - 0:06:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man adding to the pan with oil?",
+                "time_stamp": "0:05:29",
+                "answer": "D",
+                "options": [
+                    "A. Diced vegetables.",
+                    "B. Pasta.",
+                    "C. Herbs.",
+                    "D. Diced meat."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_25_real.mp4"
+    },
+    {
+        "time": "[0:08:00 - 0:09:00]",
+        "captions": "[0:08:00 - 0:08:20] [0:08:00 - 0:08:04]: The video starts with a close-up shot of a person cooking, showing a stovetop with two pans. One pan, placed on the left burner, contains boiling liquid with steam rising. To its right, a frying pan is filled with ingredients being cooked—chunks of ham, mushroom slices, and bits of tomato. The person has a checked kitchen towel draped over their right shoulder and is stirring the contents of the frying pan with a spatula. The camera angle initially provides a perspective from above the pans, and then it zooms in to focus more on the food cooking in the frying pan. [0:08:05]: The scene transitions, and now the video shows the cook at a countertop, preparing additional ingredients. The wooden cutting board has a bowl placed atop it, and other ingredients like green herbs and additional uncooked meat slices are arranged nearby. The cook, with the kitchen towel still resting over their shoulder, is using a cheese grater to grate cheese into the bowl directly. [0:08:06 - 0:08:19]: The cook grates cheese continuously over the bowl, and the scene maintains an over-the-shoulder view, showing the process in detail. The grated cheese flakes fall into the bowl, which already contains egg yolks that are slightly visible at the bottom. The camera angle shifts slightly to focus on the exact motions of the cook's hands, demonstrating the grating technique. The setup remains consistent, highlighting the meticulous cooking process. Occasionally, the scene shifts to show the cook’s facial expressions and upper body, further emphasizing the attention to detail in the preparation of the dish.\n[0:08:20 - 0:08:40] \n[0:08:40 - 0:09:00] ",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What ingredients are being cooked in the frying pan?",
+                "time_stamp": "0:08:04",
+                "answer": "D",
+                "options": [
+                    "A. Chunks of beef, onion slices, and bits of pepper.",
+                    "B. Slices of chicken, garlic cloves, and bits of zucchini.",
+                    "C. Pieces of fish, broccoli florets, and bits of carrot.",
+                    "D. Chunks of ham, mushroom slices, and bits of pepper."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_25_real.mp4"
+    }
+]

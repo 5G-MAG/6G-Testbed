@@ -7,9 +7,12 @@ runtime:
     register_model("mymodel", MyBridge)
 """
 
+import logging
 from typing import Callable, Optional, Type
 
 from .base import VLMBridge
+
+logger = logging.getLogger(__name__)
 
 _REGISTRY: dict[str, Type[VLMBridge]] = {}
 
@@ -63,9 +66,16 @@ def _load_builtin_models() -> None:
     # import side effect: registers "liquid"
     try:
         from . import liquid  # noqa: F401
-    except ImportError:
-        # heavy deps (torch/transformers) not installed in this environment
-        pass
+    except ImportError as exc:
+        # heavy deps (torch/transformers) not installed in this environment;
+        # keep the registry usable but make the gap visible instead of
+        # silently dropping every built-in model
+        logger.warning(
+            "built-in model 'liquid' not registered: import failed (%s). "
+            "Install the heavy inference stack (pip install -e '.[liquid]') "
+            "or register a model explicitly via register_model().",
+            exc,
+        )
     _BUILTIN_LOADED = True
 
 

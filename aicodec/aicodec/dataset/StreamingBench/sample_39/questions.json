@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:40 - 0:02:00] [0:01:40 - 0:01:45]: The scene is set in a well-equipped kitchen with shelves containing various kitchenware and decor. In the foreground, there is a countertop with various cooking ingredients and utensils spread out, including a bowl of cauliflower, a chopping board with diced ingredients, butter, and a lime. A person wearing a blue T-shirt is pouring a golden liquid, likely oil, into a pan that is placed on a stovetop. The pan is held in their left hand while the right hand is pouring the oil.  [0:01:46 - 0:01:49]: The person is standing in front of the stovetop, holding a small piece of food above the pan with both hands. They are focused on the task, preparing to place the food into the hot pan. Various utensils and ingredients are visible around the stovetop.  [0:01:50 - 0:01:53]: The camera angle shifts to a close-up of the pan from the side, showing the person’s hands placing pieces of ingredients into the heated pan. The stove burners are visible, and the person's movements are precise as they add the ingredients one by one. [0:01:54 - 0:01:59]: The overhead perspective shows the person continuing to add small pieces of food into the pan with both hands. The layout of the stovetop and surrounding ingredients is clear, and the focus remains on the delicate task of placing ingredients into the pan. Eventually, the view zooms out slightly, presenting the person continuing their cooking process in a broader view of the kitchen setting.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person in the blue T-shirt pouring into the pan?",
+                "time_stamp": "00:01:45",
+                "answer": "A",
+                "options": [
+                    "A. Oil.",
+                    "B. Water.",
+                    "C. Milk.",
+                    "D. Vinegar."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Object Recognition",
+                "question": "Which of the following items is NOT mentioned as being on the countertop?",
+                "time_stamp": "00:01:45",
+                "answer": "A",
+                "options": [
+                    "A. A blender.",
+                    "B. A bowl of cauliflower.",
+                    "C. A chopping board with diced ingredients.",
+                    "D. Butter."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_39_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:20 - 0:03:40] [0:03:20 - 0:03:25]: The video begins with a man in a blue shirt standing behind a kitchen counter, facing a stove with multiple burners. To his left, there is a yellow bottle and a block of knives. On the countertop, several cooking utensils and ingredients are arranged. He is holding a frying pan in his left hand, and it contains chopped vegetables and other ingredients. He starts by tossing the contents in the pan while cooking over the flames. [0:03:26 - 0:03:27]: The perspective shifts slightly, giving a wider view of the kitchen. In the background, several shelves on the wall hold different dishes and kitchenware. The man gestures with his right hand as if explaining something. [0:03:28 - 0:03:29]: The scene continues with him attending to something on the counter. He picks up a red container and continues to look engaged in what he is doing. [0:03:30 - 0:03:31]: He is seen holding the red container over the frying pan and inspecting its contents carefully. Additional utensils and ingredients remain visible on the countertop, depicting a well-prepared cooking setup. [0:03:32 - 0:03:34]: The camera focuses more closely on the man's hands as he uses a spoon to scoop out some spices from the red container and add them to the frying pan. The pan continues to sizzle with the vegetables and possibly other ingredients inside it. [0:03:35 - 0:03:37]: The camera then zooms out slightly to show the man standing centered behind the stove, continuing to add the spices from the red container into the frying pan. The kitchen shelves in the background prominently display various kitchen items such as jars, cups, and cutting boards. [0:03:38 - 0:03:39]: Finally, an aerial view shows the contents of the frying pan, allowing viewers to see the mix of vegetables and possibly meat being cooked. The man’s right hand is seen as he continues to add ingredients, while the kitchen stove with multiple burners is in full view.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man holding in his right hand right now?",
+                "time_stamp": "0:03:20",
+                "answer": "A",
+                "options": [
+                    "A. A frying pan.",
+                    "B. A spoon.",
+                    "C. A knife.",
+                    "D. A red container."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_39_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:00 - 0:05:20] [0:05:00 - 0:05:01]: A man in a blue T-shirt is seen in a modern kitchen with blue cabinets and white subway tiles. He is standing near the oven, pulling out a tray with a cloth. The counter in the foreground is filled with kitchen utensils, a frying pan, and some bowls with ingredients. [0:05:02 - 0:05:03]: The man places the tray on the counter and looks at the frying pan on the stove. In the background, shelves display various kitchen items, including plates, jars, and a large red \"COOK\" sign. [0:05:04 - 0:05:05]: The view shifts to a top-down perspective of the stove. The frying pan contains a mixture of food items, while a slice of bread is placed on a tray beside it. Various ingredients and utensils are scattered around the counter. [0:05:06 - 0:05:07]: The man is holding a slice of bread with both hands, inspecting it closely. He is still standing near the counter and stove with various kitchen utensils and ingredients visible. [0:05:08 - 0:05:09]: The man begins to prepare the ingredients on the stove, adjusting the frying pan and other utensils. The kitchen setup remains consistent with colorful cabinets, a large red \"COOK\" sign, and various kitchen items on the shelves. [0:05:10 - 0:05:11]: The man adjusts the frying pan on the stove. Ingredients are visible in bowls on the counter, and the setup remains organized with various kitchen tools. [0:05:12 - 0:05:13]: The man lifts the frying pan, tilting it slightly to stir the food inside. The counter and kitchen items are clearly displayed in the background, maintaining a vibrant and well-organized environment. [0:05:14 - 0:05:15]: The man uses a spoon to stir the contents of the frying pan. Slices of bread are visible on a tray beside the stove, and the counter is filled with various ingredients. [0:05:16 - 0:05:17]: The top-down view shows the man actively stirring the frying pan using a spoon and another utensil. The food appears to be well-cooked and mixed, with bread slices placed beside the stove on a tray. [0:05:18 - 0:05:19]: The man continues to stir the food in the frying pan, focusing on evenly cooking the mixture. The organized kitchen setup with utensils and ingredients remains consistent in the background.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man in the blue T-shirt pulling out from the oven?",
+                "time_stamp": "0:05:01",
+                "answer": "A",
+                "options": [
+                    "A. two bread.",
+                    "B. A pie.",
+                    "C. A cake.",
+                    "D. A pot."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_39_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:40 - 0:07:00] [0:06:40 - 0:06:43]: A person, viewed from a first-person perspective, is standing in a kitchen equipped with modern appliances and a counter filled with cooking utensils, including a knife block and various tools. The person is using a fork to arrange food on a baking tray filled with browned and seasoned pieces. The tray is positioned on a stovetop. [0:06:43 - 0:06:44]: The tray now sits on the counter without being moved. The person turns their attention to a frying pan on the stove, beginning to work with its contents using a cooking utensil.  [0:06:44]: The person makes a gesture with their hand while leaning slightly to the right, indicating an action or a measurement related to cooking. [0:06:45 - 0:06:46]: The focus returns to the baking tray as more food is added to it, carefully arranging the pieces. The background remains consistent with kitchen decor, including cabinets and various cooking tools. [0:06:46 - 0:06:48]: The person shifts their attention back to the frying pan, stirring its contents with a utensil while monitoring the food in the baking tray. [0:06:48 - 0:06:49]: Again, focus returns to the baking tray, with the person adding a final touch or ingredient.  [0:06:49 - 0:06:52]: The camera angle now provides a wider view of the kitchen, including shelves with dishes and other kitchen items. The person continues to work at the stove area, adjusting and preparing the food. [0:06:52 - 0:06:54]: The person is seen taking something from a counter, possibly a cloth or similar item, before returning focus to the tray.  [0:06:54 - 0:06:55]: Using a cloth, the person carefully picks up the baking tray from the counter. [0:06:55 - 0:06:56]: A closer view of the tray being held by a cloth-covered hand, showing finely grated cheese or toppings on the food. [0:06:56 - 0:06:57]: The camera pans slightly to the side showing bits of utensils and food on the counter. Text from a producer appears asking for a time check. [0:06:57 - 0:06:58]: The person moves towards an oven, preparing to put the baking tray inside while still holding the tray carefully with the cloth. [0:06:58 - 0:06:59]: Finally, the person opens the oven door and begins to place the tray inside, showing a glimpse of the oven interior, while holding the door open with one hand and maneuvering the tray inside with the other.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person using to arrange food on the baking tray right now?",
+                "time_stamp": "0:06:43",
+                "answer": "A",
+                "options": [
+                    "A. his hands.",
+                    "B. Spoon.",
+                    "C. Tongs.",
+                    "D. Spatula."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_39_real.mp4"
+    }
+]

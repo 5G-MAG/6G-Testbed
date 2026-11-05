@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:03]: The video begins with an animated introduction, showing a large white number '10' on a light blue background, with a knife and fork arranged in a clock-like manner on a round white plate. Following this, a man dressed in a white chef's jacket appears on screen, standing in front of a background with the text \"RAMSAY in 10.\"  [0:00:04 - 0:00:06]: The video transitions to a kitchen scene showing sleek black and white cabinetry with glass-fronted doors. Various kitchen appliances and utensils are visible on the countertops. The man from the introduction, dressed in a casual black t-shirt and gray pants, stands in front of the stove, holding a dish towel. [0:00:07 - 0:00:09]: He appears to be explaining something enthusiastically, smiling and gesturing with his hands. He holds a dish towel in one hand and laughs while talking. Text reading \"Previously Recorded Live\" appears at the top right of the frame. [0:00:10 - 0:00:14]: The man continues his explanation, alternating between looking at the camera and looking down at the counter. His expressions and hand movements show active engagement in what he's discussing. The phrase \"Previously Recorded Live\" remains on screen. [0:00:15 - 0:00:19]: The camera angle changes slightly, centering the man more prominently in the frame. He continues to talk, occasionally pausing for emphasis. His demeanor becomes slightly more serious as he progresses. The kitchen background remains consistent throughout, maintaining a clean and organized appearance.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man from the introduction holding in his hand right now?",
+                "time_stamp": "0:00:09",
+                "answer": "C",
+                "options": [
+                    "A. A cookbook.",
+                    "B. A knife.",
+                    "C. A towel.",
+                    "D. A spatula."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_16_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:20 - 0:05:40] [0:05:20 - 0:05:22]: A large piece of raw ground meat is placed on a ridged grill pan. The grill pan is situated on a gas stove with three burners, and the burner directly under the grill pan is lit with a blue flame. In the background, the lower part of a person, dressed in dark clothing, is visible near the stove. [0:05:22 - 0:05:24]: The person, still in the background, bends down towards the stove, holding a checkered cloth and appears to be adjusting the heat or checking the settings while the raw meat continues to cook on the grill pan. [0:05:24 - 0:05:25]: The person, holding the checkered cloth, faces the stove and reaches out with the cloth toward the grill pan. Several items, such as bottles and kitchen tools, are neatly arranged on the kitchen counter nearby. [0:05:25 - 0:05:26]: The person adjusts the position of the grill pan using the cloth for a better cooking orientation. Behind him, kitchen shelves filled with various kitchen utensils, containers, and a toaster are visible. [0:05:26 - 0:05:27]: Walking away from the stove, the person carries the checkered cloth over their shoulder, heading towards a nearby kitchen counter where additional items like plates and a cutting board with various prepared ingredients are visible. [0:05:27 - 0:05:29]: The person stands by a kitchen counter and starts prepping ingredients. A wooden pepper mill, bottles, and bowls containing various ingredients are placed on the counter. A person uses a smartphone or device to record or stream what the first person is doing. [0:05:29 - 0:05:34]: The person sets aside the checkered cloth on their shoulder and starts chopping a white onion on a cutting board. Bowls containing ingredients like sliced cheese, tomatoes, lettuce, and bacon are arranged on the counter while a bottle of olive oil is visible nearby. [0:05:34 - 0:05:36]: The person continues to chop the onion into thin slices carefully. The surrounding kitchen elements remain consistent, with the stove and its tools in the background and the neatly arranged ingredients on the counter. [0:05:36 - 0:05:37]: After chopping the onion, the person reaches for a bottle of olive oil. Another person holds a recording device, capturing the actions closely, while another bowl with additional chopped items is nearby. [0:05:37 - 0:05:39]: The person pours some olive oil onto the sliced onions on the cutting board, with another person continuing to record the process closely. Various tools and ingredients, such as tomatoes and lettuce, remain organized on the countertop.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is placed on the ridged grill pan right now?",
+                "time_stamp": "0:05:27",
+                "answer": "A",
+                "options": [
+                    "A. A large piece of raw ground meat.",
+                    "B. A piece of chicken.",
+                    "C. A slice of bread.",
+                    "D. A fish fillet."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_16_real.mp4"
+    },
+    {
+        "time": "[0:08:00 - 0:09:00]",
+        "captions": "[0:08:00 - 0:08:20] [0:08:00 - 0:08:01]: A metal grill pan sits on a gas stove, with a blue flame burning beneath it. On the pan, there are two round slices of grilled onions, a beef patty, and a few strips of bacon. A person in gray pants is visible on the right side of the frame. In the background, dark-colored kitchen cabinets with silver handles can be seen. [0:08:01 - 0:08:02]: The person uses a white and black checkered towel to grab the handle of the grill pan. The onions, patty, and bacon remain positioned on the pan, and the blue flame continues to burn under the pan on the gas stove. [0:08:02 - 0:08:03]: The person places the towel on the countertop with their left hand. The grilled food remains on the hot pan, and the kitchen cabinets and countertop are seen in the background. [0:08:03 - 0:08:04]: The person's left hand rests on the counter next to the stove. The food continues to cook on the grill pan, with steam rising. The kitchen drawer and cabinets in the background stay unchanged. [0:08:04 - 0:08:05]: A white and black checkered towel is now draped over the person's shoulder while they use a spatula to adjust the bacon in the grill pan. The grilled onions and beef patty are still visible while the gas flame is on. [0:08:05 - 0:08:06]: The person continues to adjust the food on the grill pan using the spatula. The bacon and beef patty are being moved, and the onions maintain their position. Steam rises from the hot food. [0:08:06 - 0:08:07]: The person lifts the spatula away from the bacon after adjusting it. The onions, patty, and bacon are still on the grill pan, with steam visible above them. [0:08:07 - 0:08:08]: The hand holding the spatula is now further away from the pan. The person appears to be explaining or showing something to another individual who is holding a smartphone, possibly recording or taking a photo. The food remains cooking on the grill pan. [0:08:08 - 0:08:09]: The person has moved away from the stove, leaving the food to continue cooking on the grill pan. The pan remains on the gas stove, and steam can still be seen rising from the food. [0:08:09 - 0:08:10]: The person grabs the white and black checkered towel from the countertop again. The onions, patty, and bacon continue to cook on the grill pan. [0:08:10 - 0:08:11]: The person in gray pants steps back from the stove, holding the towel. The food on the grill pan cooks steadily with steam rising. [0:08:11 - 0:08:12]: The person places a small pot next to the grill pan, positioning it close to the stove. The onions, patty, and bacon continue to be visible on the grill pan with steam rising. [0:08:12 - 0:08:13]: The person retrieves a bottle or container from the counter, possibly to add an ingredient to the grill pan. The eggs, patty, and bacon remain in place, and another individual appears to be filming or taking a picture with a phone. [0:08:13 - 0:08:14]: The focus shifts slightly to the right. The background includes kitchen drawers, countertop items, and part of a dish towel. The onions, patty, and bacon are still on the hot grill pan with steam rising. [0:08:14 - 0:08:15]: The onions, beef patty, and bacon continue sizzling on the grill pan, with steam rising. The background showcases dark kitchen cabinets with silver handles. [0:08:15 - 0:08:16]: The person lifts up a yellow slice of cheese, ready to place it on the food cooking in the grill pan. The kitchen with various utensils and shelves in the background can still be seen. [0:08:16 - 0:08:17]: The person, with a dish towel over their shoulder, starts placing the yellow cheese slice onto the food in the grill pan. The onions, patty, and bacon cook with steam rising from the pan. [0:08:17]: The person carefully places the yellow cheese slice on the bacon and beef patty in the grill pan. The cooking food continues to emit steam, and the onions remain to the side of the pan. [0:08:18]: The yellow cheese slice begins to melt atop the beef",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What items are present on the grill pan right now?",
+                "time_stamp": "00:08:01",
+                "answer": "B",
+                "options": [
+                    "A. Chicken breast, tomato slices, and mushrooms.",
+                    "B. Grilled onions, beef patty, and bacon strips.",
+                    "C. Fish fillets, asparagus, and lemon slices.",
+                    "D. Sausage links, green peppers, and onions."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_16_real.mp4"
+    },
+    {
+        "time": "[0:10:00 - 0:11:00]",
+        "captions": "[0:10:40 - 0:11:00] [0:10:40 - 0:10:41]: Standing in a modern kitchen, a person wearing a dark t-shirt and a checkered towel over their shoulder is meticulously garnishing a dish on a white plate placed on a wooden cutting board. Various ingredients and kitchen tools are spread out on the marble kitchen counter, including bowls with sauces, a whole tomato, lettuce leaves, cheese slices, and a phone displaying the time. [0:10:42 - 0:10:43]: The individual continues assembling the dish, carefully placing sliced vegetables on top of a layered composition. Nearby, there is a gas stove with cooking utensils and a bowl of crispy fried items on a paper towel. [0:10:44 - 0:10:45]: Another person in a dark sweatshirt holds a smartphone close to the plate, appearing to record or take a photo of the food preparation. The focus remains on the precise movements of the cook’s hands. [0:10:46 - 0:10:49]: A close-up view of the dish reveals detailed layers of lettuce, tomato slices, and what appears to be grilled vegetables, meticulously arranged on a toasted bun. The counter beneath displays a marble pattern, and the edge of the cutting board is visible. [0:10:50 - 0:10:52]: The individual wipes the rim of the plate with a cloth napkin, ensuring presentation perfection. The camera angle shifts slightly to maintain focus on the assembled dish on the white plate. [0:10:53 - 0:10:55]: The person places the final touches on the layered vegetable dish, adjusting the components to sit just right. [0:10:56 - 0:10:57]: The cook continues refining the presentation of the dish, adding some final garnishes to the top of the prepared layers. The dish looks nearly complete and visually appealing. [0:10:58 - 0:10:59]: The scene pulls back slightly, showing the person bending over to make detailed adjustments to the dish. Another person, with long blonde hair, leans in from the side holding a phone, likely capturing the moment. The kitchen is well-lit, with various ingredients and tools neatly arranged on the counter.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is displayed on the phone screen right now?",
+                "time_stamp": "00:10:42",
+                "answer": "C",
+                "options": [
+                    "A. A recipe.",
+                    "B. A cooking video.",
+                    "C. The time.",
+                    "D. A shopping list."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the person with long blonde hair do in the video?",
+                "time_stamp": "00:10:59",
+                "answer": "C",
+                "options": [
+                    "A. Cooks a meal.",
+                    "B. Washes dishes.",
+                    "C. Record a video about this food.",
+                    "D. Sets the table."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_16_real.mp4"
+    }
+]

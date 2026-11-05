@@ -51,7 +51,7 @@ Realtime video analysis and chat with token ID scenarios are supported.
       - "What is in the video? Answer directly!"
   ```
 - Dataset (real):
-  - Download this [dataset](https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip) and unzip to `aitestbed/examples/assets/dataset_real`
+  - Download this [dataset](https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip) and unzip to `aicodec/aicodec/dataset/StreamingBench` (each `sample_N/` holds `video.mp4` + `questions.json`; the questions are already in the repo, only the videos need adding)
 
   ***Scenario Configuration***
   ```
@@ -65,8 +65,8 @@ Realtime video analysis and chat with token ID scenarios are supported.
     task_config:
       task_class: "real"
       po_thd: 3 # not used
-      results_dir: "examples/assets/dataset_real/"
-      video_paths: "examples/assets/dataset_real/"
+      results_dir: "../aicodec/aicodec/dataset/StreamingBench/"
+      video_paths: "../aicodec/aicodec/dataset/StreamingBench/"
     prompts:
       - "What is in the video? Answer directly!"
   ```

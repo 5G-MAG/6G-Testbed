@@ -1,0 +1,83 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:20 - 0:02:40] [0:02:20 - 0:02:21]: The video begins in a well-lit kitchen with a clean, white brick backsplash and wooden shelves holding various kitchen items such as bowls, bottles, and a teapot. A man in a grey t-shirt is looking downwards, possibly at a preparation surface. His posture suggests he is focused on a task at hand. [0:02:22 - 0:02:23]: The view shifts to a top-down perspective of a wooden cutting board on a kitchen counter. Several kitchen tools and ingredients are neatly arranged. On the left, there is a pile of red sticks, resembling rhubarb, which are perfectly cut and lined up. Next to them are two rectangular pieces of pastry resting on a baking sheet lined with parchment paper. Various small bowls containing different ingredients are positioned nearby, including an orange, butter, and a beaten egg in a bowl. [0:02:24]: The man's hands come into view as he reaches for a couple of cut pieces of rhubarb. The focus seems to be on organizing or maneuvering the pieces. [0:02:25]: The next frame shows the man adjusting the position of the baking tray on the counter. [0:02:26]: His hands now hold a brown bowl and he is stirring a liquid mixture inside it, possibly preparing a glaze or an egg wash. [0:02:27 - 0:02:28]: The view returns to the overhead shot of the working surface as the man continues to stir the mixture in the brown bowl. His focus remains on ensuring the mixture is well-blended. [0:02:29 - 0:02:30]: He picks up a brush and dips it into the bowl, indicating he may be ready to apply the mixture to the pastries. There is clear intent and precision in his movements. [0:02:31 - 0:02:32]: The man then looks more closely at what appears to be the pastries on the baking tray, holding the brown bowl in one hand and the brush dipped in the mixture in the other. [0:02:33 - 0:02:34]: He starts brushing the edges of one of the pastry rectangles with the mixture from the bowl. His brush strokes are deliberate and even. [0:02:35 - 0:02:37]: The process of brushing continues, with the man ensuring every part of the edge of the pastry is well-coated. The thoroughness of his actions suggests an attention to detail and a desire for an even application. [0:02:38 - 0:02:39]: He transitions to the other side of the same pastry, continuing to apply the mixture in smooth, consistent strokes. The task flows seamlessly as part of the baking preparation process.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is resting on a baking sheet lined with parchment paper?",
+                "time_stamp": "0:02:23",
+                "answer": "B",
+                "options": [
+                    "A. Several red sticks of rhubarb.",
+                    "B. Two rectangular pieces of dough.",
+                    "C. A bowl of beaten eggs.",
+                    "D. A pile of orange slices."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the man do after picking up the brush?",
+                "time_stamp": "0:02:30",
+                "answer": "B",
+                "options": [
+                    "A. Starts stirring a liquid mixture.",
+                    "B. Apply egg wash to the dough.",
+                    "C. Adjusts the position of the baking tray.",
+                    "D. Reaches for a couple of cut pieces of rhubarb."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_33_real.mp4"
+    },
+    {
+        "time": "[0:09:00 - 0:10:00]",
+        "captions": "[0:09:20 - 0:09:40] [0:09:20 - 0:09:21]: A person is holding an orange in their left hand and grating it with a grater using their right hand over a glass mixing bowl. The mixing bowl, containing what appears to be a white creamy substance, is located on a wooden cutting board. The scene is in a kitchen with a blue and beige color palette, visible countertops, and cooking utensils. [0:09:22 - 0:09:24]: The person continues grating the orange. They look at the task at hand, seemingly concentrating. The background shelves are lined with jars, bowls, and various kitchen items. There is a red sign that says \"COOK\" on a shelf.  [0:09:25 - 0:09:27]: The viewpoint changes to an overhead view, showing the person vigorously grating the orange into the bowl. Surrounding the bowl on the countertop are various ingredients and kitchen utensils, including butter, sugar, and a cutting board with chopped ingredients. [0:09:28 - 0:09:31]: The person's facial expression changes as they continue to grate the orange. They appear focused and determined. Various kitchen implements and containers can be seen in the background, along with a portion of white brick wall tiles. [0:09:32 - 0:09:33]: The person resumes grating the orange over the glass bowl. Near the bowl are other cooking ingredients and utensils, like a frying pan on the stovetop, which hints at ongoing cooking preparations. [0:09:34 - 0:09:36]: The person steps aside to place the orange down on the counter and picks up what appears to be a knife. The setup of the kitchen includes neatly arranged dishes, containers, and utensils displayed on the shelves and countertops.  [0:09:37 - 0:09:39]: A close-up view of the person scraping the zest off the grater into the bowl using a knife. They meticulously ensure that the zest collects in the bowl, which still contains the previous white creamy mixture. The focus is on the careful and detailed process of zesting.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person using to grate the orange?",
+                "time_stamp": "0:09:21",
+                "answer": "C",
+                "options": [
+                    "A. A spoon.",
+                    "B. A knife.",
+                    "C. A grater.",
+                    "D. A fork."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What color is the bowls' mixture into which the orange zest is grated?",
+                "time_stamp": "0:09:27",
+                "answer": "B",
+                "options": [
+                    "A. Yellow.",
+                    "B. White.",
+                    "C. Green.",
+                    "D. Brown."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Causal Reasoning",
+                "question": "Why does the person use a knife after grating the orange?",
+                "time_stamp": "0:09:43",
+                "answer": "C",
+                "options": [
+                    "A. To clean the countertop.",
+                    "B. To chop more ingredients.",
+                    "C. To scrape the zest off the grater into the bowl.",
+                    "D. To cut the orange into slices."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_33_real.mp4"
+    }
+]

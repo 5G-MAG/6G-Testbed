@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:04]: The video begins with a first-person perspective view of an illustration featuring a white clock face with silver knife and fork hands, set at 10 o'clock. The number \"10\" is prominently displayed to the left of the clock on a gray background.  [0:00:01 - 0:00:04]: The scene transitions to a man standing against a background that reads \"RAMSAY in 10.\" He is wearing a navy blue shirt. [0:00:05]: A transition screen features a dark purple and light blue geometric shape overlaying the previous frame. [0:00:05 - 0:00:06]: The scene shifts to a bright kitchen with white brick walls and colorful shelves. Various cooking utensils and ingredients are arranged neatly on the shelves. The word \"COOK\" in bright red letters is displayed on the top shelf. The man, now wearing a green shirt, stands in the center of the frame, explaining something. [0:00:07 - 0:00:08]: The man continues his explanation, making expressive gestures with his hands. He appears to be very engaged in his demonstration. [0:00:09 - 0:00:10]: The man turns to his right, speaking towards an off-screen audience or object. The background reveals more kitchen equipment including an oven and some jars. [0:00:11 - 0:00:13]: He faces forward again, continuing his explanation while occasionally gesturing. The kitchen setting remains the same with the word \"HOT\" appearing on the bottom left of the frame. [0:00:14]: The man looks directly into the camera, emphasizing his point. [0:00:15 - 0:00:16]: He claps his hands together, continuing to talk, showing enthusiasm in his expressions. [0:00:17 - 0:00:18]: He gestures sideways, looking animated and engaged. The angle provides a closer view of the jars and appliances in the kitchen. [0:00:19]: The video ends with the man standing calmly, finishing his explanation, with the word \"COOK\" still visibly prominent in the background.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What word appears on the bottom left of the frame while the man continues his explanation?",
+                "time_stamp": "00:00:13",
+                "answer": "C",
+                "options": [
+                    "A. COOK.",
+                    "B. RAMSAY.",
+                    "C. HOT.",
+                    "D. READY."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_31_real.mp4"
+    },
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:01]: A man wearing a green t-shirt stands in a kitchen with white brick walls and open wooden shelves. On the countertop in front of him, there are various items, including a glass bowl of beaten eggs, a bowl of raw chicken pieces, and various ingredients and utensils. He is holding a piece of chicken over the bowl while sprinkling what seems to be seasoning or flour onto it. [0:02:01 - 0:02:02]: The man continues to prepare the chicken by placing it into the glass bowl. Behind him, there are several shelves with neatly arranged dishes, and on the left, there is a red \"COOK\" sign on the top shelf. [0:02:02 - 0:02:03]: The man is focused on the task, which involves handling the chicken pieces. In the background, various utensils and jars are visible on the shelves, while a gas stove and several frying pans are noticeable on the countertop. [0:02:03 - 0:02:04]: The man continues working with the chicken, ensuring it is coated evenly. At this point, he picks up another piece of chicken. Various kitchen tools, like a whisk and some bottles, are scattered around the working area. [0:02:04 - 0:02:05]: Closer view of the man's hands as he handles the raw chicken fillet, about to dip it into the beaten egg mixture. Both bowls are transparent, making the contents visible. There is some cilantro placed on the cutting board. [0:02:05 - 0:02:06]: The man carefully places the chicken piece into the beaten egg mixture. The workspace is organized, with cutting boards, bowls, and other ingredients aligned in a practical manner. [0:02:06 - 0:02:07]: The man dips the chicken piece into the beaten egg mixture, ensuring it is well-coated. The kitchen appears orderly, with knives hanging on a magnetic strip on the wall behind him. [0:02:07 - 0:02:12]: He continues this process, turning towards the counter to his right, where a bowl with more chicken pieces is placed. The background includes a sink with a faucet and a neatly organized shelf with bowls and plates. Green and brown bottles and a lush bunch of herbs are also present on the counter. [0:02:12 - 0:02:13]: The man focuses on coating the chicken pieces, putting them into the egg mixture one at a time. He appears to be explaining something, possibly providing cooking tips as he works. [0:02:13 - 0:02:14]: An overhead shot shows the man's hand coating the chicken in flour. Surrounding the workspace are various bowls filled with ingredients like chopped nuts, herbs, and seasoning, suggesting they are part of the recipe. [0:02:14 - 0:02:15]: The man proceeds to coat the chicken pieces, which are now in the egg mixture, with flour from another bowl. The countertop remains so neatly arranged with cooking ingredients and equipment, ensuring efficiency. [0:02:15 - 0:02:16]: The man shakes off the excess flour from a piece of chicken that has been dipped in the egg mixture and then the flour, preparing it for cooking. He is very meticulous in his method, emphasizing thorough coating. [0:02:16 - 0:02:17]: Returning to the bowl with the coated chicken pieces, the man continues to handle the ingredients attentively. The organized kitchen setup indicates a well-prepared cooking session. [0:02:17 - 0:02:18]: The man looks focused as he coats another piece of chicken. Various ingredients are laid out systematically to ensure each step of the cooking process is streamlined. The backdrop includes a shelved arrangement with knives, plates, and other kitchen essentials. [0:02:18 - 0:02:19]: The man continues to work diligently, coating the chicken pieces. His actions suggest a level of expertise and comfort in the kitchen. The setting remains consistent with various cooking ingredients and tools visible.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the man wearing in the kitchen?",
+                "time_stamp": "00:02:40",
+                "answer": "C",
+                "options": [
+                    "A. A blue apron.",
+                    "B. A red t-shirt.",
+                    "C. A green t-shirt.",
+                    "D. A white shirt."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the man doing with the chicken right now?",
+                "time_stamp": "00:02:00",
+                "answer": "D",
+                "options": [
+                    "A. Frying it.",
+                    "B. Cutting it.",
+                    "C. Washing it.",
+                    "D. Coat the chicken with flour."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_31_real.mp4"
+    },
+    {
+        "time": "[0:04:00 - 0:05:00]",
+        "captions": "[0:04:00 - 0:04:20] [0:04:00 - 0:04:02]: A person is seen standing in a kitchen, dipping their hand into a bowl of beaten eggs on a wooden cutting board. The bowl is transparent, and another bowl containing breadcrumbs is positioned to the left of the egg bowl. In the background, a stove with a pot is present on the left side, and there are blue and wooden cabinets on either side of the countertop. A bunch of green herbs is placed near the edge of the cutting board. [0:04:03 - 0:04:03]: The person starts transferring the egg-coated item into the bowl of breadcrumbs. The individual is wearing a green short-sleeve shirt. [0:04:04 - 0:04:06]: In a wider shot, the same person continues handling the food while standing in a white-tiled kitchen with wooden shelves laden with plates, bowls, and various utensils. The countertop also holds additional items, including bottles of oil and a dish with green vegetables. [0:04:06 - 0:04:09]: The person stands in the same position, adding seasoning or another ingredient to the bowl of breadcrumbs and continuing to coat the item. [0:04:09 - 0:04:10]: The perspective shifts to an overhead view showing the two bowls on the cutting board. The person uses both hands to cover the food item in the breadcrumbs mixture. Around the board are bowls containing spices and condiments. [0:04:11 - 0:04:13]: The person continues to firmly press the breadcrumbs onto the food item, ensuring it is well-coated. [0:04:14 - 0:04:16]: The scene returns to the front view of the person standing in the kitchen, adding more breadcrumbs to the bowl. Utensils and ingredients are arranged neatly on the countertop around them. [0:04:17 - 0:04:19]: The person starts cleaning up, using a cloth to wipe their hands, and the bowls with ingredients are seen on the wooden cutting board. The kitchen's layout includes modern appliances, with more utensils and ingredients arranged nearby.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is the person dipping their hand into right now?",
+                "time_stamp": "00:04:02",
+                "answer": "C",
+                "options": [
+                    "A. A bowl of flour.",
+                    "B. A bowl of breadcrumbs.",
+                    "C. A bowl of beaten eggs.",
+                    "D. A bowl of green herbs."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_31_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:01]: A person in a green t-shirt stands in a kitchen with white brick walls and shelves holding various kitchen items like utensils, jars, and bowls. He holds a white cloth in one hand while looking down towards the countertop, which has a chopping board and several ingredients on it. [0:06:01 - 0:06:02]: The person in the green t-shirt extends his arm to the left towards a bottle of olive oil while looking at the countertop. The shelves in the background display additional kitchen items such as dishes and cooking pots. [0:06:02 - 0:06:03]: The person moves a green vegetable, possibly a cucumber, on the chopping board with his right hand while maintaining his gaze downwards. The background remains consistent, showing the organized shelves. [0:06:03 - 0:06:05]: Positioned behind the kitchen counter, the person continues preparing the ingredients on the chopping board. He maintains focus, occasionally glancing up towards the background where various kitchen tools and dishes are neatly arranged on the shelves. [0:06:05 - 0:06:06]: While still standing near the kitchen counter, the person turns slightly to his right and reaches towards the upper shelf, appearing to grab a jar off a shelf. The countertop holds an assortment of green vegetables and bowls. [0:06:06 - 0:06:07]: Returning his attention to the chopping board, the person appears to hold an object, possibly a piece of vegetable in his right hand. He shifts his position slightly to the left while glancing down. [0:06:07 - 0:06:08]: The perspective shifts to a top-down view, focusing on the kitchen counter where different items, including sliced vegetables, a cucumber on a chopping board, and a frying pan, are visible. The person’s arm reaches for the cucumber. [0:06:08 - 0:06:09]: A close-up view captures the person slicing a cucumber on the chopping board. He holds the cucumber steadily while his other hand manages the knife. Several kitchen items, including olive oil and a bunch of parsley, are within reach on the countertop. [0:06:09]: The person is seen slicing cucumbers with a knife on the chopping board, with several kitchen items like olive oil and parsley positioned nearby on the countertop. [0:06:10 - 0:06:11]: The person shifts his focus while slicing, appearing to concentrate on the task. Surrounding kitchen items provide a backdrop to the chopping activity as he works precisely with the knife. [0:06:11 - 0:06:12]: With continued focus on the chopping board, the person cuts the cucumber into smaller pieces. His careful movements ensure the task is performed efficiently amidst the neatly organized kitchen setup. [0:06:12 - 0:06:13]: The person completes slicing the cucumber pieces, placing them aside on the chopping board. The organized kitchen backdrop remains consistent, displaying various utensils and ingredients neatly arranged on the shelves and countertop. [0:06:13 - 0:06:14]: Standing upright again, the person holds the cucumber, turning slightly towards the left. He engages momentarily with the task at hand against the background setting of the organized kitchen shelves filled with dishes and jars. [0:06:14 - 0:06:15]: Shifting towards the right side of the countertop, the person repositions some items while continuing to hold a piece of cucumber. His gaze moves briefly towards the countertop setup and the neatly arrayed kitchen items behind him. [0:06:15 - 0:06:16]: The person appears to inspect and remove the cucumber's peel. His focus remains on the vegetable, and the kitchen's backdrop continues to feature organized kitchenware on the shelves. [0:06:16 - 0:06:17]: Paying close attention, the person uses a peeler to remove the cucumber's skin. The kitchen background continues to showcase various cooking items and utensils well-organized on the shelves. [0:06:17 - 0:06:18]: Concentrated on peeling the cucumber, the person efficiently manages the task while positioned behind the counter. The well-maintained and neatly arranged kitchen backdrop remains visible. [0:06:18 - 0:06:19]: Consistent attention is given to the cucumber as the person completes the peeling task. The kitchen's background remains organized, exhibiting various utensils and ingredients neatly placed on the shelves and countertop.",
+        "questions": [
+            {
+                "task_type": "Counting",
+                "question": "How many pieces of fried chicken are there in the frying pan right now?",
+                "time_stamp": "00:06:12",
+                "answer": "B",
+                "options": [
+                    "A. 3.",
+                    "B. 4.",
+                    "C. 7.",
+                    "D. 9."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_31_real.mp4"
+    }
+]

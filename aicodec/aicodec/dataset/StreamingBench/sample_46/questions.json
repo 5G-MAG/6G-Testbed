@@ -1,0 +1,99 @@
+[
+    {
+        "time": "[0:01:00 - 0:02:00]",
+        "captions": "[0:01:40 - 0:02:00] [0:01:40 - 0:01:45]: A frying pan containing several clams is placed on a gas stove burner, with the flame on. A person’s hand holds the lid's handle, raising it slightly while steam escapes from the sides. Various kitchen items, including a spice rack and utensils, are visible in the background, against blue cabinets.   [0:01:46 - 0:01:49]: The person appears in view, standing behind the stove. They wear a blue shirt and are engaged in explaining something while making gestures with their hands. The kitchen setting includes a white brick backsplash, an organized arrangement of dishes, and cooking equipment hanging on the wall.  [0:01:50 - 0:01:51]: They focus on the pan again, gripping the lid, as if about to lift it. The broader kitchen environment with neatly stacked dishes, bottles, and utensils remains visible in the background.  [0:01:52 - 0:01:54]: The person continues to explain, making hand gestures and emphasizing points animatedly. They stand near a blue cabinet and a white brick wall, giving a detailed step-by-step of what they are doing.  [0:01:55 - 0:01:56]: The person is seen turning toward the countertop, gesturing as they talk. The countertops have several cooking items, including a chopping board. [0:01:57 - 0:01:58]: The camera shifts to an overhead view of a cutting board, with multiple small bowls containing spices, a large knife on the left, and a piece of seasoned raw meat on the board. A hand reaches out, placing the meat on the cutting board.  [0:01:59]: The person’s hand firmly holds the meat, positioning it for cutting while the knife is poised on the board, ready to slice through the meat.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is placed on the gas stove burner right now?",
+                "time_stamp": "0:01:19",
+                "answer": "D",
+                "options": [
+                    "A. A saucepan with boiling water.",
+                    "B. A kettle with tea.",
+                    "C. A wok with vegetables.",
+                    "D. A frying pan containing several garlic."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the person doing with the bread on the cutting board?",
+                "time_stamp": "0:01:59",
+                "answer": "C",
+                "options": [
+                    "A. Marinating it.",
+                    "B. Grilling it.",
+                    "C. Preparing to cut it.",
+                    "D. Weighing it."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_46_real.mp4"
+    },
+    {
+        "time": "[0:03:00 - 0:04:00]",
+        "captions": "[0:03:20 - 0:03:40] [0:03:20 - 0:03:22]: A person in a blue shirt stands in a kitchen with blue and white cabinets. To the right, there is a white brick wall. The person gestures with their hands, and two built-in ovens are visible behind them. A countertop with various kitchen items like jars and a cutting board is present. [0:03:22 - 0:03:23]: The person leans slightly to the right, focusing on something out of the frame. A close-up reveals the countertop below their elbows.  [0:03:24 - 0:03:26]: A bird’s-eye view of a stovetop shows a covered pan on the left burner and an open grill pan on the right burner. The person’s hands are placing two sandwich slices on the grill pan. [0:03:27 - 0:03:30]: The camera zooms out a bit, capturing more of the stovetop and the grill pan. The person adds more sandwiches to the pan. They hold a small bowl, possibly containing oil or butter, and drizzle it over the sandwiches. [0:03:31 - 0:03:32]: A close-up of the three sandwiches grilling on the pan. In the background, there are utensils, a spice jar, and a glass bowl. [0:03:32 - 0:03:33]: The person now stands back, pointing something out to someone, possibly giving cooking instructions. The camera captures more of the kitchen area, including a shelf filled with plates, jars, and a wine bottle. [0:03:34 - 0:03:35]: The person leans forward to adjust the sandwiches on the grill pan. The close-up shows the action of flipping or pressing the sandwiches down.  [0:03:36 - 0:03:37]: The person continues to adjust and press the sandwiches with their fingers on the grill pan. The view provides a glimpse of a large bowl on the left and various countertop items. [0:03:38 - 0:03:39]: The person, still focused on the grill pan, slightly lifts the sandwich slices with a spatula, checking for doneness. The kitchen setup in the background remains the same.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What does the person do after placing sandwich slices on the grill pan?",
+                "time_stamp": "00:03:30",
+                "answer": "A",
+                "options": [
+                    "A. Pours oil  over the sandwiches.",
+                    "B. Adds seasoning to the sandwiches.",
+                    "C. Puts a lid on the grill pan.",
+                    "D. Turns off the burner."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_46_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:00 - 0:05:20] [0:05:00 - 0:05:03]: The scene takes place in a modern, well-equipped kitchen. The brick walls are painted white, and there is a wooden shelf holding various kitchen items, such as green and clear glass bottles, plates, and bowls. The kitchen has a large countertop that appears to be made of concrete. Large red letters spelling \"COOK\" are displayed prominently on the upper left wall. Below the shelf is a counter with several appliances and utensils neatly arranged. The depicted individual, wearing a blue T-shirt, is standing behind the counter. He is preparing food, initially on the left side of the counter, and then moving to the right. [0:05:03 - 0:05:05]: The individual continues working on the meal. He reaches towards the far right side of the counter and grabs something from the cutting board. The kitchen remains organized with various utensils and ingredients in view. [0:05:05 - 0:05:10]: Switching angles to an overhead view, the camera shows a closer look at the cooking process. On the counter, there are spices in small bowls, half a lemon, and some sliced bread on a wooden cutting board. A gas stove with a covered pot containing a simmering mix of ingredients occupies the central part of the frame. The individual takes pieces of bread and begins placing them into the pan positioned on the stovetop. [0:05:10 - 0:05:12]: Returning to a frontal perspective, the individual continues to meticulously place the bread slices onto the pan. The kitchen background, with its neatly arranged shelves and utensils, is still visible. [0:05:12 - 0:05:14]: The individual begins to use a mortar and pestle to grind some ingredients. This new movement happens while maintaining focus on the mixture being prepared. The counter is seen with various kitchen tools and ingredients, including bowls with ground spices and fresh herbs. [0:05:14 - 0:05:19]: There is a close-up of the individual continuing to work on the mixture. He adds what appears to be ground black pepper from a small black bowl. After mixing the contents, he checks the overall progress of the meal. He places the prepared mixture down and reaches for the bread slices, still carefully attending to his cooking.\"",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the person doing right now?",
+                "time_stamp": "0:05:14",
+                "answer": "C",
+                "options": [
+                    "A. Spread the butter onto the piece of toast.",
+                    "B. Spread the jam onto the biscuit.",
+                    "C. Spread the condiments onto the slice of bread.",
+                    "D. Spread the mayonnaise onto the sandwich bun."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_46_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:40 - 0:07:00] [0:06:40 - 0:06:41]: In a kitchen with wood and blue cabinetry, gray stone countertops, and white tile backsplash, someone is working at a counter. On the counter, there is a bowl, a wooden cutting board, and some slices of bread. The person is wearing a blue t-shirt and is focused on preparing the food. They appear to be garnishing a dish with herbs.  [0:06:42 - 0:06:45]: The camera captures the person continuing to garnish the food. A pan is visible on the stovetop to the left. Several small bowls with various ingredients are spread out on the counter. The person reaches into the bowl and carefully places what looks like herbs onto the bread slices. [0:06:46 - 0:06:49]: The view shifts to an overhead shot, providing a clearer view of the ingredients and preparations. There are three pieces of bread spread with a dark paste, a knife, a cut lemon half, and several small bowls containing shallots, sauces, and seasonings. The person continues to garnish the bread slices, transferring herbs from the bowl. [0:06:50 - 0:06:51]: The focus returns to a side view, showing the person using a spoon to place onion slices and herbs onto the bread slices methodically, creating an organized and neat presentation. [0:06:52 - 0:06:53]: The person continues to place more herbs onto the bread slices, ensuring even distribution. The area is kept organized, with different ingredients neatly placed on the counter. [0:06:54 - 0:06:56]: The spoon is used again to add the final touches of herbs onto the bread, making sure every slice gets garnished equally. The person works with precision and care. [0:06:57 - 0:06:58]: The person uses their hands to assist in adding the herbs, ensuring everything is in place. The ingredients in the bowls are now mostly used, indicating the near completion of the garnish process. [0:06:59]: The final garnishing is being added with a spoon, securing the herbs and onions on top of the slices of bread, completing the preparation process. The surroundings are tidy, and the food looks ready to be served.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What object is the person using to garnish the food?",
+                "time_stamp": "0:06:54",
+                "answer": "D",
+                "options": [
+                    "A. Fork.",
+                    "B. Knife.",
+                    "C. Tongs.",
+                    "D. Spoon."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_46_real.mp4"
+    }
+]

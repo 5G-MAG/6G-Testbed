@@ -1,0 +1,83 @@
+[
+    {
+        "time": "[0:02:00 - 0:03:00]",
+        "captions": "[0:02:00 - 0:02:20] [0:02:00 - 0:02:01]: The video begins with a view of a kitchen from a first-person perspective. Two pans are on the stove, positioned side by side. A person's hand reaches out, taking hold of a spatula. White kitchen cabinets and countertops are visible in the background, along with various kitchen utensils and appliances. [0:02:01 - 0:02:02]: The scene changes slightly as the hand continues to move over the kitchen counter, close to the pans on the stove. The person begins to prepare food, reaching toward the nearby items. The focus remains on the hands and the cooking area. [0:02:02 - 0:02:03]: The camera shifts slightly for a clearer view of the person working in the kitchen. The focus is on the upper body of the person, who is wearing a dark-colored shirt. The background reveals more details of the kitchen, such as utensils and white cabinets with glass doors. [0:02:03 - 0:02:04]: The person continues to concentrate on the task, looking down at the counter. A closer view of the person's face and hands is seen, emphasizing the attention to the cooking process.  [0:02:04 - 0:02:05]: The camera angle widens, showing the person standing in front of the stove with two pans cooking. The kitchen has a modern design, with stainless steel appliances, white cabinets, and a tile backsplash. Sunlight streams in through the window, illuminating the room. [0:02:05]: The person maintains focus on the food in the pans, ensuring it is cooked properly. The kitchen counter is organized, with a few plates and a cooking board visible on the left side. [0:02:06]: The person reaches for another kitchen utensil with the right hand while keeping an eye on the pans. The scene shows the detailed layout of the kitchen, with drawers and cabinets arranged neatly. [0:02:07]: After adding an ingredient, the person momentarily glances away from the stove. The background remains constant, showing the orderly arrangement of the kitchen and the bright, sunny view through the window. [0:02:08]: The person starts to walk toward the left, perhaps to gather more ingredients or utensils. The left side of the counter comes into view, revealing more kitchen tools and dishes. [0:02:09]: The person picks up a container from the counter and moves back toward the stove, still focused on the task at hand. The kitchen environment remains consistent, with clean and organized surfaces. [0:02:10]: The individual returns to the stove, holding the container. The focus shifts back to the cooking area, showing the person’s dedication to preparing the food. [0:02:11]: The person adds the content from the container to the pans, carefully stirring the ingredients. The kitchen setup is designed for efficient cooking, with all necessary items within reach. [0:02:12]: Continuing to cook, the person adjusts the heat of the pans while making sure the food in each pan is evenly cooked. The camera captures the person’s attentive movements and the organized kitchen space. [0:02:13]: The person uses the spatula to flip the items in the pan, ensuring even cooking. The scene highlights the precise movements and the neat kitchen environment. [0:02:14]: A close-up view of the pan reveals slices of vegetables sizzling in oil. The person's hands are busy adjusting food in the pan to make sure it cooks evenly. [0:02:15]: The person continues to work on the pan, adjusting the vegetables carefully. Steam rises from the pan, indicating that the food is cooking well. [0:02:16]: The person briefly lifts the pan to prevent the ingredients from sticking, shaking it gently to drizzle the oil evenly over the vegetables. [0:02:17]: The individual places the pan back down and uses a spatula to rearrange the food, ensuring everything is cooked properly. [0:02:18]: The camera shifts back to a wider angle, showing the person gesturing with one hand while explaining or thinking about the next step. The organized kitchen provides a tranquil and efficient cooking environment. [0:02:19]: The person continues to gesture, possibly explaining a part of the recipe. The focus is on the individual's expression and hand movements, with the kitchen serving as a clean and well-organized backdrop.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What is the person doing right now?",
+                "time_stamp": "0:02:07",
+                "answer": "A",
+                "options": [
+                    "A. Sprinkle seasonings into the pot.",
+                    "B. Pours oil into the pans.",
+                    "C. Slices vegetables on the counter.",
+                    "D. Washes hands at the sink."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What does the person do after adding an ingredient to the pans?",
+                "time_stamp": "0:02:07",
+                "answer": "A",
+                "options": [
+                    "A. Adjust the food in the pot to evenly distribute the seasonings on top.",
+                    "B. Adjusts the heat of the pans.",
+                    "C. Cleans the countertop.",
+                    "D. Moves to the dining table."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_26_real.mp4"
+    },
+    {
+        "time": "[0:06:00 - 0:07:00]",
+        "captions": "[0:06:00 - 0:06:20] [0:06:00 - 0:06:01]: A person's hand is seen holding a black frying pan containing mixed vegetables and meat pieces over a stove. The pan is tilted, causing the ingredients to rise into the air. Another black frying pan is on the adjacent burner to the right. Both pans are over a stainless steel stovetop with horizontal grooves. [0:06:01 - 0:06:02]: A closer view shows the person's hand gripping the pan handle, which is still over the stove. The vegetables and meat pieces are now settled in the pan. [0:06:02 - 0:06:03]: The scene transitions to a kitchen view. A person, with short hair, wearing a dark T-shirt, is standing in front of an open refrigerator. Vegetables and sliced items are on the kitchen counter to the left.  [0:06:03]: The person is now reaching towards the refrigerator's interior with both hands placed on the knobs. [0:06:04]: The person opens the refrigerator door, revealing a variety of items including bottles, containers, and food items on the shelves inside. [0:06:05]: The person takes out a bottle and turns away from the refrigerator towards the stove. The kitchen counter in front is lined with various ingredients, including sliced vegetables. [0:06:06 - 0:06:07]: Returning to the stove, the person holds the bottle in one hand and attempts to pour its contents into the frying pan, causing the steam to rise.  [0:06:08 - 0:06:09]: The bottle is closer, and more liquid is being poured into the frying pan, which is positioned centrally on the stove. [0:06:10 - 0:06:11]: The liquid continues pouring, creating steam around the cooking food in the pan.  [0:06:12 - 0:06:13]: The person, seen mid-motion from the front, moves slightly away from the stove, wiping their hands with a cloth while the steam rises from the cooking food. [0:06:13 - 0:06:14]: Steam envelops the person, who holds the frying pan and shakes it slightly to mix the ingredients. [0:06:14 - 0:06:15]: The person is back at the stove, still holding and shaking the frying pan amidst the steam. [0:06:15 - 0:06:16]: With continued shaking, the person stands at the stove, producing more steam. The background shows kitchen cabinets and a window allowing natural light to stream in. [0:06:17 - 0:06:18]: An overhead view captures the person holding the frying pan above the stove, which now has multiple pans. The countertop shows various ingredients like pickles and a white bowl. [0:06:18 - 0:06:19]: The camera continues to provide an overhead perspective, showing the person stirring the contents inside the frying pan. The kitchen counter surface is visible, consisting of multiple cooking utensils and ingredients.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What item is holding by his right hand right now?",
+                "time_stamp": "00:06:01",
+                "answer": "A",
+                "options": [
+                    "A. A bottle.",
+                    "B. Only vegetables.",
+                    "C. Only meat pieces.",
+                    "D. Sliced fruits."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Action Recognition",
+                "question": "What action is the person performing right now?",
+                "time_stamp": "00:06:11",
+                "answer": "A",
+                "options": [
+                    "A. Pours the contents into the frying pan.",
+                    "B. Puts the bottle back in the refrigerator.",
+                    "C. Places the bottle on the counter.",
+                    "D. Drinks from the bottle."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Causal Reasoning",
+                "question": "Why does the person shake the frying pan after pouring the liquid into it?",
+                "time_stamp": "00:06:16",
+                "answer": "A",
+                "options": [
+                    "A. To mix the ingredients.",
+                    "B. To cool down the pan.",
+                    "C. To stop the steam.",
+                    "D. To clean the pan."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_26_real.mp4"
+    }
+]

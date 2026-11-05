@@ -1,0 +1,91 @@
+[
+    {
+        "time": "[0:00:00 - 0:01:00]",
+        "captions": "[0:00:00 - 0:00:20] [0:00:00 - 0:00:03]: A white rectangular shape and a round white clock with a fork and knife at the center are displayed on a blue background. [0:00:01 - 0:00:03]: A person in a white chef's coat stands with arms crossed in front of a blue background, with the words \"RAMSAY in 10\" displayed prominently in bold red letters. [0:00:04 - 0:00:06]: The scene changes to a modern kitchen with blue cabinets, glass-fronted upper cabinets, a tiled backsplash, and various kitchen appliances such as a microwave, toaster, and coffee maker on the counter. There are also books and utensils. [0:00:05 - 0:00:07]: In the foreground, a steel countertop with a stove has two large burners and a frying pan on top, along with a griddle. The camera angle changes slightly, showing a hand moving into the frame on the left side. [0:00:07 - 0:00:08]: The person wearing a navy blue t-shirt enters the frame, standing beside the stove, and appears to be engaging with the camera, possibly speaking. [0:00:08 - 0:00:11]: The person is leaning forward, closer to the camera, showing a closer view of the stove and kitchen behind. They seem animated and expressive, indicating a dynamic interaction. [0:00:09 - 0:00:13]: The camera captures the person pausing momentarily, with the text \"Previously Recorded Live\" appearing at the top right of the screen. [0:00:13 - 0:00:14]: The person resumes speaking and moves slightly, gesturing with their hands. The kitchen setting remains consistent in the background. [0:00:15 - 0:00:17]: They continue talking, occasionally looking at the stove and then back at the camera. The frying pan on the stove remains central in the frame. [0:00:17 - 0:00:18]: The person looks directly at the camera and continues to engage, with their hands resting on the countertop. The background stays the same with the kitchen in view. [0:00:18 - 0:00:19]: In the final frames, the person steps back slightly, continuing to speak with an expressive demeanor, maintaining the focus on the kitchen environment.",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What text appears at the top right of the screen right now?",
+                "time_stamp": "00:00:13",
+                "answer": "B",
+                "options": [
+                    "A. \"Live Recording\".",
+                    "B. \"Previously Recorded Live\".",
+                    "C. \"Recording Now\".",
+                    "D. \"Live Now\"."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_28_real.mp4"
+    },
+    {
+        "time": "[0:05:00 - 0:06:00]",
+        "captions": "[0:05:20 - 0:05:40] [0:05:20 - 0:05:21]: A man is standing in a kitchen with blue cabinets and a white tile backsplash, placing sliced potatoes into a black frying pan on a gas stove. He is wearing a dark blue t-shirt and a black wristwatch. Various kitchen appliances and utensils are visible on the counter behind him. [0:05:21 - 0:05:22]: The man continues to place additional potato slices into the frying pan. The potatoes are cut into thin rounds and are being laid flat in a single layer. [0:05:22 - 0:05:24]: He adjusts the positions of the potato slices within the pan, ensuring they are evenly spread out for cooking. His left hand holds a few more potato slices ready to be placed in the pan. [0:05:24 - 0:05:27]: The man meticulously arranges the potato slices while occasionally looking down at the pan to check their placement. In the background, the kitchen counter holds a variety of cooking items, including bottles and a knife block. [0:05:27 - 0:05:28]: He reaches over to the side, possibly to grab more potato slices from a wooden cutting board located next to the stove. His movements are precise and careful, indicating attention to detail in his cooking process. [0:05:28 - 0:05:29]: A close-up view of the man placing more potato slices into the frying pan. There are audible sizzling sounds as the potatoes come in contact with the hot surface. [0:05:29 - 0:05:30]: He adjusts the heat on the gas stove, ensuring the temperature is optimal for cooking the potatoes. His focus remains on the pan as he works. [0:05:30 - 0:05:31]: The man arranges the last few potato slices in the pan, making sure they are not overlapping and have enough space to cook evenly. His hand movements are quick and practiced. [0:05:31 - 0:05:32]: He shifts his gaze from the pan to another part of the kitchen, possibly checking on another cooking task. Behind him, there are glass cabinets with neatly arranged glassware and other kitchen items. [0:05:32 - 0:05:35]: The man briefly steps away from the pan, walking over to the cutting board where there are a few more potato slices left. He picks them up and returns to the pan, placing them inside it carefully. [0:05:35 - 0:05:36]: He stirs the potatoes slightly, ensuring they are all evenly cooked. The kitchen has a modern and clean ambiance, with everything in its place and well-organized. [0:05:36 - 0:05:37]: The man wipes his forehead with his forearm, showing that he is engaged in an activity that requires focus and effort. He then resumes his attention to the stove. [0:05:37 - 0:05:39]: The camera focuses on the frying pan showing the potatoes sizzling in oil. The potatoes are starting to turn golden brown on the edges indicating they are cooking well. The scene ends with the man giving the pan a slight shake to ensure even cooking.",
+        "questions": [
+            {
+                "task_type": "Action Recognition",
+                "question": "What action does the man take after placing the potato slices in the frying pan?",
+                "time_stamp": "0:05:24",
+                "answer": "B",
+                "options": [
+                    "A. He adds seasoning to the potatoes.",
+                    "B. He sprinkles seasonings on the potatoes.",
+                    "C. He washes his hands.",
+                    "D. He prepares another dish."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Attribute Recognition",
+                "question": "What does the man do to ensure the potatoes cook evenly in the pan?",
+                "time_stamp": "0:05:31",
+                "answer": "B",
+                "options": [
+                    "A. He stirs them constantly.",
+                    "B. He arranges them to avoid overlapping.",
+                    "C. He covers the pan.",
+                    "D. He adds more oil."
+                ],
+                "required_ability": "working memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_28_real.mp4"
+    },
+    {
+        "time": "[0:10:00 - 0:11:00]",
+        "captions": "[0:10:40 - 0:11:00] [0:10:40 - 0:10:52]: A person wearing a dark blue t-shirt stands at a kitchen counter, chopping green onions on a wooden cutting board. Various objects are present on the counter including a frying pan to the left and a white bowl with vegetables on the right. Behind the person, a grey cupboard with glass doors contains various dishes and a few bottles. The countertop itself is white with a small portion of a sink visible. The person continues chopping and adjusting the green onions with a focused expression;  [0:10:53]: The person shifts their focus from the cutting board to the bowl on the counter, holding both items. They are captured in mid-motion, appearing to smile or laugh while engaging with someone off-screen;  [0:10:54 - 0:10:56]: The person momentarily steps backward from the counter, facing away from the camera towards a kitchen shelf and microwave in the background. In this shot, more of the kitchen is visible, including a large clock mounted on the back wall. Another individual seated at a table is semi-visible in the distant background through a doorway;  [0:10:57 - 0:10:58]: The camera angle shifts, zooming back in on the countertop area. Numerous kitchen utensils and a stovetop with partially visible food being cooked are captured. The person resumes their previous position at the counter, holding the bowl with vegetables;  [0:10:59]: The person lifts the bowl towards the camera while using a spoon to mix the contents. The expression on their face is cheerful and engaging, as they look towards the camera. The kitchen setup in the background remains the same with the grey cupboards and various kitchen items.",
+        "questions": [
+            {
+                "task_type": "Object Recognition",
+                "question": "What is this person doing right now?",
+                "time_stamp": "0:10:39",
+                "answer": "B",
+                "options": [
+                    "A. He is chopping green onions.",
+                    "B. He is slicing carrots.",
+                    "C. He is dicing tomatoes.",
+                    "D. He is mincing garlic."
+                ],
+                "required_ability": "working memory"
+            },
+            {
+                "task_type": "Event Understanding",
+                "question": "What is the person doing with the bowl right now?",
+                "time_stamp": "0:11:00",
+                "answer": "C",
+                "options": [
+                    "A. Putting it in the microwave.",
+                    "B. Washing it in the sink.",
+                    "C. Mixing its contents with a spoon.",
+                    "D. Placing it back on the counter."
+                ],
+                "required_ability": "episodic memory"
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_28_real.mp4"
+    }
+]

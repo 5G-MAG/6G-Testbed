@@ -29,6 +29,8 @@
 !aitestbed/run_full_tests.sh
 !aitestbed/test_profiles.sh
 !aitestbed/test_vllm.sh
+!aitestbed/run_vlm_test.sh
+!aitestbed/run_chat_test.sh
 !netemu/scripts/apply_profile.sh
 !netemu/scripts/clear_profile.sh
 !aitestbed/docker/entrypoint.sh
@@ -55,20 +57,19 @@ ml/data/*.npz
 ml/synthetic/
 ml/results/
 
-aitestbed/examples/assets/dataset_real/*
-aicodec/aicodec/models/*
 !start_sidecar.sh
 !start_sidecar_concurrent.sh
 !start_sidecar_concurrent_qwen36.sh  
 !start_sidecar_qwen36.sh
 
-!aicodec/aicodec/models/VidCom2/
-!aicodec/aicodec/models/VidCom2/**
-!aicodec/aicodec/models/__init__.py
-!aicodec/aicodec/models/base.py
-!aicodec/aicodec/models/download.py
-
 aicodec/aicodec/models/VidCom2/token_compressor/__pycache__/
 aicodec/aicodec/models/VidCom2/token_compressor/vidcom2/__pycache__/
 nohup.out*
 aicodec/runs/
+
+# liquid checkpoints: download only (see README), never commit weights
+aicodec/aicodec/models/liquid/checkpoints/**/*.ckpt
+aicodec/aicodec/models/liquid/checkpoints/**/*.safetensors
+aicodec/aicodec/models/liquid/checkpoints/model/tokenizer.json
+aicodec/aicodec/dataset/StreamingBench/**/*.mp4
+aicodec/aicodec/dataset/StreamingBench/**/questions_results_*.json
