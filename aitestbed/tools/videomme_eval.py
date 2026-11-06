@@ -369,3 +369,6 @@ def build_prompt(question: str, options: list[str]) -> str:
 
 def save(path: Path, results: list[dict]) -> None:
     tmp = path.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(results, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
