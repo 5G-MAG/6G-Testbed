@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Causal Reasoning",
+                "question": "What is the sticker on the windshield saying right now?",
+                "time_stamp": "00:00:04",
+                "answer": "B",
+                "options": [
+                    "A. PLEASE PAY FARE.",
+                    "B. PLEASE HAND UP.",
+                    "C. PLEASE EXIT.",
+                    "D. PLEASE TAKE SEATS."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_459_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What device is located to the right side of the steering wheel right now?",
+                "time_stamp": "00:02:03",
+                "answer": "A",
+                "options": [
+                    "A. A digital device.",
+                    "B. A water bottle.",
+                    "C. A map.",
+                    "D. A book."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_459_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What street is visible on the signpost right now?",
+                "time_stamp": "00:04:02",
+                "answer": "D",
+                "options": [
+                    "A. Oak Street.",
+                    "B. Maple Street.",
+                    "C. Elm Street.",
+                    "D. Jersey Street."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_459_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What sign is visible to the right of the intersection right now?",
+                "time_stamp": "00:06:00",
+                "answer": "D",
+                "options": [
+                    "A. STOP.",
+                    "B. YIELD.",
+                    "C. NO ENTRY.",
+                    "D. GIVE WAY."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_459_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What color is the first car on the left side of the road right now?",
+                "time_stamp": "00:07:58",
+                "answer": "D",
+                "options": [
+                    "A. Green.",
+                    "B. Blue.",
+                    "C. Silver.",
+                    "D. Red."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_459_real.mp4"
+    }
+]

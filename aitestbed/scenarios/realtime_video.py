@@ -65,6 +65,9 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
         target_fps = self.config.get("target_fps", 10)
         max_frames = self.config.get("max_frames_per_video")
         task_config = self.config.get("task_config", {})
+        # interface for ICE candidate filtering; injected by the orchestrator
+        # from --interface so media traffic stays on the shaped/captured NIC
+        ice_iface = self.config.get("network_interface")
         dataset_dir = task_config.get("video_paths", "data/videos")
         video_paths = []
         if dataset_dir and Path(dataset_dir).exists():
@@ -81,6 +84,13 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
         else:
             video_paths = self.config.get("video_paths", [])
         # print(f"video paths: {video_paths}")
+        # INVARIANT: exactly ONE video per session/connection. The
+        # per-video pts timeline this scenario's question matching
+        # relies on is only correct under this invariant: a second
+        # video on the same sender resets pts to 0, aiortc's
+        # TimestampMapper then reads it as an RTP timestamp wrap, and
+        # question matching stops working. Sending more videos requires
+        # a fresh connection (or explicit pts offsetting) per video.
         video_path = [video_paths[run_index % len(video_paths)]]
         print(f"run index: {run_index}, video path: {video_path}")
 
@@ -98,6 +108,7 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
             target_fps=target_fps,
             model=model,
             network_profile=network_profile, # for result saving
+            ice_iface=ice_iface,
         )
 
         try:

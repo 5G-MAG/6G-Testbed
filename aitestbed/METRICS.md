@@ -82,6 +82,7 @@ Measures the time from request submission to response completion.
 |--------|---------|------|-------------|
 | `latency_mean` | `mean(latencies)` | seconds | Average latency across all requests |
 | `latency_median` | `median(latencies)` | seconds | 50th percentile latency |
+| `latency_p50` | `percentile(latencies, 50)` | seconds | 50th percentile (linear interpolation; equals `latency_median`) |
 | `latency_min` | `min(latencies)` | seconds | Minimum observed latency |
 | `latency_max` | `max(latencies)` | seconds | Maximum observed latency |
 | `latency_std` | `stdev(latencies)` | seconds | Standard deviation (0 if n=1) |
@@ -89,6 +90,8 @@ Measures the time from request submission to response completion.
 | `latency_p99` | `percentile(latencies, 99)` | seconds | 99th percentile latency |
 
 **Source:** `latency_sec` field from each `LogRecord`
+
+**No-data sentinel:** the `latency_*`, traffic-volume (`*_bytes_mean`, `total_bytes_mean`) and `ul_dl_ratio_mean` fields use `null` when no qualifying record exists (truthy-`latency_sec` filter, §2.3); `0.0` is **not** a valid "no data" marker for them. JSON/3GPP report outputs coerce `null → 0` at serialization (`or 0`), preserving legacy schema shape.
 
 ---
 
@@ -110,8 +113,52 @@ for each record:
     if t_first_token and t_request_start are set:
         ttft = t_first_token - t_request_start
         if ttft >= 0:
-            ttft_values.append(ttft)
+             ttft_values.append(ttft)
 ```
+
+#### 2.1 TTFT Field Semantics (encoder_placement scenarios)
+
+Applies to the whole `encoder_placement` family, including the `qwen36` client variants (identical client structure). Several TTFT-like fields coexist in the records; they are **not interchangeable**:
+
+| Field | Anchor (t=0) | Covers | Status |
+|-------|--------------|--------|--------|
+| `LogRecord.t_first_token − t_request_start` (→ `metadata.ttft_sec`, `ttft_values`) | `t_request_start` captured by the scenario/worker | Full path: video read + edge preprocessing + ViT + upload + network + server prefill + first token | **Authoritative** — use for all aggregation and analysis |
+| `metadata.e2e_ttft` (client-side) | client function entry `t_e2e_start` | Same as above within <1 ms (a few lines of function entry) | Redundant / historical; may drift by milliseconds — do **not** use for SQL reconciliation against `ttft_sec` |
+| `engine_stats.server_ttft` (sidecar) | server `t_gen_start` (prefill submission; the preceding bundle `t_prepare` is reported separately) | Engine-side prefill + first token only; excludes upload, network, preprocessing | Server-perspective attribution only; **much smaller** than terminal-observed TTFT — never compare against terminal TTFT |
+| `ScenarioResult.ttft_sec` (aggregation layer) | — | serial: first turn, single user; concurrent: first wave `ttft_p50` (see `metadata.ttft_semantics`) | Read `ttft_semantics` before comparing across scenarios |
+
+**Comparison warnings:**
+
+- **serial vs. concurrent TTFT is not directly comparable.** The concurrent protocol excludes model loading from the measurement window (workers are `ready` before the barrier), while a serial first request includes cold loading (mechanism and required filtering in §2.2 below).
+- The reconcile lines in the client log (`[EncPl] reconcile:`) decompose the gap between `ttft_sec` and `server_ttft`. The expected gap is upload + network + preprocessing; an unexpectedly large gap usually means `e2e_ttft` was mistaken for `ttft_sec`, not a real network effect.
+
+#### 2.2 Cold-Load Bias in Serial encoder_placement Runs
+
+**Mechanism.** The serial `encoder_placement` scenario has no warmup phase, and the client's `AutoProcessor` and edge model (`_get_processor` / `_get_edge_model`) load lazily. The **first request of each session** therefore pays transformers import + weight loading *inside* the measurement window — tens of seconds on first use.
+
+**Scope.** Serial scenarios only (including the `qwen36` serial variants, same structure): the first record of each session gets a cold-load-inflated `ttft_sec` / `latency_sec`. Concurrent scenarios are unaffected (loading happens in the ready phase before the barrier, outside the window), and all subsequent serial records hit process-level caches.
+
+**Required analysis practice:**
+
+- Multi-run serial comparisons: **discard the first record of each `run_index`** (or at minimum the first turn) before aggregating TTFT/latency.
+- Serial `--runs 1`: TTFT/latency columns must not be used for cross-mode or cross-scenario comparison.
+- Bench tools (`encpl_bench_eval*`): the serial tools (`encpl_bench_eval.py`, `encpl_bench_eval_qwen36.py`) warm the client caches before the question loop, so new runs have no cold first question; results files written **before** the warmup was added still contain one cold first entry (first question of the first video) — discard it when analyzing old files.
+
+#### 2.3 Aggregation Caveats (encoder_placement)
+
+- **Empty completions record latency as 0.0 — filtered by the analysis layer AND the wave stats; raw SQL does not.** When the model emits EOS on the first token (greedy decode, occasional prompts), the request is `ok=True` with `ttft = NULL` and `latency_sec = 0.0`. Both `analysis/metrics.py` (`if r.get("latency_sec")`) and the concurrent scenario/bench wave aggregations use truthiness filters, so `latency_mean` / `latency_p50` exclude the zeros; a raw `AVG(latency_sec)` in SQL **includes** them and pulls the mean down. When querying SQL directly, filter `tokens_out > 0` (or the concurrent wave summary's `wave_empty` count) yourself. Related: a record set consisting **only** of empty completions yields `null` `latency_*` / `*_bytes_mean` metrics (§1 sentinel note), not `0.0`.
+- **`--users` above the sidecar's `--max-bundles` evicts in-flight bundles.** `BundleStore` evicts the oldest bundle when full; with all N users uploading before any POST consumes, N must stay ≤ `--max-bundles` (concurrent sidecar default 64) or a user's bundle can be LRU-evicted and fail with 404.
+- **`ScenarioResult.total_latency_sec` is scenario-shaped.** Serial: sum of per-turn user latencies. Concurrent: sum of per-wave wall-clock (`wave_wall_sec`). The two are not comparable across scenario types — compare means or per-wave wall time instead.
+- **Event timestamps are read-buffer quantized.** SSE events are parsed in batches at urllib3 read boundaries, so fast streams show several events sharing one timestamp; `inter_chunk_times` inherits this quantization. Treat inter-chunk jitter from the DB as coarse — the authoritative timing is pcap (`--capture-pcap`).
+- **`_pct` (wave stats) uses linear interpolation — same semantics as `analysis/metrics.py _percentile`.** Historical note: before this unification it used round-to-index selection, under which an n=2 `p50` equaled the *minimum*; results produced before the fix interpret small-wave percentiles as order statistics. Current code interpolates (`k = (n−1)·p/100`, fractional part weighted between neighbors).
+- **`wave_wall_sec` in edge-process mode includes process spawn, interpreter import, model load and teardown.** Every wave cold-starts its worker processes, so thread-mode and process-mode `wave_wall_sec` are not comparable. Use per-request fields (`ttft_sec`, `latency_sec`) or `wave_barrier_wall_sec` (barrier release → all workers joined; process mode only, emitted by both the concurrent scenarios and the concurrent bench tools) for cross-topology wave comparisons.
+- **Dataset mode is playlist-shaped (qwen3/qwen36 concurrent scenarios): one barrier wave, per-user serial playlists.** The barrier aligns only each user's FIRST video; afterwards every user runs its playlist serially with no inter-video barrier (user u gets `items[u::N]` round-robin — same question→user assignment the old wave-chunking produced). Consequences: (1) `wave_wall_sec` spans the whole playlist marathon (a fast user finishing early does not wait for slow siblings), so N-user "wave" and per-request TTFT are still per-video comparable but `wave_wall_sec` no longer bounds a single synchronized request set; (2) `wave_ok`/`wave_empty`/`wave_videos` count VIDEOS, not users, and `ok_per_user`/`ttft_per_user`/`latency_per_user`/`video_paths_per_user` are nested per-video lists (`upload_bytes/time_per_user` are whole-playlist totals, `conns_per_user` is the first video's connections); (3) `turn_index = user_index*1000 + seq` (the old `wave*1000+user` layout is gone; rows carry explicit `seq` + `user_index`); (4) a failed video is one `ok=False` entry and the user's playlist CONTINUES — a user producing no record at all yields `ok_per_user[u] = None` in single-video mode or a `[]`/placeholder list in playlist mode; (5) `bench.padded` is always `false` in playlist mode (the final-wave filler duplicates are gone; the key stays for schema compatibility with older wave-chunked rows — aggregators skipping `padded=true` still work). Older rows from the wave-chunked era are identified by `wave_index > 0` in `waves` metadata / absent `seq` in record metadata.
+- **`engine_stats.upload_time` is PUT send→response, not payload transfer time.** It includes server-side `torch.load`/dequantization of the bundle before the HTTP response is returned, so it overstates the pure wire-transfer time; use pcap for transfer-time attribution.
+- **`server_ttft` carries a thread-hop of milliseconds (concurrent sidecar).** The first-token timestamp is taken when the uvicorn event loop dequeues the engine's output, so under concurrency the value includes engine-loop→uvicorn queueing jitter. Fine for attribution at the ~100 ms scale; do not treat single-digit-ms differences as engine-side signal.
+- **Reconcile `edge_riders` is a residual, not a precise stage sum.** It is computed as `edge_prep_time − stage1 − stage2`, so it absorbs every unmodeled slice of `_prepare_edge_bundle` (riders, file reads, serialization) — read it as "unexplained edge prep", not as a named pipeline stage.
+- **"overall TTFT p90" has two incompatible calibers.** The Qwen3 concurrent bench final summary (`encpl_bench_eval_concurrent.py` `_print_final_summary`) pools **raw per-request TTFT values** across waves and takes the p90 of that pool; the two runners (`run_encoder_placement_concurrent{,_qwen36}.py`) and the qwen36 bench instead take **the median of per-wave p90s** (`_pct(all_p90, 50)`). Both print the same "overall ... p90" label but answer different questions (request-tail vs typical-wave-tail); with few waves the median-of-p90s is markedly coarser. Never compare the two directly; for new analysis prefer the request-level pooling (recomputable row-by-row from the DB).
+- **Percentile variants coexist in the chart/Excel layer.** `generate_charts.py` (nearest-rank `int(n·0.95)`; `np.percentile` elsewhere) and `export_to_excel.py` (`sorted[len//2]` upper-median) do not use the linear-interpolation semantics that `metrics.py`/`_pct` standardized. Values differ slightly for the same data; treat `metrics.py` output as the authoritative percentile caliber and never diff chart-vs-analysis numbers at small sample sizes.
+- **chat / chat_token success-vs-failure rows use different anchors.** Success rows take the client's `t_request_start` (post message-serialization); failure rows take the scenario's pre-build anchor. The gap is request-build time (milliseconds). Failure rows are excluded from TTFT anyway; the asymmetry only matters for `latency_sec` on failure-heavy runs.
 
 ---
 
@@ -155,6 +202,10 @@ def estimate_payload_bytes(obj):
     return len(json.dumps(obj, default=str).encode('utf-8'))
 ```
 
+**SSE framing (encoder_placement clients).** For `encoder_placement` chat streams, `response_events[i].bytes` and `response_bytes` count the **full SSE line** — `data: ` prefix (6 B) + JSON payload + the `\n\n` event separator (2 B) — over **every** stream event: content chunks, usage chunks, role-only/finish_reason deltas, and the final `engine_stats` event. The invariant `sum(response_events[i].bytes) == response_bytes` holds per stream; check it in analysis to detect truncation. Caveat: `TRACE_MAX_EVENTS` / `TRACE_MAX_BYTES` truncate the event list written to the **trace JSON file** only (a `[trace truncated]` note marks it) — the DB's `response_bytes` is unaffected; run the invariant check on the bench results file, not the truncated trace. Data written before this convention was introduced is not directly comparable; check the capture date.
+
+**`on_wire` estimates are coarse (encoder_placement upload path).** `metadata.*_wire_bytes` (and the helper `_on_wire_len`) estimate TCP framing as a fixed MSS = 1460 B with no ACK/Header overhead modeling. Two known distortions: (a) on loopback the MTU is 64 KB, so real segments are far larger than modeled; (b) delayed ACKs and Nagle interactions are not modeled. Treat wire numbers as **order-of-magnitude estimates only**; the authoritative byte counts on the cable come from `--capture-pcap` capture analysis. Note that since the `request_bytes` payload-semantics fix, `request_bytes` counts application-layer bytes only (upload payload + chat JSON); wire estimates remain available via `metadata.uploaded_wire_bytes` / `metadata.video_wire_bytes`.
+
 ---
 
 ### 5. Token Metrics
@@ -176,10 +227,14 @@ for record in records:
 token_rate_mean = mean(token_rates)
 ```
 
+**Rate-metric denominators are not interchangeable.** `token_rate_mean` (and ran2 `tokens_per_sec`) divide `tokens_out` by the **full `latency_sec`** (TTFT included), i.e. an *effective* end-to-end generation rate. `streaming_rate_mean` (§9) divides by `t_last_token − t_first_token` (TTFT excluded), i.e. the *decode-phase* streaming rate. The three coexisting denominators are intentional (different questions); never compare values across them — see §5/§9 boundary notes.
+
 **Fallback Token Estimation:**
 When the provider doesn't return token counts:
 1. Use `tiktoken` library with `cl100k_base` encoding
 2. Fall back to `len(text) // 4` approximation
+
+**Fallback accuracy caveat:** `cl100k_base` is an OpenAI vocabulary; applied to Qwen tokenizer text it deviates systematically by ±20–30 %. In `encoder_placement` fallbacks (no usage chunk), `tokens_in` is estimated from the prompt alone (~20 tokens) while the true prefill includes the ~14.5k video tokens — treat fallback token counts as placeholders, never as prefill-volume evidence. Prefer the engine-reported usage counts whenever present.
 
 ---
 
@@ -249,7 +304,7 @@ Measures streaming response behavior and quality.
 | Metric | Formula | Unit | Description |
 |--------|---------|------|-------------|
 | `chunk_count_mean` | `mean(chunk_count)` | chunks | Average chunks per streaming response |
-| `streaming_rate_mean` | `mean(response_bytes / duration)` | bytes/sec | Average streaming throughput |
+| `streaming_rate_mean` | `mean(response_bytes / (t_last_token - t_first_token))` | bytes/sec | Average streaming throughput — note the duration **excludes TTFT** (first-token to last-token window) |
 
 **Streaming Rate Calculation:**
 ```python

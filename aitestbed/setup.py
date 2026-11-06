@@ -41,7 +41,8 @@ setup(
             "seaborn>=0.12.0",
         ],
         "webrtc": [
-            "aiortc>=1.5.0",
+            "aiortc>=1.14.0,<1.16.0",
+            "aicodec",
         ],
         "computer-use": [
             "playwright>=1.41.0",

@@ -1,0 +1,161 @@
+# Scenarios config (Qwen3.6 variant) for the 6G AI Traffic Testbed.
+#
+# Standalone sibling of scenarios.yaml for the Qwen3.6
+# (qwen3_5 / qwen3_5_moe) encoder-placement experiment — zero changes
+# to the Qwen3-VL config, so both experiments can run/debug in
+# parallel.
+#
+# Run via the standalone runner (does NOT touch orchestrator.py):
+#   python aitestbed/run_encoder_placement_qwen36.py --help
+#
+# Mode switching (env ENC_MODE_QWEN36 wins over the `mode` key,
+# ENC_MODE is honored as fallback):
+#   ENC_MODE_QWEN36=server — terminal uploads the original video; the
+#                             server runs decode+processor+ViT+prefill
+#   ENC_MODE_QWEN36=edge   — terminal runs decode+processor+ViT (single
+#                             [N, 2048] latent segment — Qwen3.6 has no
+#                             deepstack), uploads the
+#                             precomputed_embedding bundle
+# Use a different output DB/session per mode for A/B comparison.
+
+defaults:
+  retry_count: 0
+  retry_backoff_sec: 1.0
+  retry_backoff_multiplier: 2.0
+
+scenarios:
+  # =============================================================================
+  # Encoder Placement (SGLang engine sidecar, Qwen3.6-35B-A3B BF16)
+  # =============================================================================
+  encoder_placement_qwen36:
+    type: "encoder_placement_qwen36"
+    inter_prompt_delay_sec: 0  # sec between prompts; 0 = back-to-back
+    description: "Visual encoder placement (Qwen3.6-35B-A3B BF16): server-side ViT (video upload) vs terminal-side ViT (precomputed single-segment [N, 2048] embedding bundle — no deepstack), SGLang engine sidecar on port 8004"
+    provider: "sglang-engine-qwen36"
+    model: "../aicodec/aicodec/models/Qwen3.6-35B-A3B"
+    network_interface: "lo"
+    # mode: "server" uploads the original video and the server runs the
+    # full pipeline; "edge" runs decode+processor+ViT on the terminal and
+    # uploads the precomputed_embedding bundle. Env ENC_MODE_QWEN36 wins.
+    mode: "server"
+    max_frames: 768
+    max_tokens: 256
+    # Ratio-of-native frame sampling (v3 semantics): keep
+    # floor(total_frames * R) frames (multiple of 2, min 4, capped by
+    # max_frames) instead of sglang's default 2fps x duration. In
+    # (0, 1]; absent/0 = off. Edge mode samples locally (patched
+    # smart_nframes; canary-verified per request). Server mode: the
+    # ENGINE samples with its STARTUP config — start the sidecar with
+    # the SAME --frame-ratio. Env ENCPL_FRAME_RATIO wins; runner flag:
+    # --frame-ratio.
+    # frame_ratio: 0.25
+    # Optional VidCom2 token compression of the edge bundle (edge mode
+    # only): prune to retention_ratio of the video tokens. Env
+    # COMPRESSOR / R_RATIO win; runner flags: --compressor /
+    # --retention-ratio.
+    # compressor: "vidcom2"
+    # retention_ratio: 0.25
+    # Two-tier retention split (edge + vidcom2 only): optional_ratio
+    # carves the least-critical tail out of the RETAINED set. Must tier
+    # (retention - optional) rides the reliable first wave (accuracy
+    # floor); optional tier streams best-effort over UDP (E2U
+    # datagrams) BETWEEN the must PUT and the chat POST — parts that
+    # miss the server's merge snapshot are dropped and never
+    # retransmitted. Requires the sidecar started with --opt-udp-port
+    # (default 8005; the must PUT response reports it). Per-frame
+    # optional counts follow the frame's own dynamic scale gap.
+    # 0 (default) = single-tier legacy path, byte-identical.
+    # Env ENCPL_OPTIONAL_RATIO wins.
+    # optional_ratio: 0.10
+    # Best-effort part granularity: tokens packed into one UDP part
+    # (server merges by per-token position; packaging-only knob).
+    # Env ENCPL_OPT_TOKENS_PER_PACKET wins.
+    # opt_tokens_per_packet: 64
+    # UDP second-wave timing (edge + tiered only): opt_send_gap_ms
+    # sleeps between ADJACENT datagrams (default 0.05 ms ~ 20k
+    # datagrams/s, paced below the receiver's reassembly rate; 0 =
+    # blast, only safe with a raised receiver SO_RCVBUF and small
+    # waves); opt_chat_delay_ms sleeps AFTER the wave and BEFORE the
+    # chat POST — the dial that trades opt-token arrival rate against
+    # TTFT (the server snapshots at chat-arrival). Env
+    # ENCPL_OPT_SEND_GAP_MS / ENCPL_OPT_CHAT_DELAY_MS win.
+    # opt_send_gap_ms: 0.05
+    # opt_chat_delay_ms: 0.0
+    # Optional fp8 (e4m3, per-tensor scale) quantization of the pruned
+    # feature tensor — halves the uploaded feature bytes; requires
+    # compressor=vidcom2 + edge mode. Env ENCPL_BUNDLE_QUANT wins;
+    # runner flag: --bundle-quant.
+    # bundle_quant: "fp8"
+    # Edge load: standalone vision tower only (default true on Qwen3.6 —
+    # the fp8 35B full load costs ~35 GB VRAM just to obtain the ~0.5 GB
+    # tower). Env ENCPL_VISION_ONLY overrides.
+    vision_only: true
+    # Edge-mode terminal CPU budget (edge mode only): pin the
+    # orchestrator process for the whole run (lazy torch import + model
+    # load included). "auto-half-other" = SECOND half of the cores,
+    # disjoint from the sidecar's default --server-cpus auto-half
+    # (first half) on a single host. Other values: "auto-half", a cpu
+    # list with ranges ("48-95,100"), or '' to disable. Server mode
+    # warns and ignores. Env ENCPL_EDGE_CPUS wins. The applied budget
+    # lands in every record's metadata.edge_cpus.
+    edge_cpus: "auto-half-other"
+    # Edge ViT attention backend: sdpa (default) | flash_attention_4 |
+    # eager. Env ENCPL_ATTN_IMPL overrides.
+    attn_impl: "sdpa"
+    # decord/torchcodec decode-thread cap for the TERMINAL's decoder
+    # (edge mode; the env name SGLANG_DECORD_NUM_THREADS is historical
+    # — caps BOTH backends). decord sizes its pool by HOST core count
+    # and is NOT covered by torch thread knobs. Server mode: no
+    # terminal-side decode — the ENGINE-side cap is the sidecar's own
+    # --decode-threads flag (restart it with the same value). Env
+    # ENCPL_DECODE_THREADS_QWEN36 wins; runner flag: --decode-threads.
+    # decode_threads: 2
+    # torch/OMP intra-op thread cap for the terminal's CPU-side
+    # preprocessing AFTER decode (torchvision resize / HF processor;
+    # edge mode only — server mode warns and ignores). Effective value
+    # min(N, edge_cpus budget): N above the budget is clamped to it,
+    # N below simulates a weaker terminal. Same knob as the sidecar's
+    # --preprocess-threads flag (restart it with the same value for
+    # symmetric server-vs-edge comparisons; the sidecar sizes its
+    # pools by --server-cpus otherwise — the resize-stage thread
+    # asymmetry behind "server decodes faster"). absent/null/'' = the
+    # edge_cpus budget's core count (historical behaviour). Env
+    # ENCPL_PREPROCESS_THREADS_QWEN36 wins; runner flag:
+    # --preprocess-threads.
+    preprocess_threads: null
+    # flush SGLang radix/mm caches before each request (cold-prefix
+    # measurement; default true).
+    flush_cache: true
+    # OPTIONAL dataset-bench mode: replace the single video_path with a
+    # QA test set — each question becomes one logged turn, letter
+    # answers are scored (metadata.bench in the DB), and a summary
+    # line prints at the end. Env ENCPL_DATASET_DIR wins over
+    # dataset_dir (runner flags --dataset/--dataset-dir/--limit/
+    # --tasks/--sample land on these keys; env still wins inside the
+    # scenario). MLVU: tasks selection via tasks (null/'' = MCQ tasks
+    # 1-7; 'all' = every task — 8/9 generation tasks recorded
+    # unscored; or a stem list like [1_plotQA, 8_sub_scene]), json/ +
+    # video/ layout (e.g. /data01/MLVU). Video-MME: full set
+    # (test-*.parquet + videozip/, e.g. /data01/Video-MME). limit:
+    # 0/null = all questions (MLVU mcq = 2174; Video-MME = 2700); set
+    # small for smoke runs. sample: null/'' = stratified (per-task/
+    # duration quota so a limit covers the workload mix); 'head' =
+    # first N rows in file order. dataset: null means single-video
+    # mode. Examples:
+    #   dataset: "mlvu"
+    #   dataset_dir: "/data01/MLVU"
+    #   limit: 20
+    #   tasks: "all"
+    dataset: null
+    dataset_dir: null
+    limit: null
+    tasks: null
+    sample: null
+    # video asset lives under aitestbed/examples/ (NOT repo-root
+    # examples/); base_dir anchors it so the runner works from either
+    # cwd (repo root or aitestbed/). The concurrent yaml relies
+    # on launching from aitestbed/ for the same relative path.
+    video_base_dir: "."
+    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    prompts:
+      - "Describe this video in detail."
