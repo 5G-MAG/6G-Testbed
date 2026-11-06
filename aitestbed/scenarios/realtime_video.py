@@ -84,6 +84,13 @@ class RealtimeVideoUnderstandingScenario(BaseScenario):
         else:
             video_paths = self.config.get("video_paths", [])
         # print(f"video paths: {video_paths}")
+        # INVARIANT: exactly ONE video per session/connection. The
+        # per-video pts timeline this scenario's question matching
+        # relies on is only correct under this invariant: a second
+        # video on the same sender resets pts to 0, aiortc's
+        # TimestampMapper then reads it as an RTP timestamp wrap, and
+        # question matching stops working. Sending more videos requires
+        # a fresh connection (or explicit pts offsetting) per video.
         video_path = [video_paths[run_index % len(video_paths)]]
         print(f"run index: {run_index}, video path: {video_path}")
 
