@@ -782,7 +782,10 @@ class MetricsCalculator:
         # Calculate deltas from baseline (first profile)
         baseline = metrics_list[0]
         for m in metrics_list[1:]:
-            if baseline.latency_mean:
+            # Guard BOTH sides like the baseline check: a non-baseline
+            # profile with no latency data (latency_mean=None) would
+            # raise TypeError inside the arithmetic below.
+            if baseline.latency_mean and m.latency_mean:
                 latency_delta = ((m.latency_mean - baseline.latency_mean) / baseline.latency_mean) * 100
             else:
                 latency_delta = 0
