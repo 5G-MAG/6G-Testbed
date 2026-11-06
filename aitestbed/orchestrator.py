@@ -851,18 +851,18 @@ class TestbedOrchestrator:
             # Encoder placement under concurrency — Qwen3-VL concurrent
             # sidecar 8012 (N barrier-aligned users per wave; orchestrator
             # yaml keys mirror configs/scenarios_encoder_placement_
-            # concurrent.yaml; point it at the 8012 sidecar via env
-            # SGLANG_ENGINE_BASE_URL=http://localhost:8012 — the same
-            # provider/client as the serial 8002 scenario, so the env is
-            # set per orchestrator invocation)
+            # concurrent.yaml; the scenario pins the shared client to the
+            # yaml base_url (default 8012) at run() entry — the same
+            # provider/client as the serial 8002 scenario, so no env
+            # export is needed for the common local case)
             "encoder_placement_concurrent": EncoderPlacementConcurrentScenario,
             # Encoder placement, Qwen3.6 sibling — serial sidecar 8004
             "encoder_placement_qwen36": EncoderPlacementQwen36Scenario,
             # Encoder placement, Qwen3.6 sibling — concurrent sidecar 8014
             # (N barrier-aligned users per wave; orchestrator yaml keys
             # mirror configs/scenarios_encoder_placement_concurrent_
-            # qwen36.yaml; point it at the 8014 sidecar via env
-            # SGLANG_ENGINE_QWEN36_BASE_URL=http://localhost:8014)
+            # qwen36.yaml; the scenario pins the shared client to the
+            # yaml base_url (default 8014) at run() entry)
             "encoder_placement_concurrent_qwen36":
                 EncoderPlacementConcurrentQwen36Scenario
 
@@ -1197,20 +1197,67 @@ class TestbedOrchestrator:
         host = (urlparse(url or "").hostname or "").lower()
         return host in ("localhost", "127.0.0.1", "::1", "")
 
+    # Concurrent ENCPL scenario types: their yaml/base_url default is
+    # the lock-free concurrent sidecar port (8012 Qwen3-VL / 8014
+    # Qwen3.6), NOT the serial port their provider's client class
+    # defaults to. Serial types keep the serial defaults.
+    _ENCPL_CONCURRENT_TYPES = frozenset({
+        "encoder_placement_concurrent",
+        "encoder_placement_concurrent_qwen36",
+    })
+
     def _encpl_sidecar_url(self, scenario_config: dict) -> "str | None":
         """Base URL of the ENCPL sidecar a scenario will talk to.
 
-        Order: env override (SGLANG_ENGINE_QWEN36_BASE_URL — the
-        documented way to point the scenario at the 8014 concurrent
-        sidecar) → the shared client's DEFAULT_BASE_URL (8004 serial).
+        Mirrors each scenario's own pin chain (env/yaml/family default)
+        so the orchestrator's netem port filter, prereq check and tiered
+        preflight always target the sidecar the scenario will ACTUALLY
+        use. run_scenario injects the resolved URL into
+        scenario_config["base_url"] before constructing the scenario,
+        so by the time the scenario runs, yaml tier == the injected
+        value; here the tiers are resolved explicitly in the same
+        order the scenario pins:
+
+        - Qwen3.6 scenarios (serial 8004 / concurrent 8014): env
+          SGLANG_ENGINE_QWEN36_BASE_URL → env SGLANG_ENGINE_BASE_URL →
+          yaml base_url (concurrent only) → family default (8004 serial
+          / 8014 concurrent).
+        - Qwen3-VL scenarios (serial 8002 / concurrent 8012): env
+          SGLANG_ENGINE_BASE_URL → yaml base_url (concurrent only) →
+          family default (8002 serial / 8012 concurrent).
+
         Only reads: never constructs the client (side effect-free, and
         env inspection must happen BEFORE get_client memoizes, so call
         sites run pre-run, not post).
         """
-        env_url = os.environ.get("SGLANG_ENGINE_QWEN36_BASE_URL")
+        scenario_type = scenario_config.get("type")
+        concurrent = scenario_type in self._ENCPL_CONCURRENT_TYPES
+        yaml_url = str(
+            scenario_config.get("base_url") or "").strip()
+        if concurrent and yaml_url:
+            # Normalized the same way the scenario pin does.
+            yaml_url = yaml_url.rstrip("/")
+        else:
+            yaml_url = ""
+        if scenario_type in ("encoder_placement_qwen36",
+                             "encoder_placement_concurrent_qwen36"):
+            env_url = (os.environ.get("SGLANG_ENGINE_QWEN36_BASE_URL")
+                       or os.environ.get("SGLANG_ENGINE_BASE_URL"))
+            if env_url:
+                return env_url.rstrip("/")
+            if yaml_url:
+                return yaml_url
+            if concurrent:
+                return "http://localhost:8014"
+            return EncoderPlacementQwen36Client.DEFAULT_BASE_URL
+        env_url = os.environ.get("SGLANG_ENGINE_BASE_URL")
         if env_url:
             return env_url.rstrip("/")
-        return EncoderPlacementQwen36Client.DEFAULT_BASE_URL
+        if yaml_url:
+            return yaml_url
+        if concurrent:
+            return "http://localhost:8012"
+        return EncoderPlacementClient.DEFAULT_BASE_URL
 
     def _encpl_tiered_info(self, scenario_config: dict) -> dict:
         """Resolve the tiered knobs for ONE experiment (read-only).
@@ -1452,6 +1499,21 @@ class TestbedOrchestrator:
         # so that "auto" does NOT activate the filter (stock ICE behaviour)
         if "network_interface" not in scenario_config:
             scenario_config["network_interface"] = self.raw_network_interface
+
+        # ENCPL sidecar URL: resolve once (env > yaml base_url > family
+        # default) and inject into the config. The scenario's run()
+        # pins the shared client to this URL before any request, so the
+        # netem port filter below, the prereq check and this injection
+        # all agree on ONE sidecar address per experiment. get_client
+        # may have memoized the client at another scenario's port (the
+        # provider is shared across serial/concurrent siblings); the
+        # per-run pin is what makes that safe.
+        encpl_sidecar_url = None
+        if scenario_config.get("type") in self._ENCPL_SCENARIO_TYPES:
+            encpl_sidecar_url = self._encpl_sidecar_url(scenario_config)
+            if encpl_sidecar_url:
+                scenario_config["base_url"] = encpl_sidecar_url
+
         scenario = scenario_class(client, self.logger, scenario_config)
 
         # Pass emulator to agent scenarios so they can apply netem to loopback
@@ -1474,8 +1536,28 @@ class TestbedOrchestrator:
             sidecar_url = self._encpl_sidecar_url(scenario_config)
             if self._is_local_url(sidecar_url):
                 encpl_lo = True
+                # Default-port fallback must match the scenario family
+                # AND arm: Qwen3.6 serial/concurrent → 8004/8014,
+                # Qwen3-VL serial/concurrent → 8002/8012. A URL without
+                # an explicit port only reaches this fallback via the
+                # family defaults (yaml base_url and the sidecar
+                # conventions all carry explicit ports).
+                if scenario_config.get("type") in (
+                        "encoder_placement_qwen36",
+                        "encoder_placement_concurrent_qwen36"):
+                    default_tcp_port = (
+                        8014
+                        if scenario_config.get("type")
+                        in self._ENCPL_CONCURRENT_TYPES
+                        else 8004)
+                else:
+                    default_tcp_port = (
+                        8012
+                        if scenario_config.get("type")
+                        in self._ENCPL_CONCURRENT_TYPES
+                        else 8002)
                 tcp_port = int(
-                    (urlparse(sidecar_url).port or 0) or 8004)
+                    (urlparse(sidecar_url).port or 0) or default_tcp_port)
                 if encpl_tiered["tiered"]:
                     encpl_tiered["udp_port"] = \
                         self._encpl_preflight_opt_udp(
@@ -1895,8 +1977,10 @@ class TestbedOrchestrator:
                                 f"Failed to print encpl bench per-user "
                                 f"stats: {e}")
 
-                    logger.info(f"Metrics: latency_mean={metrics.latency_mean:.3f}s, "
-                               f"success_rate={metrics.success_rate:.1f}%")
+                    logger.info(
+                        "Metrics: latency_mean="
+                        f"{(metrics.latency_mean or 0):.3f}s, "
+                        f"success_rate={metrics.success_rate:.1f}%")
 
                 except RunFailedError:
                     raise
@@ -2365,12 +2449,20 @@ def main():
             print(f"Results for {args.scenario} with {args.profile}")
             print("="*60)
             print(f"  Samples: {metrics.sample_count}")
-            print(f"  Latency (mean): {metrics.latency_mean:.3f}s")
-            print(f"  Latency (p95):  {metrics.latency_p95:.3f}s")
+            # Optional fields (None when the run produced no usable
+            # samples, e.g. all-failured encpl runs or empty --resume):
+            # guard like the block below rather than crash the summary.
+            if metrics.latency_mean is not None:
+                print(f"  Latency (mean): {metrics.latency_mean:.3f}s")
+            if metrics.latency_p95 is not None:
+                print(f"  Latency (p95):  {metrics.latency_p95:.3f}s")
             print(f"  Success rate:   {metrics.success_rate:.1f}%")
-            print(f"  Request bytes:  {metrics.request_bytes_mean:.0f}")
-            print(f"  Response bytes: {metrics.response_bytes_mean:.0f}")
-            print(f"  UL/DL ratio:    {metrics.ul_dl_ratio_mean:.3f}")
+            if metrics.request_bytes_mean is not None:
+                print(f"  Request bytes:  {metrics.request_bytes_mean:.0f}")
+            if metrics.response_bytes_mean is not None:
+                print(f"  Response bytes: {metrics.response_bytes_mean:.0f}")
+            if metrics.ul_dl_ratio_mean is not None:
+                print(f"  UL/DL ratio:    {metrics.ul_dl_ratio_mean:.3f}")
             if metrics.tokens_in_mean is not None and metrics.tokens_out_mean is not None:
                 print(f"  Tokens in:      {metrics.tokens_in_mean:.0f}")
                 print(f"  Tokens out:     {metrics.tokens_out_mean:.0f}")

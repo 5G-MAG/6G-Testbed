@@ -481,7 +481,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
                              "lo via port filters)")
     parser.add_argument("--base-url", default=None,
                         help="sidecar base URL override "
-                             "(default: client default http://localhost:8012)")
+                             "(default: yaml base_url / concurrent sidecar "
+                             "convention http://localhost:8012)")
     parser.add_argument("--wait-sidecar", type=float, default=900,
                         metavar="SEC",
                         help="preflight GET /v1/models retry budget while "
@@ -700,13 +701,16 @@ def main() -> None:
     # + schema), netem shaping and the tcpdump spawn all come after, so
     # a failed preflight (sidecar down / model mismatch) leaves the box
     # and the --db exactly as they were.
-    # _preflight_url mirrors the client's own fallback chain (flag >
-    # env SGLANG_ENGINE_BASE_URL > client DEFAULT 8002) without
-    # constructing the client first; rstrip matches its normalization.
+    # _preflight_url mirrors the scenario's own pin chain (flag >
+    # env SGLANG_ENGINE_BASE_URL > yaml base_url > concurrent default
+    # 8012) without constructing the client first; rstrip matches its
+    # normalization. The runner's config file ships base_url
+    # http://localhost:8012 (the concurrent sidecar convention).
     _preflight_url = (
         args.base_url
         or os.environ.get("SGLANG_ENGINE_BASE_URL")
-        or "http://localhost:8002"
+        or str(cfg.get("base_url") or "").strip()
+        or "http://localhost:8012"
     ).rstrip("/")
     _preflight_sidecar(
         _preflight_url,
@@ -738,6 +742,16 @@ def main() -> None:
         stream_first_event_timeout=args.stream_first_event_timeout,
         stream_idle_timeout=args.stream_idle_timeout,
         stream_upload_read_timeout=args.stream_upload_read_timeout)
+    # Pin the client to the SAME URL the preflight probed (flag > env
+    # > yaml > concurrent default 8012): without this, a no-flag run
+    # against a fresh client falls back to the client class default
+    # 8002 (serial sidecar) while the preflight above checked 8012 —
+    # the runner would pass preflight and then talk to the wrong
+    # sidecar. cfg["base_url"] carries the resolution for the
+    # scenario's own run()-entry pin (which would also catch this).
+    if client.base_url != _preflight_url:
+        client.base_url = _preflight_url
+    cfg["base_url"] = _preflight_url
     logger = TrafficLogger(args.db)
     scenario = EncoderPlacementConcurrentScenario(client, logger, cfg)
 

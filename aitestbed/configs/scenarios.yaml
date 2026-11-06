@@ -190,7 +190,7 @@ scenarios:
     #   limit: 20
     #   tasks: "all"
     dataset: mlvu
-    dataset_dir: /data01/mlvu/MLVU
+    dataset_dir: "../aicodec/aicodec/dataset/mlvu/MLVU"
     limit: 8
     tasks: null
     sample: null
@@ -201,7 +201,7 @@ scenarios:
     # against this. Env-independent (scenario key only). Example:
     #   video_base_dir: "."
     video_base_dir: null
-    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    video_path: null
     prompts:
       - "Describe this video in detail."
 
@@ -211,12 +211,13 @@ scenarios:
   # standalone runner's config). Server pairing:
   #   bash start_sidecar_concurrent.sh            # port 8012
   # The provider is the same "sglang-engine" as the serial 8002
-  # scenario (one shared EncoderPlacementClient), so for the
-  # concurrent sidecar export SGLANG_ENGINE_BASE_URL=http://localhost:8012
-  # for THIS orchestrator invocation (separate invocation from any
-  # serial run). Per-user turn indexing: turn_index = wave*1000 + user.
-  # Config keys ONLY for this scenario family (no env vars beyond the
-  # client's SGLANG_ENGINE_BASE_URL); the standalone runner maps every
+  # scenario (one shared EncoderPlacementClient), but the concurrent
+  # scenario pins the client to base_url below (8012) at run() entry —
+  # no env export needed for the common local case. Env
+  # SGLANG_ENGINE_BASE_URL still wins for remote sidecars.
+  # Per-user turn indexing: turn_index = wave*1000 + user. Config keys
+  # ONLY for this scenario family (no env vars beyond the client's
+  # SGLANG_ENGINE_BASE_URL); the standalone runner maps every
   # CLI flag onto these keys, CLI > yaml.
   encoder_placement_concurrent:
     type: "encoder_placement_concurrent"
@@ -224,6 +225,14 @@ scenarios:
     description: "Encoder placement under concurrency: N barrier-aligned terminal users per wave, server-side ViT (video upload) vs terminal-side ViT (precomputed embedding bundle), lock-free SGLang engine sidecar on port 8012"
     provider: "sglang-engine"
     model: "../aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct"
+    # Sidecar base URL: the concurrent scenario pins the shared client
+    # to this at run() entry (serial siblings pin back to 8002/8004, so
+    # mixed matrices are safe). Env SGLANG_ENGINE_BASE_URL and the
+    # runner's --base-url win over this key; the orchestrator's netem /
+    # preflight mirror the same resolution. Default = the concurrent
+    # sidecar convention (port 8012). Remote example:
+    #   base_url: "http://<server-host>:8012"
+    base_url: "http://localhost:8012"
     network_interface: "lo"
     # mode: "server" uploads the original video and the server runs the
     # full pipeline; "edge" runs decode+processor+ViT on the terminal
@@ -352,7 +361,7 @@ scenarios:
     #   dataset_dir: "/data01/MLVU"
     #   limit: 20
     dataset: mlvu
-    dataset_dir: /data01/mlvu/MLVU
+    dataset_dir: "../aicodec/aicodec/dataset/mlvu/MLVU"
     limit: 16
     tasks: null
     sample: null
@@ -362,7 +371,7 @@ scenarios:
     # cwd (repo root or aitestbed/). Relative video_path /
     # video_paths entries resolve against this. Example: "."
     video_base_dir: null
-    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    video_path: null
     # Per-user DISTINCT videos (either mode, threads or processes):
     # user i watches video_paths[i]. STRICT — len(video_paths) MUST
     # equal concurrent_users; a miscount aborts the run. Omitted/empty
@@ -494,7 +503,7 @@ scenarios:
     #   dataset_dir: "/data01/MLVU"
     #   limit: 20
     dataset: mlvu
-    dataset_dir: /data01/mlvu/MLVU
+    dataset_dir: "../aicodec/aicodec/dataset/mlvu/MLVU"
     limit: 10
     tasks: null
     sample: null
@@ -511,7 +520,7 @@ scenarios:
     # examples/); base_dir anchors it so the scenario works from either
     # cwd (repo root or aitestbed/).
     video_base_dir: "."
-    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    video_path: null
     prompts:
       - "Describe this video in detail."
 
@@ -520,15 +529,25 @@ scenarios:
   # scenarios_encoder_placement_concurrent_qwen36.yaml; env precedence
   # identical. Server pairing:
   #   bash start_sidecar_concurrent_qwen36.sh --port 8014
-  # Remote sidecar: export SGLANG_ENGINE_QWEN36_BASE_URL=http://<host>:8014
-  # Per-user turn indexing: turn_index = wave*1000 + user (encoded in
-  # the DB alongside the shared session_id).
+  # The concurrent scenario pins the shared client to base_url below
+  # (8014) at run() entry — no env export needed for the common local
+  # case. Env SGLANG_ENGINE_QWEN36_BASE_URL still wins for remote
+  # sidecars. Per-user turn indexing: turn_index = wave*1000 + user
+  # (encoded in the DB alongside the shared session_id).
   encoder_placement_concurrent_qwen36:
     type: "encoder_placement_concurrent_qwen36"
     inter_prompt_delay_sec: 1  # sec between waves; 0 = back-to-back
     description: "Encoder placement (Qwen3.6-35B-A3B) under concurrency: N barrier-aligned terminal users per wave, server-side ViT (video upload) vs terminal-side ViT (precomputed single-segment [N, 2048] embedding bundle — no deepstack), lock-free SGLang engine sidecar on port 8014"
     provider: "sglang-engine-qwen36"
     model: "../aicodec/aicodec/models/Qwen3.6-35B-A3B"
+    # Sidecar base URL: the concurrent scenario pins the shared client
+    # to this at run() entry (serial siblings pin back to 8002/8004, so
+    # mixed matrices are safe). Env SGLANG_ENGINE_QWEN36_BASE_URL and
+    # the runner's --base-url win over this key; the orchestrator's
+    # netem / preflight mirror the same resolution. Default = the
+    # concurrent sidecar convention (port 8014). Remote example:
+    #   base_url: "http://<server-host>:8014"
+    base_url: "http://localhost:8014"
     network_interface: "lo"
     # mode: "server" uploads the original video and the server runs the
     # full pipeline; "edge" runs decode+processor+ViT on the terminal
@@ -613,9 +632,9 @@ scenarios:
     # POST — parts that miss the server's merge snapshot are dropped,
     # never retransmitted. 0 (default) = legacy single-tier path,
     # byte-identical. The orchestrator preflights the sidecar's opt_udp
-    # receiver before any run when this is > 0 (point the orchestrator
-    # at the 8014 sidecar via env SGLANG_ENGINE_QWEN36_BASE_URL and
-    # start it with --opt-udp-port 8015). Env ENCPL_OPTIONAL_RATIO
+    # receiver before any run when this is > 0 (the default base_url
+    # already points at the 8014 sidecar — start it with
+    # --opt-udp-port 8015). Env ENCPL_OPTIONAL_RATIO
     # wins. Example:
     #   optional_ratio: 0.10
     optional_ratio: 0.0
@@ -645,7 +664,7 @@ scenarios:
     # the scenario so it works from any cwd (same sentinel convention
     # as scenarios_qwen36.yaml).
     video_base_dir: "."
-    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    video_path: null
     # OPTIONAL per-user videos (list): user i uses entry i. STRICT —
     # len(video_paths) must equal concurrent_users; a miscount aborts
     # the run. Absent/empty/null falls back to the shared video_path
@@ -691,7 +710,7 @@ scenarios:
     #   dataset_dir: "/data01/MLVU"
     #   limit: 20
     dataset: mlvu
-    dataset_dir: /data01/mlvu/MLVU
+    dataset_dir: "../aicodec/aicodec/dataset/mlvu/MLVU"
     limit: 16
     tasks: null
     sample: null
@@ -1633,9 +1652,10 @@ test_matrix:
   # Qwen3-VL concurrent arm (lock-free sidecar 8012, N barrier-aligned
   # users per wave; dataset mode = N playlists: turn_index =
   # user*1000 + seq in the DB, single-video mode = wave*1000 + user).
-  # Same provider as the serial scenario: export
-  # SGLANG_ENGINE_BASE_URL=http://localhost:8012 for the orchestrator
-  # invocation. Remote sidecar: edit the prereq URL to match.
+  # Same provider as the serial scenario, but the scenario pins the
+  # shared client to the yaml base_url (default 8012) at run() entry —
+  # no env export needed. Remote sidecar: set base_url (or env
+  # SGLANG_ENGINE_BASE_URL) and edit the prereq URL to match.
   - scenario: "encoder_placement_concurrent"
     phase: "split"
     profiles: *full_suite_profiles
@@ -1661,9 +1681,10 @@ test_matrix:
   # Qwen3.6 sibling, concurrent arm (lock-free sidecar 8014, N
   # barrier-aligned users per wave; dataset mode = N playlists:
   # turn_index = user*1000 + seq in the DB, single-video mode =
-  # wave*1000 + user). Remote sidecar: export
-  # SGLANG_ENGINE_QWEN36_BASE_URL before the run and edit the prereq
-  # URL to match.
+  # wave*1000 + user). The scenario pins the shared client to the
+  # yaml base_url (default 8014) at run() entry — no env export
+  # needed. Remote sidecar: set base_url (or env
+  # SGLANG_ENGINE_QWEN36_BASE_URL) and edit the prereq URL to match.
   - scenario: "encoder_placement_concurrent_qwen36"
     phase: "split"
     profiles: *full_suite_profiles

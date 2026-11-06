@@ -479,6 +479,8 @@ The encoder-placement family measures the traffic/QoE impact of moving the **vis
 | Qwen3-VL | `Qwen3-VL-30B-A3B-Instruct` (4B for edge) | `sglang_engine_server.py`, port 8002 | `sglang_engine_server_concurrent.py`, port 8012 | `encoder_placement` / `encoder_placement_concurrent` |
 | Qwen3.6 | `Qwen3.6-35B-A3B(-FP8)` (qwen3_5_moe) | `sglang_engine_server_qwen36.py`, port 8004 | `sglang_engine_server_concurrent_qwen36.py`, port 8014 | `encoder_placement_qwen36` / `encoder_placement_concurrent_qwen36` |
 
+Sidecar port resolution: every scenario pins the shared provider client to its own sidecar at `run()` entry — chain env `SGLANG_ENGINE_QWEN36_BASE_URL`/`SGLANG_ENGINE_BASE_URL` > yaml `base_url` (the concurrent blocks ship `http://localhost:8012`/`8014`) > family default (serial 8002/8004). A concurrent run therefore talks to the concurrent sidecar (8012/8014) by default — no env export per invocation — and a serial run that follows in the same orchestrator process pins back to 8002/8004, so mixed matrices never cross the arms. The orchestrator's netem shaping, prereq check and runner preflights mirror the same resolution.
+
 **Modes (both arms, A/B comparison — use a separate `--db` per mode):**
 
 - `server` — the terminal uploads the original video; the sidecar's SGLang engine runs decode + processor + ViT + prefill + decode.
@@ -670,16 +672,22 @@ python aitestbed/run_encoder_placement_concurrent.py \
 | `--attn-impl sdpa\|flash_attention_4\|eager` | Edge ViT attention backend — not bit-identical; separate DBs per backend |
 | `--preprocess-threads N` | Terminal CPU-side (resize/processor) thread cap; mirror on the sidecar too |
 | `--frame-ratio R` | Edge: sampled locally via patched `smart_nframes`. Server: the ENGINE samples with its STARTUP config — start the sidecar with the SAME value |
-| `--profile NAME` | Profile name recorded in the DB only; netem is NOT applied by these runners (apply `tc` yourself on the terminal's egress interface for dual-host shaping) |
+| `--profile NAME` | Profile name recorded in the DB only; netem is NOT applied by these runners (apply `tc` yourself on the terminal's egress interface for dual-host shaping — which also requires starting the sidecar with `--host 0.0.0.0`, since the bind default is loopback-only) |
 | `--no-flush-cache` | Skip the per-request/per-wave `/flush_cache` (cold-prefix is the default) |
 
 **Orchestrator path (dataset mode + bench report)** — the same five dataset keys work through `orchestrator.py` for all four `encoder_placement*` scenario types (env `ENCPL_DATASET_DIR` wins over `dataset_dir`; `dataset: null` = single-video mode). Enable them in `configs/scenarios.yaml` (or the standalone sibling yamls) — e.g. the qwen36 serial block defaults to `dataset: mlvu, dataset_dir: /data01/mlvu/MLVU, limit: 10`:
 
 ```bash
-# point the client at the right sidecar first (qwen36 serial example)
-export SGLANG_ENGINE_QWEN36_BASE_URL=http://localhost:8004
+# serial qwen36 example — the scenario pins the client to its own
+# sidecar (8004) at run() entry; the env export is only needed for a
+# REMOTE sidecar or an explicit override
 python orchestrator.py --scenario encoder_placement_qwen36 \
     --profile no_emulation --runs 2 --db logs/traffic_logs_encpl_q36.db
+
+# concurrent arms default to their lock-free sidecars (8012/8014) the
+# same way — no env export needed either
+python orchestrator.py --scenario encoder_placement_concurrent_qwen36 \
+    --profile no_emulation --runs 2 --db logs/traffic_logs_encpl_cq36.db
 ```
 
 Bench scoring lands in the DB as per-record `metadata.bench` (answer, model_answer, correct, padded, task_type/duration). After each experiment the orchestrator aggregates it into `ScenarioMetrics.real_*` — `real_accuracy` uses **run-mean semantics** (mean of per-run accuracies, one session = one run; padded duplicates skipped, parse failures counted separately) — and it flows into the stdout `Real total/correct/accuracy` lines and `experiment_report.json`'s `task_accuracy` block, exactly like `realtime_video_understanding`. It also prints a bench-tool-style rich summary after each experiment (`[EncPlBench]` blocks: mode counts, OVERALL run-mean + pooled, accuracy by task_type/duration, per-run detail, E2E TTFT/LAT percentiles with zero-token EMPTY completions excluded, first-video vs steady TTFT and a per-user summary when waves exist), followed by the standalone runners' per-user detail — per-wave headers, per-video ttft/lat lines with EMPTY/FAIL cells, full video paths, upload bytes + time, and the up/chat connection 5-tuples (src_port is the pcap<->user join key) — the cross-wave overall TTFT line (per-wave aggregates), and the concurrent bench tool's per-user stat blocks (ttft/lat mean/p50/p90/p95/max per user with first/steady split), full per-video detail lines (video_id, upload/wire bytes, up_time, error rows) and pooled per-request overall TTFT/lat percentiles with ok/fail/empty counts. Note `--resume` only aggregates freshly-executed runs; use the DB report tool below for full history.
@@ -749,7 +757,7 @@ Driver flags:
 | Flag | Meaning |
 |:-----|:--------|
 | `--model PATH` | Engine weights (repo-local default under `aicodec/aicodec/models/`) |
-| `--host` / `--port` | Bind address (default `0.0.0.0`) and port (8002/8004 serial, 8012/8014 concurrent) |
+| `--host` / `--port` | Bind address (default `127.0.0.1`, loopback-only; pass `--host 0.0.0.0` when the sidecar must serve a remote terminal) and port (8002/8004 serial, 8012/8014 concurrent) |
 | `--mem-fraction-static F` | GPU KV-cache fraction reserved by SGLang (default 0.85) |
 | `--server-cpus SPEC` | Pin the sidecar + scheduler subprocess to a CPU set (default `auto-half` = first half of cores; keep disjoint from the terminals' `--edge-cpu-ids` pool — the concurrent runner preflight hard-fails on an overlap it sees in `/stats`, and the matrix driver preflight cross-checks `--conc-server-cpus` vs `--conc-edge-cpu-ids`) |
 | `--max-running-requests N` | Scheduler cap on GPU-batched requests; above it requests queue (raise ≥ `--users`) |
@@ -765,7 +773,7 @@ Driver flags:
 | `--frame-ratio R` / `--max-frames N` | Engine-wide frame sampling; startup-time config — restart the sidecar to change, and mirror the runner's value for symmetric arms |
 | `--parallel-video-preprocess` | Concurrent-only knob enabling parallel video preprocessing inside the engine |
 
-**Environment variables (fallbacks; CLI flags win):** `ENC_MODE_QWEN36`/`ENC_MODE`, `SGLANG_ENGINE_QWEN36_MODEL`/`_HOST`/`_PORT`, `SGLANG_ENGINE_QWEN36_BASE_URL` (bench tool), `ENCPL_EDGE_CPUS`, `ENCPL_DECODE_THREADS`(+`_QWEN36`), `ENCPL_PREPROCESS_THREADS_QWEN36`, `ENCPL_BUNDLE_QUANT`, `ENCPL_VISION_ONLY`, `ENCPL_FRAME_RATIO`, `COMPRESSOR`/`R_RATIO`, and the stream-timeout overrides `ENCPL_STREAM_CONNECT_TIMEOUT` / `ENCPL_STREAM_FIRST_EVENT_TIMEOUT` / `ENCPL_STREAM_IDLE_TIMEOUT` / `ENCPL_STREAM_UPLOAD_READ_TIMEOUT` (ad-hoc manual runs only — the matrix driver forwards explicit values and `sanitized_env` strips these from cell subprocesses).
+**Environment variables (fallbacks; CLI flags win):** `ENC_MODE_QWEN36`/`ENC_MODE`, `SGLANG_ENGINE_QWEN36_MODEL`/`_HOST`/`_PORT`, `SGLANG_ENGINE_QWEN36_BASE_URL`/`SGLANG_ENGINE_BASE_URL` (sidecar base URL — wins over the yaml `base_url`; the concurrent scenarios default to 8012/8014 via yaml, serial to 8002/8004 via the client class defaults), `ENCPL_EDGE_CPUS`, `ENCPL_DECODE_THREADS`(+`_QWEN36`), `ENCPL_PREPROCESS_THREADS_QWEN36`, `ENCPL_BUNDLE_QUANT`, `ENCPL_VISION_ONLY`, `ENCPL_FRAME_RATIO`, `COMPRESSOR`/`R_RATIO`, and the stream-timeout overrides `ENCPL_STREAM_CONNECT_TIMEOUT` / `ENCPL_STREAM_FIRST_EVENT_TIMEOUT` / `ENCPL_STREAM_IDLE_TIMEOUT` / `ENCPL_STREAM_UPLOAD_READ_TIMEOUT` (ad-hoc manual runs only — the matrix driver forwards explicit values and `sanitized_env` strips these from cell subprocesses).
 
 **Model-specific notes:**
 

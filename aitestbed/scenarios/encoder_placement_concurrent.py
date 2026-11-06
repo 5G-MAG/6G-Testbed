@@ -276,6 +276,24 @@ class EncoderPlacementConcurrentScenario(BaseScenario):
         run_index: int = 0
     ) -> ScenarioResult:
         session_id = self._create_session_id()
+        # Pin the shared client's base URL for THIS scenario. The
+        # provider's client is memoized and SHARED with the serial
+        # sibling (default 8002) — without the pin a concurrent run
+        # after a serial run in the same orchestrator process would
+        # silently talk to the serial sidecar. Chain: env
+        # SGLANG_ENGINE_BASE_URL > yaml base_url > the concurrent
+        # sidecar convention 8012 (NEVER the client's current/default
+        # URL — that is the serial port when the client is fresh or was
+        # left by a serial run). Process-mode workers receive the
+        # pinned value via cfg["base_url"] below; thread mode uses
+        # self.client directly.
+        _pin = (os.environ.get("SGLANG_ENGINE_BASE_URL")
+                or str(self.config.get("base_url") or "").strip()
+                or "http://localhost:8012").rstrip("/")
+        if _pin and getattr(self.client, "base_url", None) != _pin:
+            print(f"[EncPlC] pinning client base_url -> {_pin} "
+                  f"(was {self.client.base_url})")
+            self.client.base_url = _pin
         model = self.config.get("model", "Qwen/Qwen3-VL-30B-A3B-Instruct")
         model_alias = self._anonymizer.model_alias(model)
         prompts = self.config.get("prompts", ["Describe this video in detail."])

@@ -38,6 +38,13 @@ scenarios:
     inter_prompt_delay_sec: 0  # sec between waves; 0 = back-to-back
     description: "Encoder placement (Qwen3.6-35B-A3B BF16) under concurrency: N barrier-aligned terminal users per wave, server-side ViT (video upload) vs terminal-side ViT (precomputed single-segment [N, 2048] embedding bundle — no deepstack), lock-free SGLang engine sidecar on port 8014"
     provider: "sglang-engine"
+    # Sidecar base URL: runner flag --base-url > env
+    # SGLANG_ENGINE_QWEN36_BASE_URL (falls back to
+    # SGLANG_ENGINE_BASE_URL) > this key > the runner's built-in
+    # default (the same value). The scenario pins the client to the
+    # resolved URL at run() entry. Remote example:
+    #   base_url: "http://<server-host>:8014"
+    base_url: "http://localhost:8014"
     # "../aicodec/..." is a sibling of aitestbed/; the scenario anchors
     # relatives to its own dir's parent before the client sees them
     # (cwd-independent).

@@ -33,6 +33,12 @@ scenarios:
     description: "Encoder placement under concurrency: N barrier-aligned terminal users per wave, server-side ViT (video upload) vs terminal-side ViT (precomputed embedding bundle), lock-free SGLang engine sidecar on port 8012"
     provider: "sglang-engine"
     model: "../aicodec/aicodec/models/qwen3_vl_4B"
+    # Sidecar base URL: runner flag --base-url > env
+    # SGLANG_ENGINE_BASE_URL > this key > the runner's built-in
+    # default (the same value). The scenario pins the client to the
+    # resolved URL at run() entry. Remote example:
+    #   base_url: "http://<server-host>:8012"
+    base_url: "http://localhost:8012"
     network_interface: "lo"
     # mode: "server" uploads the original video and the server runs the
     # full pipeline; "edge" runs decode+processor+ViT on the terminal and

@@ -300,6 +300,12 @@ def main() -> None:
         stream_first_event_timeout=args.stream_first_event_timeout,
         stream_idle_timeout=args.stream_idle_timeout,
         stream_upload_read_timeout=args.stream_upload_read_timeout)
+    # Serial runner: no pin needed (client default == serial sidecar
+    # 8004), but still record the resolution into cfg so the
+    # scenario's run()-entry pin sees the SAME URL the client holds
+    # (flag > env > class default) instead of a possibly-stale yaml
+    # value.
+    cfg.setdefault("base_url", client.base_url)
     logger = TrafficLogger(args.db)
     scenario = EncoderPlacementQwen36Scenario(client, logger, cfg)
 

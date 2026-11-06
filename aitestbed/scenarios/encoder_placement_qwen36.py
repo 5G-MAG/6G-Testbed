@@ -294,6 +294,24 @@ class EncoderPlacementQwen36Scenario(BaseScenario):
         run_index: int = 0
     ) -> ScenarioResult:
         session_id = self._create_session_id()
+        # Pin the shared client's base URL for THIS scenario (the
+        # provider's client is memoized and shared with the concurrent
+        # sibling, which pins 8014; serial always pins back to 8004 so
+        # a mixed matrix never leaks one arm's sidecar into the other).
+        # Chain: env SGLANG_ENGINE_QWEN36_BASE_URL > env
+        # SGLANG_ENGINE_BASE_URL > yaml base_url (injected by the
+        # orchestrator as the env>yaml>default resolution) > the SERIAL
+        # sidecar default 8004 — never the client's current URL, which
+        # may be the concurrent port a previous scenario in the same
+        # process left behind.
+        _pin = (os.environ.get("SGLANG_ENGINE_QWEN36_BASE_URL")
+                or os.environ.get("SGLANG_ENGINE_BASE_URL")
+                or str(self.config.get("base_url") or "").strip()
+                or "http://localhost:8004").rstrip("/")
+        if _pin and getattr(self.client, "base_url", None) != _pin:
+            print(f"[EncPl36] pinning client base_url -> {_pin} "
+                  f"(was {self.client.base_url})")
+            self.client.base_url = _pin
         model = self.config.get(
             "model", "../aicodec/aicodec/models/Qwen3.6-35B-A3B")
         # Anchor relative model paths to the aitestbed/ dir (the scenario

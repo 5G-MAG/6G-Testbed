@@ -287,6 +287,22 @@ class EncoderPlacementScenario(BaseScenario):
         run_index: int = 0
     ) -> ScenarioResult:
         session_id = self._create_session_id()
+        # Pin the shared client's base URL for THIS scenario (the
+        # provider's client is memoized and shared with the concurrent
+        # sibling, which pins 8012; serial always pins back to 8002 so
+        # a mixed matrix never leaks one arm's sidecar into the other).
+        # Chain: env SGLANG_ENGINE_BASE_URL > yaml base_url (injected
+        # by the orchestrator as the env>yaml>default resolution) >
+        # the SERIAL sidecar default 8002 — never the client's current
+        # URL, which may be the concurrent port a previous scenario in
+        # the same process left behind.
+        _pin = (os.environ.get("SGLANG_ENGINE_BASE_URL")
+                or str(self.config.get("base_url") or "").strip()
+                or "http://localhost:8002").rstrip("/")
+        if _pin and getattr(self.client, "base_url", None) != _pin:
+            print(f"[EncPl] pinning client base_url -> {_pin} "
+                  f"(was {self.client.base_url})")
+            self.client.base_url = _pin
         model = self.config.get("model", "Qwen/Qwen3-VL-30B-A3B-Instruct")
         model_alias = self._anonymizer.model_alias(model)
         prompts = self.config.get("prompts", ["Describe this video in detail."])

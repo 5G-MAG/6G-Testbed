@@ -97,8 +97,8 @@ video: mean/p50/p90/p95/max, first-video vs steady-state split) plus
 the per-user traffic footprint.
 
 Environment:
-    SGLANG_ENGINE_BASE_URL   sidecar base URL (default http://localhost:8002;
-                             the concurrent sidecar usually runs on 8012)
+    SGLANG_ENGINE_BASE_URL   sidecar base URL (default http://localhost:8012,
+                             the concurrent sidecar convention)
     ENC_MODE                 fallback for --mode (env wins over yaml)
     ENCPL_EDGE_CPUS          fallback for --edge-cpus (env wins)
     ENCPL_DECODE_THREADS     fallback for --decode-threads (env wins)
@@ -1405,9 +1405,10 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     # ---- netem (bench direction-aware + runner iface) -------------------
     parser.add_argument("--base-url",
                         default=os.environ.get("SGLANG_ENGINE_BASE_URL",
-                                               "http://localhost:8002"),
-                        help="SGLang engine sidecar base URL (the "
-                             "concurrent sidecar usually runs on 8012); "
+                                               "http://localhost:8012"),
+                        help="SGLang engine sidecar base URL (default = the "
+                             "concurrent sidecar convention, port 8012; env "
+                             "SGLANG_ENGINE_BASE_URL wins); "
                              "localhost means single-host (loopback netem "
                              "on the base-url port), a remote host means "
                              "dual-host (whole-interface netem on this "
