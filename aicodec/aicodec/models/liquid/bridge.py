@@ -89,10 +89,19 @@ class LiquidBridge(VLMBridge):
         vqgan_ckpt_path = model_path / "chameleon" / "vqgan.ckpt"
         llm_model_path = model_path / "model"
 
+        # Check for actual WEIGHTS, not directory existence: the model/
+        # dir ships placeholder files (README, Liquid_download.py), so
+        # llm_model_path.exists() is always true and would never warn
+        # when the LLM weights are missing. The safetensors index (or
+        # any *.safetensors shard) is only present after a real download.
+        llm_weights_present = (
+            llm_model_path / "model.safetensors.index.json").exists() or any(
+            llm_model_path.glob("*.safetensors"))
+
         if not (
             vqgan_cfg_path.exists()
             and vqgan_ckpt_path.exists()
-            and llm_model_path.exists()
+            and llm_weights_present
         ):
             logger.warning(
                 "liquid checkpoints not found at %s "
