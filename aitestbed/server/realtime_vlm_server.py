@@ -205,11 +205,10 @@ class TcpSignalingServer:
 # Main Server
 # ======================
 class VlmServer:
-    def __init__(self, host: str, port: int, persistent: bool, preload_bridge: bool, model: str = "liquid"):
+    def __init__(self, host: str, port: int, persistent: bool, model: str = "liquid"):
         self.host = host
         self.port = port
         self.persistent_mode = persistent
-        self.preload_bridge = preload_bridge
         self.default_model = model  # used when a client does not negotiate a model
         self.stop_event = asyncio.Event()
         self.background_tasks: Set[asyncio.Task] = set()
@@ -278,11 +277,13 @@ class VlmServer:
                 logger.info("Signaling closed")
             except Exception as e:
                 logger.error(f"Signaling close error: {e}")
-        if self.preload_bridge:
-            try:
-                AsyncTokenIdDecoder.cleanup_bridge()
-            except Exception as e:
-                logger.error(f"Bridge cleanup error: {e}")
+        # cleanup_bridge is unconditional: the bridge is always live by
+        # now (deferred load happens during session negotiation), so
+        # there is nothing to gate on a flag here.
+        try:
+            AsyncTokenIdDecoder.cleanup_bridge()
+        except Exception as e:
+            logger.error(f"Bridge cleanup error: {e}")
 
         logger.info("=== Program cleanup completed ===")
 
@@ -426,9 +427,8 @@ class Session:
 
         # apply model + load bridge (deferred load happens here)
         AsyncTokenIdDecoder.reset_decoder_state(model_name=model_name)
-        if self.server_ref.preload_bridge:
-            AsyncTokenIdDecoder.preload_bridge()
-            logger.info(f"[Model] vlm model preloaded ({model_name})")
+        AsyncTokenIdDecoder.preload_bridge()
+        logger.info(f"[Model] vlm model preloaded ({model_name})")
         await self.signaling.send({"type": "model_ack", "ok": True})
         logger.info(f"[Model] Negotiated model: {model_name}")
         return model_name
@@ -674,20 +674,6 @@ class Session:
         self._session_stop_event.set()
         self._is_clean_up = True
 
-        # drain pending inference work before saving: the last question's
-        # answer is written into bench_config by the inference worker, which
-        # may still be generating when the connection drops
-        try:
-            from aicodec.shared import get_inference_queue
-            queue = get_inference_queue()
-            deadline = time.time() + 30.0
-            while not queue.empty() and time.time() < deadline:
-                await asyncio.sleep(0.5)
-            # extra grace for an in-flight generation
-            await asyncio.sleep(1.0)
-        except Exception as e:
-            logger.warning(f"[Cleanup] Inference queue drain failed: {e}")
-
         logger.info("[Server] Connection closed, saving benchmark results...")
         self.server_ref.save_results()
 
@@ -752,7 +738,6 @@ async def main():
     parser.add_argument("--signaling-port", type=int, default=1234)
     parser.add_argument("--persistent", action=argparse.BooleanOptionalAction, default=True,
                         help="keep serving multiple clients after a session ends (use --no-persistent for a single session)")
-    parser.add_argument("--preload-bridge", action="store_true", default=True, help="preload vlm model")
     parser.add_argument("--model", default="liquid",
                         help="default VLM model (used when the client does not negotiate one)")
     parser.add_argument("--ice-interface", default=None,
@@ -770,7 +755,6 @@ async def main():
         host = args.signaling_host,
         port = args.signaling_port,
         persistent=args.persistent,
-        preload_bridge=args.preload_bridge,
         model=args.model,
     )
 
