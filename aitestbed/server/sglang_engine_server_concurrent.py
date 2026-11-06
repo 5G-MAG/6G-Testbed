@@ -773,7 +773,10 @@ def _prepare_edge_mode(entry: dict, prompt: str):
     import torch
 
     buf = io.BytesIO(entry["data"])
-    bundle = torch.load(buf, map_location="cpu", weights_only=False)
+    # weights_only=True: the bundle comes from an untrusted terminal; it
+    # only ever contains tensors + plain str/int/float scalars, so the
+    # safe loader is sufficient and blocks pickle RCE.
+    bundle = torch.load(buf, map_location="cpu", weights_only=True)
     if (not isinstance(bundle, dict)
             or bundle.get("format") != "precomputed_embedding"):
         raise HTTPException(
@@ -1259,7 +1262,10 @@ def main():
                     "launcher skips).")
     parser.add_argument("--model", default=str(
         REPO_ROOT / "aicodec" / "aicodec" / "models" / "qwen3_vl_4B"))
-    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--host", default="127.0.0.1",
+                        help="bind address; default 127.0.0.1 (loopback "
+                             "only). Pass --host 0.0.0.0 only when the "
+                             "sidecar must serve remote terminals.")
     parser.add_argument("--port", type=int, default=8012,
                         help="default 8012 (original serial sidecar uses "
                              "8002; run both side by side on different ports)")

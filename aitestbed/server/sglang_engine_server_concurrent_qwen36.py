@@ -470,7 +470,7 @@ class OptUdpReceiver:
     _DRAIN_QUIET_SEC = 0.003
     _DRAIN_POLL_SEC = 0.0005
 
-    def __init__(self, store: BundleStore, port: int, host: str = "0.0.0.0",
+    def __init__(self, store: BundleStore, port: int, host: str = "127.0.0.1",
                  workers: int = 1, reassembly_cap: int = 256):
         self._store = store
         self._port = int(port)
@@ -1436,7 +1436,7 @@ def _merge_tiered_parts(bundle: dict, bundle_id: str) -> tuple[dict, dict]:
     for p in parts:
         try:
             part = torch.load(io.BytesIO(p["data"]), map_location="cpu",
-                              weights_only=False)
+                              weights_only=True)
         except Exception as exc:  # corrupted part: drop, never retransmit
             logger.warning("edge2 part seq=%s unreadable (%s); dropped",
                            p["seq"], exc)
@@ -1661,7 +1661,10 @@ def _prepare_edge_mode(entry: dict, prompt: str,
     import torch
 
     buf = io.BytesIO(entry["data"])
-    bundle = torch.load(buf, map_location="cpu", weights_only=False)
+    # weights_only=True: the bundle comes from an untrusted terminal; it
+    # only ever contains tensors + plain str/int/float scalars, so the
+    # safe loader is sufficient and blocks pickle RCE.
+    bundle = torch.load(buf, map_location="cpu", weights_only=True)
     if (not isinstance(bundle, dict)
             or bundle.get("format") not in (
                 "precomputed_embedding", "precomputed_embedding_tiered")):
@@ -2154,7 +2157,10 @@ def main():
         str(REPO_ROOT / "aicodec" / "aicodec" / "models"
             / "Qwen3.6-35B-A3B")))
     parser.add_argument("--host", default=os.environ.get(
-        "SGLANG_ENGINE_QWEN36C_HOST", "0.0.0.0"))
+        "SGLANG_ENGINE_QWEN36C_HOST", "127.0.0.1"),
+        help="bind address; default 127.0.0.1 (loopback only). Pass "
+             "--host 0.0.0.0 or set SGLANG_ENGINE_QWEN36C_HOST only when "
+             "the sidecar must serve remote terminals.")
     parser.add_argument("--port", type=int, default=int(
         os.environ.get("SGLANG_ENGINE_QWEN36C_PORT", "8014")),
                         help="default 8014 (serial Qwen3.6 sidecar uses "
@@ -2537,8 +2543,10 @@ def main():
     global _opt_udp_receiver, _opt_merge_drain_ms
     _opt_merge_drain_ms = float(args.opt_merge_drain_ms)
     if args.opt_udp_port > 0:
+        # Same bind policy as the HTTP listener (default loopback; the
+        # UDP tier rides the same host topology as the must-tier TCP).
         _opt_udp_receiver = OptUdpReceiver(
-            store, args.opt_udp_port, host="0.0.0.0",
+            store, args.opt_udp_port, host=args.host,
             workers=args.opt_udp_workers,
             reassembly_cap=args.opt_udp_reassembly_cap)
         if not _opt_udp_receiver.start():

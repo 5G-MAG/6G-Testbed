@@ -611,7 +611,10 @@ class VQModel(nn.Module):
         self.lr_g_factor = lr_g_factor
 
     def init_from_ckpt(self, path, ignore_keys=list()):
-        sd = torch.load(path, map_location="cpu")["state_dict"]
+        # weights_only=True: a VQGAN checkpoint is a plain state_dict of
+        # tensors; the safe loader blocks pickle RCE from a tampered ckpt.
+        sd = torch.load(path, map_location="cpu",
+                        weights_only=True)["state_dict"]
         keys = list(sd.keys())
         for k in keys:
             for ik in ignore_keys:

@@ -463,7 +463,10 @@ def _prepare_edge_mode(entry: dict, prompt: str):
     import torch
 
     buf = io.BytesIO(entry["data"])
-    bundle = torch.load(buf, map_location="cpu", weights_only=False)
+    # weights_only=True: the bundle comes from an untrusted terminal; it
+    # only ever contains tensors + plain str/int/float scalars, so the
+    # safe loader is sufficient and blocks pickle RCE.
+    bundle = torch.load(buf, map_location="cpu", weights_only=True)
     if (not isinstance(bundle, dict)
             or bundle.get("format") != "precomputed_embedding"):
         raise HTTPException(
@@ -780,7 +783,10 @@ def main():
         "SGLANG_ENGINE_MODEL",
         str(REPO_ROOT / "aicodec" / "aicodec" / "models" / "qwen3_vl_4B")))
     parser.add_argument("--host", default=os.environ.get(
-        "SGLANG_ENGINE_HOST", "0.0.0.0"))
+        "SGLANG_ENGINE_HOST", "127.0.0.1"),
+        help="bind address; default 127.0.0.1 (loopback only). Pass "
+             "--host 0.0.0.0 or set SGLANG_ENGINE_HOST only when the "
+             "sidecar must serve a remote terminal.")
     parser.add_argument("--port", type=int, default=int(
         os.environ.get("SGLANG_ENGINE_PORT", "8002")))
     parser.add_argument("--device", default="cuda")
