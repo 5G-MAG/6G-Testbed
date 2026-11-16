@@ -58,7 +58,7 @@ external metric taxonomy.
 - One call aggregates a single capture or a whole campaign into distributions
 - Connection metrics: handshake RTT, TLS setup, full connection setup, time to first data, flow duration, exchanges per flow, connection reuse, destination fan-out
 - Direction metrics: uplink and downlink volumes and their ratio, per-direction packet size and inter-packet gap
-- Burst metrics: count, size, duration, peak rate and inter-burst idle, per gap threshold and direction
+- Burst metrics: count, size, duration, mean rate and inter-burst idle, per gap threshold and direction
 - Throughput metrics: mean and peak, plus peak and burstiness per averaging window
 - Reliability metrics: retransmission counts and rates, per capture and per flow
 - Every distribution carries `n`, mean, min, max, p50, p95, p99, stdev and coefficient of variation
@@ -613,7 +613,7 @@ count is which" above.
 ### Burst
 
 `bursts.by_gap[gap_label][direction]` holds `count`, `size_bytes`, `duration_s`,
-`peak_rate_bps` and `idle_gap_s`, each a serialized `Distribution`. Gap labels
+`mean_rate_bps` and `idle_gap_s`, each a serialized `Distribution`. Gap labels
 are whatever thresholds `PcapAnalyzer` was configured with, `10ms` and `100ms`
 by default. `count` is per capture; the rest pool over individual bursts.
 
