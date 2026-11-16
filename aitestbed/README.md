@@ -513,7 +513,7 @@ Mode precedence: CLI `--mode` > env `ENC_MODE_QWEN36` (fallback `ENC_MODE`) > ya
   ```
 
   The `--no-deps` flag is required: the snapshot already pins every transitive dependency and ships a known, harmless protobuf 5.x metadata conflict that pip's resolver would reject.
-- Models: place weights under `aicodec/aicodec/models/` (e.g. `Qwen3.6-35B-A3B/`, `Qwen3-VL-30B-A3B-Instruct/`, `qwen3_vl_4B/`); the yaml default `model` paths point there. The VidCom2 `token_compressor` is vendored in-repo (`aicodec/aicodec/models/VidCom2/`) — no install needed.
+- Models: place weights under `aicodec/aicodec/models/` (e.g. `Qwen3.6-35B-A3B/`, `Qwen3_VL_30B_A3B_Instruct/`, `qwen3_vl_4B/`); the yaml default `model` paths point there. The VidCom2 `token_compressor` is vendored in-repo (`aicodec/aicodec/models/VidCom2/`) — no install needed.
 - The bootstrap scripts (`start_sidecar*.sh` from the repo root, inside the conda env) resolve CUDA_HOME (external toolkit → conda nvcc → pip cu13 prefix), require `nvcc` for flashinfer JIT, and run the sglang host patcher (`patch_host_sglang.py` — anchors the `PRECOMPUTED_EMBEDDING` guard in `qwen3_vl.py::_get_visual_feature`, which `qwen3_5_moe` inherits, plus the frame-ratio sampling branch) before launching the sidecar. First launch JIT-compiles flashinfer kernels (minutes, then cached). Idempotent; verify with `curl http://<host>:<port>/stats`.
 
 **Tested commands — Qwen3.6 serial:**
@@ -575,7 +575,7 @@ python tools/encpl_bench_eval_concurrent_qwen36.py \
 
 ```bash
 bash start_sidecar.sh \
-    --model aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct \
+    --model aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct \
     --mem-fraction-static 0.85
 
 # benchmark (from aitestbed/)
@@ -589,7 +589,7 @@ python tools/encpl_bench_eval.py \
     --dataset mlvu --dataset-dir ./MLVU \
     --mode server --limit 10 \
     --base-url http://localhost:8002 \ 
-    --model ../aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct/
+    --model ../aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct/
 ```
 
 **Tested commands — Qwen3-VL concurrent:**
@@ -597,7 +597,7 @@ python tools/encpl_bench_eval.py \
 ```bash
 bash start_sidecar_concurrent.sh \
     --max-running-requests 2 \
-    --model ./aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct/ \
+    --model ./aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct/ \
     --server-cpus "0-31" --enable-mixed-chunk --mm-io-worker-num 4 \
     --mm-processor-worker-num 4  --decode-threads 2 --preprocess-threads 4
 
@@ -606,7 +606,7 @@ python tools/encpl_bench_eval_concurrent.py \
 	--mode edge --users 8 --vision-only \
     --compressor vidcom2 --retention-ratio 0.3 --bundle-quant fp8 \
     --base-url http://localhost:8012 \
-    --runs 1 --db logs/encpl_conc_edge_n4.db --model ../aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct \
+    --runs 1 --db logs/encpl_conc_edge_n4.db --model ../aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct \
 	--enable-multi-processes --edge-cpu-ids "32-63" --edge-cpus-per-worker 3 --decode-threads 2 \
 	--dataset mlvu --dataset-dir /data01/mlvu/MLVU	--limit 32	
     
@@ -615,7 +615,7 @@ python tools/encpl_bench_eval_concurrent.py \
     --base-url http://localhost:8012 \
     --runs 1 --db logs/encpl_conc_server_n4.db \
     --edge-cpu-ids "32-63" --edge-cpus-per-worker 2 \
-    --enable-multi-processes --model ../aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct \
+    --enable-multi-processes --model ../aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct \
 	--dataset mlvu --dataset-dir /data01/mlvu/MLVU --limit 32
 ```
 
@@ -659,7 +659,7 @@ python aitestbed/run_encoder_placement_concurrent.py \
     --mode edge --users 4 \
     --base-url http://172.16.148.166:8012 \
     --runs 1 --db logs/encpl_conc_edge_n4.db \
-    --model ../aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct \
+    --model ../aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct \
     --enable-multi-processes --edge-cpu-ids "32-58" --edge-cpus-per-worker 3 \
     --decode-threads 2 \
     --dataset mlvu --dataset-dir /data01/mlvu/MLVU --limit 32

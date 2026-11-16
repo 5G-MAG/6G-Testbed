@@ -1,0 +1,4 @@
+https://huggingface.co/turing-motors/One-D-Piece-L-256/tree/main
+
+Download pytorch_model.bin (and config.json / odp_l256.yaml if not already
+present) from the link above and place it in this folder.

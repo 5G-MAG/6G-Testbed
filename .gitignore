@@ -73,3 +73,15 @@ aicodec/aicodec/models/liquid/checkpoints/**/*.safetensors
 aicodec/aicodec/models/liquid/checkpoints/model/tokenizer.json
 aicodec/aicodec/dataset/StreamingBench/**/*.mp4
 aicodec/aicodec/dataset/StreamingBench/**/questions_results_*.json
+
+aicodec/aicodec/dataset/MMBench/MMBench_DEV_EN/**
+!aicodec/aicodec/dataset/MMBench/MMBench_DEV_EN/download*
+
+aicodec/aicodec/models/one_d_piece/checkpoints/**
+!aicodec/aicodec/models/one_d_piece/checkpoints/download*
+
+aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct/**
+!aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct/download*
+
+aicodec/aicodec/models/Qwen36_35B_A3B/**
+!aicodec/aicodec/models/Qwen36_35B_A3B/download*

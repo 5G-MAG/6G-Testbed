@@ -813,6 +813,17 @@ class TestbedOrchestrator:
         # Initialize clients (lazy loaded based on provider)
         self._clients = {}
 
+        # One-D-Piece image-over-UDP scenario: import lazily so a missing GPU
+        # bridge (torch/omegaconf, see aicodec/aicodec/models/one_d_piece)
+        # cannot break scenario discovery at orchestrator start-up.
+        _odp_image_udp_scenario_cls = None
+        try:
+            from scenarios.odp_image_udp import ODPImageUDPScenario
+            _odp_image_udp_scenario_cls = ODPImageUDPScenario
+        except Exception as _e:  # noqa: BLE001
+            logging.getLogger(__name__).warning(
+                f"odp_image_udp scenario unavailable: {_e}")
+
         # Scenario type mapping
         self.scenario_classes = {
             "chat": ChatScenario,
@@ -867,6 +878,8 @@ class TestbedOrchestrator:
                 EncoderPlacementConcurrentQwen36Scenario
 
         }
+        if _odp_image_udp_scenario_cls is not None:
+            self.scenario_classes["odp_image_udp"] = _odp_image_udp_scenario_cls
 
     # ------------------------------------------------------------------
     # Asymmetric profile support (S4-260848 Table C.Z-1)
@@ -1132,6 +1145,15 @@ class TestbedOrchestrator:
                 self._clients[provider] = EncoderPlacementClient()
             elif provider == "sglang-engine-qwen36":
                 self._clients[provider] = EncoderPlacementQwen36Client()
+            elif provider == "odp-image-udp":
+                # One-D-Piece image link over lossy UDP. Nominal placeholder
+                # only: ODPImageUDPScenario builds its own sender (chunked or
+                # whole) from the scenario config's `mode` key. Use the whole
+                # client as the placeholder so a whole-mode run does not
+                # import the chunked implementation before mode dispatch.
+                from clients.odp_image_udp_client_whole import (
+                    ODPImageUDPWholeClient)
+                self._clients[provider] = ODPImageUDPWholeClient()
             else:
                 raise ValueError(f"Unknown provider: {provider}")
         return self._clients[provider]

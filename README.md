@@ -4,11 +4,11 @@ A framework for measuring and analyzing AI/LLM service traffic patterns under va
 
 ## Components
 
-| Component | Description |
-|-----------|-------------|
-| [aitestbed/](./aitestbed/) | Main testing framework for running AI traffic experiments |
-| [netemu/](./netemu/) | Network emulation library wrapping Linux tc/netem |
-| [aicodec/](./aicodec/) | AI codec plugin for aiortc (token semantic communication: VLM tokenizer and LLM processing over RTP) |
+| Component                  | Description                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [aitestbed/](./aitestbed/) | Main testing framework for running AI traffic experiments                                            |
+| [netemu/](./netemu/)       | Network emulation library wrapping Linux tc/netem                                                    |
+| [aicodec/](./aicodec/)     | AI codec plugin for aiortc (token semantic communication: VLM tokenizer and LLM processing over RTP) |
 
 ## aitestbed
 
@@ -172,12 +172,12 @@ python tools/encpl_bench_eval_qwen36.py \
 
 **Stream safety timeouts** — available on every encoder-placement bench/runner (both model families). A wedged sidecar stream used to stall a run forever (observed: a 29.5 h frozen matrix); these caps turn that into a per-request exception:
 
-| Parameter | Default (serial / concurrent) | Meaning |
-|-----------|-------------------------------|---------|
-| `--stream-connect-timeout` | 20 s | TCP connect timeout for sidecar HTTP requests (loopback handshake with netem'd SYN retransmits) |
-| `--stream-first-event-timeout` | 200 s / 900 s | Budget from chat POST to the first SSE event — covers server-side edge prepare + queueing + prefill + TTFT. Concurrent tools default 900: barrier waves of N users against a small running-request cap queue tail users behind minutes of prefill |
-| `--stream-idle-timeout` | 20 s | Max silent gap between SSE events mid-stream (tightened onto the socket right after the first event) |
-| `--stream-upload-read-timeout` | 1200 s | Read timeout for the bundle-upload PUT response (covers the server's store+ack after the possibly minutes-long upload-direction transfer) |
+| Parameter                      | Default (serial / concurrent) | Meaning                                                                                                                                                                                                                                           |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--stream-connect-timeout`     | 20 s                          | TCP connect timeout for sidecar HTTP requests (loopback handshake with netem'd SYN retransmits)                                                                                                                                                   |
+| `--stream-first-event-timeout` | 200 s / 900 s                 | Budget from chat POST to the first SSE event — covers server-side edge prepare + queueing + prefill + TTFT. Concurrent tools default 900: barrier waves of N users against a small running-request cap queue tail users behind minutes of prefill |
+| `--stream-idle-timeout`        | 20 s                          | Max silent gap between SSE events mid-stream (tightened onto the socket right after the first event)                                                                                                                                              |
+| `--stream-upload-read-timeout` | 1200 s                        | Read timeout for the bundle-upload PUT response (covers the server's store+ack after the possibly minutes-long upload-direction transfer)                                                                                                         |
 
 `0` disables any guard (restores the historical unlimited wait). Equivalent env overrides for ad-hoc runs: `ENCPL_STREAM_CONNECT_TIMEOUT`, `ENCPL_STREAM_FIRST_EVENT_TIMEOUT`, `ENCPL_STREAM_IDLE_TIMEOUT`, `ENCPL_STREAM_UPLOAD_READ_TIMEOUT` (explicit CLI flags win).
 
