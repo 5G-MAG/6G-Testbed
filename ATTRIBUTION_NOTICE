@@ -58,9 +58,8 @@ Model weights
   Qwen3-VL-8B-Instruct) and Qwen3.6 models (Qwen3.6-27B,
   Qwen3.6-35B-A3B), downloaded from the Hugging Face Qwen organization
   (https://huggingface.co/Qwen)
-  Licensed under the Qwen Community License / Qwen Research License
-  (non-OSI custom terms; research use). Redistribution and commercial use
-  of the weights must comply with the license accompanying each model card.
+  Licensed under Apache License 2.0 (as stated on each model card, for
+  example https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Instruct)
 
 Datasets
 --------
@@ -76,14 +75,14 @@ Datasets
   Licensed under MIT License (https://github.com/THUNLP-MT/StreamingBench/blob/main/LICENSE)
 
 - Video-MME (loaded by aitestbed/tools/videomme_eval.py)
-  available at https://huggingface.co/lmms-lab/VideoMME
+  available at https://huggingface.co/datasets/lmms-lab/VideoMME
   Licensed under CC BY-NC 4.0 (non-commercial)
   (https://huggingface.co/datasets/lmms-lab/VideoMME)
 
 - MLVU (benchmark for long video understanding)
-  available at https://github.com/BradyFU/Video-MMLU
-  Licensed under CC BY-NC 4.0 (non-commercial)
-  (https://github.com/BradyFU/Video-MMLU)
+  available at https://github.com/JUNJIE99/MLVU
+  Licensed under CC BY-NC-SA 4.0 (non-commercial, research use only)
+  (https://github.com/JUNJIE99/MLVU#license)
 
 Runtime dependencies
 --------------------
