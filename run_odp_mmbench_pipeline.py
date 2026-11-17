@@ -215,7 +215,7 @@ def run_one_profile(args, profile: str) -> dict:
     # ---- phase 1: server -------------------------------------------------
     server_cmd = [
         sys.executable, str(DEFAULT_SERVER),
-        "--host", "0.0.0.0",
+        "--host", "127.0.0.1",
         "--port", str(args.server_port),
         "--fresh",
         "--network-profile", tag,

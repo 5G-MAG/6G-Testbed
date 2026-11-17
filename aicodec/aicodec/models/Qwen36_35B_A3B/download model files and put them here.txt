@@ -1,1 +1,1 @@
-https://huggingface.co/Junfeng5/Liquid_V1_7B/tree/main
+https://huggingface.co/Qwen/Qwen3.6-35B-A3B/tree/main

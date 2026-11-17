@@ -134,10 +134,7 @@ class OneDPieceBridge(VLMBridge):
         from modeling.one_d_piece import OneDPiece  # external repo, unmodified
 
         model = OneDPiece(config)
-        try:
-            state = torch.load(str(ckpt_path), map_location="cpu", weights_only=True)
-        except Exception:
-            state = torch.load(str(ckpt_path), map_location="cpu", weights_only=False)
+        state = torch.load(str(ckpt_path), map_location="cpu", weights_only=True)
         missing, unexpected = model.load_state_dict(state, strict=False)
         if missing or unexpected:
             raise RuntimeError(

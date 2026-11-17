@@ -40,7 +40,7 @@ whatever survived to the decoder. That is what turns loss into *image
 degradation* instead of a hung session.
 
 Run:
-    python server/odp_image_udp_server.py --host 0.0.0.0 --port 1237 \\
+    python server/odp_image_udp_server.py --host 127.0.0.1 --port 1237 \\
         --dump-recon --dump-recon-dir results/odp_image_recon/udp_lossy \\
         --report-dir results/odp_image_reports --fresh
 
@@ -101,7 +101,7 @@ def setup_logger(name: str) -> None:
 class ODPImageUDPServer:
     """Token sink + reconstructor for UDP-delivered ODP image payloads."""
 
-    def __init__(self, host: str = "0.0.0.0", port: int = 1237,
+    def __init__(self, host: str = "127.0.0.1", port: int = 1237,
                  model: str = "one_d_piece", num_tokens: int = 256,
                  dump_recon: bool = True,
                  dump_recon_dir: str = "results/odp_image_recon",
@@ -579,7 +579,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="ODP image UDP receiver (lossy-link counterpart of "
                     "odp_image_http_server.py)")
-    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=1237)
     parser.add_argument("--model", default="one_d_piece")
     parser.add_argument("--num-tokens", type=int, default=256,
