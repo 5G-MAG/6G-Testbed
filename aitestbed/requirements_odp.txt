@@ -1,0 +1,35 @@
+# Qwen3-VL + vLLM + MMBench eval environment (isolated from the main
+# aitestbed/orchestrator env -- vLLM/transformers versions conflict with it).
+# File location: aitestbed/ (moved back from the repo root so it sits next
+# to aitestbed/README_ODP.md and aitestbed/requirements.txt; requirements-epd.txt,
+# the other isolated-env requirements file, stays at the repo root since it
+# backs the unrelated encoder-placement docs in the root README.md).
+#
+# Python: 3.11 (use a clean venv/conda env; do NOT reuse one that already has
+# an old torch -- torch 2.5.1 lacks torch.distributed.fsdp.CPUOffloadPolicy and
+# breaks transformers >= 4.57 / the vLLM stack).
+#
+# Usage (run from the repo root, same convention as aitestbed/README_ODP.md):
+#   python -m venv ~/envs/qwen3vl && source ~/envs/qwen3vl/bin/activate
+#   # or: conda create -n qwen3vl python=3.11 && conda activate qwen3vl
+#   pip install --upgrade pip
+#   pip install -r aitestbed/requirements_qwen.txt
+#
+# Let vLLM resolve a COHERENT torch / torchvision / transformers set. Do NOT
+# hard-pin transformers: pinning a very new one (e.g. 5.17) forces torch>=2.7
+# while an old vLLM may pin torch 2.5.x -> exact conflict seen in the wild.
+# transformers just needs to be >=4.57 for Qwen3-VL.
+vllm==0.31.0
+transformers>=4.57.0
+qwen-vl-utils>=0.0.14
+
+# ---- MMBench eval direct deps ----
+numpy
+pillow
+pandas
+pyyaml
+tqdm
+requests
+
+# ---- weight download helper (huggingface_hub snapshot_download) ----
+huggingface_hub>=0.20
