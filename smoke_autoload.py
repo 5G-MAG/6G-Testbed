@@ -12,8 +12,8 @@ patcher.main = counting
 # __init__ path (the production entry): constructing the client ensures
 sys.path.insert(0, '.')
 from clients.encoder_placement_client import EncoderPlacementClient
-qv = '/home/vivoadmin/miniforge3/envs/epd/lib/python3.11/site-packages/sglang/srt/multimodal/processors/qwen_vl.py'
-import hashlib
+import hashlib, os, sglang
+qv = os.path.join(os.path.dirname(sglang.__file__), 'srt', 'multimodal', 'processors', 'qwen_vl.py')
 h0 = hashlib.sha256(open(qv, 'rb').read()).hexdigest()
 c1 = EncoderPlacementClient()          # __init__ -> ensure (quiet, no-op)
 c2 = EncoderPlacementClient()          # same process -> flag hit, no call

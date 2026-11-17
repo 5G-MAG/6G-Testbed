@@ -3,10 +3,11 @@ This software contains dependencies with the following open-source projects.
 This version of the testbed focuses on Qwen3-VL / Qwen3.6 visual tokenizer
 down-placement (terminal-side video decode + processor + ViT, uploading a
 precomputed embedding bundle), dynamic token pruning (VidCom2 retention
-ratio), fp8 bundle-feature quantization, and concurrent multi-user test
-scenarios (barrier-aligned waves over lock-free SGLang engine sidecars).
-The retired split-inference, Mage-VL and One-D-Piece links have been
-removed. The third-party components listed below remain in use.
+ratio), fp8 bundle-feature quantization, concurrent multi-user test
+scenarios (barrier-aligned waves over lock-free SGLang engine sidecars), and
+the One-D-Piece image-token link over lossy UDP, evaluated with Qwen3-VL on
+MMBench. The retired split-inference and Mage-VL links have been removed.
+The third-party components listed below remain in use.
 
 Vendored code
 -------------
@@ -23,33 +24,65 @@ Vendored code
   available at https://github.com/FoundationVision/Liquid
   Licensed under MIT License (https://github.com/FoundationVision/Liquid/blob/main/LICENSE)
 
+- One-D-Piece model code (vendored under
+  aicodec/aicodec/models/one_d_piece/modeling/; licence text in
+  aicodec/aicodec/models/one_d_piece/LICENSE)
+  available at https://github.com/turingmotors/One-D-Piece
+  Code Copyright (2024) Turing Inc. and/or its affiliates
+  Licensed under Apache License 2.0
+  (https://github.com/turingmotors/One-D-Piece/blob/main/LICENSE)
+
+- TiTok model code, on which One-D-Piece is based (vendored in the same
+  directory: titok.py, blocks.py, quantizer.py, base_model.py)
+  available at https://github.com/bytedance/1d-tokenizer
+  Copyright (2024) Bytedance Ltd. and/or its affiliates
+  Licensed under Apache License 2.0
+  (https://github.com/bytedance/1d-tokenizer/blob/main/LICENSE)
+
+- MaskGIT-VQGAN code (modeling/modules/maskgit_vqgan.py, adapted from
+  muse/modeling_maskgit_vqgan.py)
+  available at https://github.com/huggingface/open-muse
+  Copyright 2023 Google LLC and The HuggingFace Inc. team
+  Licensed under Apache License 2.0
+  (https://github.com/huggingface/open-muse/blob/main/LICENSE)
+
 Model weights
 -------------
+
+- One-D-Piece L-256 tokenizer weights (pytorch_model.bin, downloaded per
+  aitestbed/README_ODP.md)
+  available at https://huggingface.co/turing-motors/One-D-Piece-L-256
+  Licensed under Apache License 2.0 (as stated on the model card)
 
 - Qwen3-VL models (qwen3_vl_4B, Qwen3-VL-30B-A3B-Instruct,
   Qwen3-VL-8B-Instruct) and Qwen3.6 models (Qwen3.6-27B,
   Qwen3.6-35B-A3B), downloaded from the Hugging Face Qwen organization
   (https://huggingface.co/Qwen)
-  Licensed under the Qwen Community License / Qwen Research License
-  (non-OSI custom terms; research use). Redistribution and commercial use
-  of the weights must comply with the license accompanying each model card.
+  Licensed under Apache License 2.0 (as stated on each model card, for
+  example https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Instruct)
 
 Datasets
 --------
+
+- MMBench (MMBench_DEV_EN, converted by aicodec/aicodec/dataset/tsv2figure.py)
+  available at https://github.com/open-compass/MMBench
+  Licensed under CC BY 4.0 (as stated on the dataset card,
+  https://huggingface.co/datasets/opencompass/MMBench); the repository
+  code is under Apache License 2.0
 
 - StreamingBench (Proactive Output / Real-Time Visual Understanding tasks)
   available at https://github.com/THUNLP-MT/StreamingBench/
   Licensed under MIT License (https://github.com/THUNLP-MT/StreamingBench/blob/main/LICENSE)
 
 - Video-MME (loaded by aitestbed/tools/videomme_eval.py)
-  available at https://huggingface.co/lmms-lab/VideoMME
+  available at https://huggingface.co/datasets/lmms-lab/VideoMME
   Licensed under CC BY-NC 4.0 (non-commercial)
   (https://huggingface.co/datasets/lmms-lab/VideoMME)
 
 - MLVU (benchmark for long video understanding)
-  available at https://github.com/BradyFU/Video-MMLU
-  Licensed under CC BY-NC 4.0 (non-commercial)
-  (https://github.com/BradyFU/Video-MMLU)
+  available at https://github.com/JUNJIE99/MLVU
+  Licensed under CC BY-NC-SA 4.0 (non-commercial, research use only)
+  (https://github.com/JUNJIE99/MLVU#license)
 
 Runtime dependencies
 --------------------
