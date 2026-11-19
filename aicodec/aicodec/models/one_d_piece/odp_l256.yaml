@@ -1,0 +1,21 @@
+model:
+    type: "one_d_piece"
+    vq_model:
+        codebook_size: 4096
+        token_size: 12
+        use_l2_norm: True
+        commitment_cost: 0.25
+        # vit arch
+        vit_enc_model_size: "large"
+        vit_dec_model_size: "large"
+        vit_enc_patch_size: 16
+        vit_dec_patch_size: 16
+        num_latent_tokens: 256
+        finetune_decoder: True
+        # relax assertion
+        strict_length_assertion: False
+    
+dataset:
+    preprocessing:
+        crop_size: 256
+

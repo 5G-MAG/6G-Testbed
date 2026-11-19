@@ -1,0 +1,1 @@
+https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Instruct/tree/main

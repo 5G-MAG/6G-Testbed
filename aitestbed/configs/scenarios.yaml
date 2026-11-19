@@ -89,7 +89,7 @@ scenarios:
     inter_prompt_delay_sec: 1  # sec between prompts; 0 = back-to-back
     description: "Visual encoder placement: server-side ViT (video upload) vs terminal-side ViT (precomputed embedding bundle), SGLang engine sidecar"
     provider: "sglang-engine"
-    model: "../aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct"
+    model: "../aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct"
     network_interface: "lo"
     # mode: "server" uploads the original video and the server runs the full
     # pipeline; "edge" runs decode+processor+ViT on the terminal and uploads
@@ -224,7 +224,7 @@ scenarios:
     inter_prompt_delay_sec: 1  # sec between waves; 0 = back-to-back
     description: "Encoder placement under concurrency: N barrier-aligned terminal users per wave, server-side ViT (video upload) vs terminal-side ViT (precomputed embedding bundle), lock-free SGLang engine sidecar on port 8012"
     provider: "sglang-engine"
-    model: "../aicodec/aicodec/models/Qwen3-VL-30B-A3B-Instruct"
+    model: "../aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct"
     # Sidecar base URL: the concurrent scenario pins the shared client
     # to this at run() entry (serial siblings pin back to 8002/8004, so
     # mixed matrices are safe). Env SGLANG_ENGINE_BASE_URL and the
@@ -1431,6 +1431,91 @@ scenarios:
       - "neural networks"
       - "computer vision"
 
+  # --- One-D-Piece image link over lossy UDP ---
+  # Merged from configs/scenarios_odp_image_udp.yaml (lossy-link sibling of
+  # configs/scenarios_odp_image.yaml). TCP/HTTP cannot express packet loss (it
+  # retransmits until delivery, so impairment shows up only as latency); UDP
+  # has no retransmission, so loss reaches the decoder and One-D-Piece's
+  # graceful degradation becomes measurable.
+  #
+  # Run with:
+  #   python orchestrator.py --config configs/scenarios.yaml \
+  #       --scenario odp_image_udp_whole --profile lossy --runs 1 --interface lo
+  # With --interface lo the orchestrator applies the profile impairment to the
+  # loopback device itself, so NO extra netem code is needed here.
+  #
+  # The image cloud server MUST be started before the run, e.g.:
+  #   python server/odp_image_udp_server.py --port 1237 --fresh \
+  #       --network-profile lossy \
+  #       --dump-recon-dir results/odp_image_recon_udp_whole_lossy \
+  # The server loads the MMBench question manifest from its source-level path.
+  #
+  # WHERE THE LOSS NUMBERS LIVE: the client scenario reports OFFERED load only
+  # (UDP gives the sender no delivery feedback). Per-chunk loss, partial-image
+  # counts and token recovery rates come from the SERVER's report in
+  # results/odp_image_reports/ plus udp_rx_manifest.jsonl in the recon dir.
+  #
+  # Tokens-per-image knob: ODP_NUM_TOKENS env wins end-to-end (bridge + client);
+  # `num_tokens` below drives metrics and should match it.
+
+  # --- graceful degradation: one lost datagram costs only its own tokens ---
+  odp_image_udp_chunked:
+    type: "odp_image_udp"
+    mode: "chunked"
+    inter_prompt_delay_sec: 0
+    description: "Image tokenization + chunked UDP upload (64 tokens/datagram)"
+    provider: "odp-image-udp"
+    model: "one_d_piece"
+    num_tokens: 256            # latent tokens per image; ODP_NUM_TOKENS wins
+    tokens_per_datagram: 64    # MUST be EVEN (12-bit packing seam)
+    stream: false
+    max_images: 0              # 0 = FULL dataset (4329 images; raise timeout)
+    server_host: "127.0.0.1"
+    server_port: 1237
+    network_interface: "lo"
+    inter_image_delay_sec: 0
+    inter_datagram_delay_sec: 0   # raise if the local socket buffer overflows
+    image_dir: "aicodec/aicodec/dataset/MMBench/MMBench_DEV_EN"
+    # manifest_path: ""        # optional jsonl ordering the image set
+    task_config:
+      task_class: "real"
+      results_dir: "examples/assets/dataset_real/"
+
+  # --- all-or-nothing control: any loss destroys the whole image ---
+  # Run this alongside the chunked one to isolate how much the per-chunk
+  # hole filling in odp_recover_tokens actually buys you at the same loss.
+  odp_image_udp_whole:
+    type: "odp_image_udp"
+    mode: "whole"
+    inter_prompt_delay_sec: 0
+    description: "Image tokenization + whole-image UDP upload (1 datagram)"
+    provider: "odp-image-udp"
+    model: "one_d_piece"
+    num_tokens: 256            # at 256 a datagram is 419 B, well under MTU
+    stream: false
+    max_images: 0
+    server_host: "127.0.0.1"
+    server_port: 1237
+    network_interface: "lo"
+    inter_image_delay_sec: 0
+    image_dir: "aicodec/aicodec/dataset/MMBench/MMBench_DEV_EN"
+    # Payload-level synthetic token drop (applied BEFORE 12-bit packing).
+    # ONLY takes effect when the run's network_profile == "no_emulation"
+    # (configs/profiles.yaml: already zero netem impairment by definition,
+    # so it is reused as the dedicated payload-drop-only lane); every other
+    # profile in odp_image_udp_profiles below forces "none"/0 regardless of
+    # these values, so a multi-profile sweep never silently mixes payload
+    # drop into the real netem-loss runs.
+    # Defaults below are "none"/0 so a plain no_emulation baseline run
+    # (including inside odp_image_udp_profiles) stays a clean, drop-free
+    # control. Override per-run via CLI/env when sweeping drop ratios, e.g.
+    #   ODP_PAYLOAD_DROP_MODE=tail ODP_PAYLOAD_DROP_PCT=30
+    payload_drop_mode: "none"   # "none" | "tail" | "random"
+    payload_drop_pct: 0         # 0..100
+    task_config:
+      task_class: "real"
+      results_dir: "examples/assets/dataset_real/"
+
 # Default experiment settings
 defaults:
   runs_per_scenario: 10          # Direct-orchestrator default; run_full_tests.sh overrides globally
@@ -1456,6 +1541,22 @@ runner_profile_sets:
     - congested
     - 5qi_7
     - 5qi_80
+
+  # ODP image-over-UDP runner profile set (merged from
+  # configs/scenarios_odp_image_udp.yaml): deliberately small since each run
+  # launches a GPU-backed One-D-Piece bridge + real UDP sockets.
+  # "no_emulation" carries ZERO netem impairment (see configs/profiles.yaml)
+  # and is the ONLY profile under which odp_image_udp_whole's
+  # payload_drop_mode/payload_drop_pct actually take effect (see
+  # scenarios/odp_image_udp.py); it isolates source-side token drop from
+  # real link loss instead of composing with it. payload_drop_mode/pct
+  # default to "none"/0 (see above), so plain no_emulation runs here stay a
+  # clean, drop-free baseline unless explicitly overridden for a sweep.
+  odp_image_udp_profiles: &odp_image_udp_profiles
+    - no_emulation
+    - lossy
+    - 5g_urban
+    - congested
 
 # Test matrix definition
 # Mirrors the scenario coverage in run_full_tests.sh.
@@ -1693,3 +1794,25 @@ test_matrix:
     prereqs:
       - "http://localhost:8014/v1/models"
       - "examples/assets/dataset_real/sample_1/video.mp4"
+
+  # One-D-Piece image link over lossy UDP (merged from
+  # configs/scenarios_odp_image_udp.yaml). GPU-backed + real UDP sockets, so
+  # kept off the default full-suite run; invoke explicitly via
+  # run_odp_mmbench_pipeline.py or `orchestrator.py --scenario odp_image_udp_*`.
+  - scenario: "odp_image_udp_chunked"
+    phase: "image"
+    profiles: *odp_image_udp_profiles
+    priority: "medium"
+    runner_enabled_by_default: false
+    prereqs:
+      - "aicodec/aicodec/dataset/MMBench/MMBench_DEV_EN"
+      - "aicodec/aicodec/models/one_d_piece/checkpoints/pytorch_model.bin"
+
+  - scenario: "odp_image_udp_whole"
+    phase: "image"
+    profiles: *odp_image_udp_profiles
+    priority: "medium"
+    runner_enabled_by_default: false
+    prereqs:
+      - "aicodec/aicodec/dataset/MMBench/MMBench_DEV_EN"
+      - "aicodec/aicodec/models/one_d_piece/checkpoints/pytorch_model.bin"
