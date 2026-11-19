@@ -161,6 +161,21 @@ def test_l7_redacts_headers_and_query_credentials():
     assert "secret" not in url and "weather" in url and "fragment" not in url
 
 
+def test_l7_header_redaction_covers_provider_headers_in_module_and_addon():
+    from capture.l7_capture import ADDON_SCRIPT_TEMPLATE
+
+    secret = ["X-Subscription-Token", "x-goog-api-key", "APCA-API-SECRET-KEY",
+              "Ocp-Apim-Subscription-Key", "x-api-key", "Proxy-Authorization"]
+    plain = {"Content-Type": "application/json", "x-ratelimit-remaining-tokens": "99"}
+    headers = {**{name: "value" for name in secret}, **plain}
+    addon = {}
+    exec(ADDON_SCRIPT_TEMPLATE.format(output_file="unused.jsonl"), addon)
+    for redact in (_redact_headers, addon["redact_headers"]):
+        out = redact(headers)
+        assert all(out[name] == "[REDACTED]" for name in secret)
+        assert all(out[name] == value for name, value in plain.items())
+
+
 class _SlowScenario:
     def __init__(self, marker):
         self.marker = marker

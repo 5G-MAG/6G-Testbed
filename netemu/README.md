@@ -149,8 +149,8 @@ emulator.apply_profile("good_wifi", ingress_profile="poor_cellular")
 ```python
 from netemu import NetworkEmulator, capture_to, analyze_pcap
 
-with NetworkEmulator(interface="eth0") as emu:
-    emu.apply_profile("cell_edge")
+with NetworkEmulator(interface="eth0", profiles_path="examples/profiles.yaml") as emu:
+    emu.apply_profile("lte_typical")
     with capture_to("run.pcap", interface="eth0", filter_expr="port 443"):
         run_workload()
 

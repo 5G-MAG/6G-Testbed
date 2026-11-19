@@ -20,16 +20,26 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 logger = logging.getLogger(__name__)
 
-SENSITIVE_HEADERS = {
-    "authorization", "proxy-authorization", "cookie", "set-cookie",
-    "x-api-key", "api-key", "x-auth-token",
-}
+# Matched against the lower-cased header name with "-" replaced by "_", so one
+# entry covers x-api-key, x-goog-api-key, apca-api-secret-key and similar.
+SENSITIVE_HEADER_PARTS = (
+    "authorization", "api_key", "apikey", "secret", "password", "passwd",
+    "cookie", "credential", "signature",
+)
 SENSITIVE_QUERY_PARTS = ("key", "token", "secret", "password", "signature", "auth")
+
+
+def _is_sensitive_header(name) -> bool:
+    key = str(name).lower().replace("-", "_")
+    # Also names ending in "token" or "key" (x-subscription-token,
+    # ocp-apim-subscription-key), but not rate-limit headers such as
+    # x-ratelimit-remaining-tokens.
+    return key.endswith(("token", "key")) or any(p in key for p in SENSITIVE_HEADER_PARTS)
 
 
 def _redact_headers(headers) -> dict:
     return {
-        str(key): "[REDACTED]" if str(key).lower() in SENSITIVE_HEADERS else str(value)
+        str(key): "[REDACTED]" if _is_sensitive_header(key) else str(value)
         for key, value in headers.items()
     }
 
@@ -154,11 +164,15 @@ import time
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 OUTPUT_FILE = "{output_file}"
-SENSITIVE_HEADERS = {{"authorization", "proxy-authorization", "cookie", "set-cookie", "x-api-key", "api-key", "x-auth-token"}}
+SENSITIVE_HEADER_PARTS = ("authorization", "api_key", "apikey", "secret", "password", "passwd", "cookie", "credential", "signature")
 SENSITIVE_QUERY_PARTS = ("key", "token", "secret", "password", "signature", "auth")
 
+def is_sensitive_header(name):
+    k = str(name).lower().replace("-", "_")
+    return k.endswith(("token", "key")) or any(p in k for p in SENSITIVE_HEADER_PARTS)
+
 def redact_headers(headers):
-    return {{str(k): "[REDACTED]" if str(k).lower() in SENSITIVE_HEADERS else str(v) for k, v in headers.items()}}
+    return {{str(k): "[REDACTED]" if is_sensitive_header(k) else str(v) for k, v in headers.items()}}
 
 def redact_url(url):
     parts = urlsplit(url)

@@ -51,7 +51,8 @@ Linux network emulation plus the capture and analysis path that goes with it.
 ```python
 from netemu import NetworkEmulator, capture_to, analyze_pcap
 
-with NetworkEmulator(interface="eth0") as emu:
+with NetworkEmulator(interface="eth0",
+                     profiles_path="aitestbed/configs/profiles.yaml") as emu:
     emu.apply_profile("5g_urban")           # 20 ms delay, 0.1% loss, 100 Mbps
     with capture_to("run.pcap", interface="eth0", filter_expr="port 443"):
         run_workload()
