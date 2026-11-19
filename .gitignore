@@ -85,3 +85,6 @@ aicodec/aicodec/models/Qwen3_VL_30B_A3B_Instruct/**
 
 aicodec/aicodec/models/Qwen36_35B_A3B/**
 !aicodec/aicodec/models/Qwen36_35B_A3B/download*
+
+aicodec/aicodec/dataset/mlvu/**
+!aicodec/aicodec/dataset/mlvu/download*
