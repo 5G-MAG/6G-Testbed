@@ -74,7 +74,7 @@ from .metrics import (
     compute_packet_metrics,
     summarize,
 )
-from .profile import NetworkProfile
+from .profile import NetworkProfile, load_profile_catalog
 
 # Optional pcap analysis (requires dpkt).
 try:
@@ -104,6 +104,7 @@ __all__ = [
     # Emulation
     "NetworkEmulator",
     "NetworkProfile",
+    "load_profile_catalog",
     "apply_profile",
     "clear_profile",
     # Capture

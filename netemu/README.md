@@ -26,7 +26,7 @@ external metric taxonomy.
 
 - **Latency & jitter**: delay with configurable distributions (normal, pareto, paretonormal)
 - **Packet loss**: random, correlated, or Gilbert-Elliot (`gemodel`)
-- **Bandwidth limiting**: HTB-based rate limiting with burst/cburst and ceil
+- **Bandwidth limiting**: HTB, native Netem serialization, or combined HTB/Netem, with burst/cburst and ceil
 - **Corruption**: single-bit error injection
 - **Reordering** and **duplication**, each with correlation
 - **Bidirectional shaping**: egress directly, ingress redirected through an IFB device
@@ -776,8 +776,8 @@ constructor was given `interface="auto"`.
 class NetworkProfile:
     name: str
     description: str = ""
-    delay_ms: int = 0
-    jitter_ms: int = 0
+    delay_ms: float = 0
+    jitter_ms: float = 0
     delay_distribution: Optional[str] = None  # normal, pareto, paretonormal
     delay_correlation_pct: Optional[float] = None
     loss_pct: float = 0.0
@@ -794,6 +794,18 @@ class NetworkProfile:
     duplicate_pct: float = 0.0
     duplicate_correlation_pct: Optional[float] = None
     limit_packets: Optional[int] = None
+    rate_mode: Optional[str] = None  # netem, htb, htb_netem; None = legacy
+    netem_rate_mbit: Optional[float] = None
+    burst_bytes: Optional[int] = None
+    cburst_bytes: Optional[int] = None
+    loss_mean_burst_packets: Optional[float] = None
+    slot_distribution: Optional[str] = None
+    slot_delay_ms: Optional[float] = None
+    slot_jitter_ms: Optional[float] = None
+    slot_max_packets: Optional[int] = None
+    slot_max_bytes: Optional[int] = None
+    bypass: bool = False
+    uplink: Optional["NetworkProfile"] = None
 ```
 
 ### Exceptions
@@ -810,6 +822,42 @@ class NetworkProfile:
 ## Configuration
 
 ### Profile YAML Format
+
+`NetworkEmulator.load_profiles()` and `load_profile_catalog()` accept both the
+legacy `profiles:` format below and calibration schema v1 `cases:` catalogs.
+Calibration cases must pair `<name>/uplink` with `<name>/downlink`; callers keep
+using `--profile <name>`. Egress uses uplink, and ingress uses downlink. An
+explicit `<name>/uplink` or `<name>/downlink` selects that direction on its own.
+`--ingress-profile` selects the named profile's downlink; egress-only operation
+still uses uplink. Port-scoped loopback shaping uses separate request/response
+bands with the same service models.
+
+Only `parameters` configure tc. Calibration targets, workloads, CDF references,
+and fitting bounds are retained in the file but never applied as impairments.
+The whole catalog is validated before replacing loaded profiles; unsupported
+versions, unpaired directions, unknown parameters and invalid values fail early.
+
+The calibration fields have these runtime meanings:
+
+- `rate_mode: netem` uses native Netem rate limiting; `htb` uses HTB with a
+  Netem impairment leaf; `htb_netem` additionally serializes in that leaf.
+  `netem_rate_mbit` overrides the combined mode's native cap, whose default is
+  `ceil_mbit` or `rate_mbit`. Legacy profiles without a mode retain HTB behavior.
+- `ceil_mbit` aliases `rate_ceil_mbit`. `burst_bytes` and `cburst_bytes` remain
+  byte counts; legacy `rate_burst_kbit` and `rate_cburst_kbit` retain their units.
+- `loss_model: gemodel` with `loss_mean_burst_packets: B` treats `loss_pct` as
+  stationary mean loss `L`. The transition probabilities are `r = 1/B` and
+  `p = (L/100) * r / (1 - L/100)`, with BAD-state loss 100% and GOOD-state loss 0%.
+  Calibration GE cases require the burst field. Legacy positional GE settings
+  remain supported in flat `profiles:` files.
+- `slot_distribution`, `slot_delay_ms`, `slot_jitter_ms`, `slot_max_packets`,
+  and `slot_max_bytes` are passed to Netem. Uniform packet jitter uses the
+  kernel's built-in distribution without requesting a distribution table.
+- `bypass: true` clears previous rules and installs no shaping or IFB redirect.
+
+Calibration settings describe synthetic inputs. Loading them does not assert
+that every workload's observed delay/loss matches a calibration target.
+
 
 ```yaml
 profiles:
@@ -863,8 +911,8 @@ shaping host already include the emulated delay.
 Traffic between two processes on the same host never reaches the shaped
 interface: the kernel delivers it over `lo`, whatever address it carries.
 `apply_profile_to_loopback` shapes that path selectively, installing a
-three-band `prio` root on `lo` with a netem leaf that only selected traffic
-enters:
+three-band `prio` root on `lo`. Only selected traffic enters the shaping
+queues; all other traffic uses the unshaped default band:
 
 ```python
 # TCP to or from one port (a local HTTP server)
@@ -887,13 +935,19 @@ Selectors are `(protocol, port)` pairs with `protocol` one of `"tcp"` or
 matched. Each call resets the loopback root, so pass every selector in one
 call.
 
-Two differences from shaping a real interface:
+Both directions cross `lo` once each, so a one-way `delay_ms` produces a round
+trip of about twice that, as with bidirectional shaping on a real interface.
 
-- Both directions cross `lo` once each, so a one-way `delay_ms` produces a
-  round trip of about twice that. This matches bidirectional shaping on a
-  real interface.
-- There is no HTB on `lo`. A `rate_mbit` limit uses netem's own rate option
-  and is shared by both directions, since one queue carries them.
+Calibration profiles retain their configured HTB/Netem rate model, loss model,
+and queue sizes. Selectors with a server port put requests and responses into
+separate uplink and downlink bands. A protocol-wide selector, such as
+`("udp", None)`, or an all-traffic selector cannot identify the client: it
+uses the downlink service model in a shared queue for both directions. An
+asymmetric profile logs a warning in that case. Port-specific rules take
+precedence over a protocol-wide fallback.
+
+Legacy symmetric profiles without calibration fields retain one shared Netem
+queue, including native Netem rate limiting on loopback.
 
 Note that ICE never offers `127.0.0.1` as a host candidate, so a local WebRTC
 peer exchanges media between the primary interface address and itself. That
