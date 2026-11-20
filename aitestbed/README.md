@@ -235,7 +235,7 @@ The test matrix uses the 10 selected profiles from `configs/profiles.yaml`, alig
 | `satellite_geo` ⇄ | 340 ms / 340 ms | 15 ms / 18 ms | normal | 0.1% / 0.2% | correlated (20% / 25%) | 50 / 3 Mbps | GEO satellite (long RTT, asymmetric UL) |
 | `congested` | 200 ms | 50 ms | pareto | 3% | Gilbert-Elliot (40%) | 1 Mbps | Bufferbloat / heavy congestion |
 | `5qi_7` | 80 ms | 10 ms | normal | 0.1% | correlated (20%) | -- | 5QI 7: Voice / Live Streaming (PDB 100 ms, PER 1e-3) |
-| `5qi_80` | 8 ms | 1 ms | normal | 1e-6 | correlated (5%) | -- | 5QI 80: Low-latency eMBB / AR (PDB 10 ms, PER 1e-6) |
+| `5qi_80` | 8 ms | 1 ms | normal | 0.0001% | correlated (5%) | -- | 5QI 80: Low-latency eMBB / AR (PDB 10 ms, PER 1e-6) |
 | `lossy` | 0 ms | 0 ms | fixed | 10% | -- | unlimited | High loss test |
 
 ⇄ Asymmetric profiles (`satellite_leo`, `satellite_geo`) use an optional `uplink:` sub-block that overrides egress-side fields only. The columns above show **downlink / uplink**; fields not listed under `uplink:` are inherited from the downlink block. 5QI anchors follow the S4-260848 rule `delay_ms = PDB − 2.054 × jitter_ms` when `jitter_ms > 0`.
