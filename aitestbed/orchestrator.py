@@ -613,6 +613,7 @@ class TestbedOrchestrator:
         finally:
             # Clear network profile
             self.emulator.clear()
+            self._clear_scenario_loopback()
 
         # stop-on-error: only raise if every run failed on a baseline profile
         # (no_emulation), indicating a real infrastructure problem. Failures on
@@ -654,6 +655,19 @@ class TestbedOrchestrator:
             except Exception:  # noqa: BLE001, torch built without CUDA support
                 pass
         return None
+
+    def _clear_scenario_loopback(self) -> None:
+        """Remove loopback netem left by scenarios (MCP/gateway shaping).
+
+        Skipped when the experiment itself shapes ``lo``: that qdisc is the
+        active profile and is removed by ``self.emulator.clear()`` instead.
+        """
+        if getattr(self.emulator, "interface", None) == "lo":
+            return
+        try:
+            self.emulator.clear_loopback()
+        except Exception as exc:  # noqa: BLE001, best-effort cleanup
+            logger.warning(f"Failed to clear loopback shaping: {exc}")
 
     def _run_with_timeout(
         self,
@@ -751,6 +765,9 @@ class TestbedOrchestrator:
             )
             _kill_worker_group()
             recv_conn.close()
+            # The killed worker never ran its teardown, so loopback shaping
+            # applied by agent/openclaw/a2a/realtime scenarios would linger.
+            self._clear_scenario_loopback()
             return ScenarioResult(
                 scenario_id=scenario_name,
                 session_id=f"timeout_{int(time.time())}",
