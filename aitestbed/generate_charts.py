@@ -4193,7 +4193,8 @@ def _generate_per_scenario_ran2_subcharts(scenario_id: str,
             db_ = per_dir.get("dl") or []
             ul_counts.append(len(ub)); dl_counts.append(len(db_))
             def _p95(bursts):
-                rates = sorted(b.get("peak_rate_bps", 0) / 1_000_000 for b in bursts)
+                rates = sorted(b["total_bytes"] * 8 / b["duration_sec"] / 1_000_000
+                               for b in bursts if b["duration_sec"] > 0)
                 if not rates:
                     return 0.0
                 idx = max(0, int(len(rates) * 0.95) - 1)
@@ -4209,9 +4210,9 @@ def _generate_per_scenario_ran2_subcharts(scenario_id: str,
         ax.set_ylabel("Burst count"); ax.set_title(f"Q2.1 — bursts @ >{gap} gap")
         ax.legend(loc="upper left", fontsize=8); ax.grid(axis="y", alpha=0.3)
         ax2 = ax.twinx()
-        ax2.plot(pos, ul_p95, marker="^", color="#1f77b4", alpha=0.8, label="UL peak p95")
-        ax2.plot(pos, dl_p95, marker="v", color="#ff7f0e", alpha=0.8, label="DL peak p95")
-        ax2.set_ylabel("Intra-burst peak rate p95 (Mbps)")
+        ax2.plot(pos, ul_p95, marker="^", color="#1f77b4", alpha=0.8, label="UL mean-rate p95")
+        ax2.plot(pos, dl_p95, marker="v", color="#ff7f0e", alpha=0.8, label="DL mean-rate p95")
+        ax2.set_ylabel("Mean burst rate p95 (Mbps)")
         ax2.legend(loc="upper right", fontsize=7)
     fig.suptitle(f"RAN2 per-direction bursts: {label}",
                  fontsize=12, fontweight="bold")

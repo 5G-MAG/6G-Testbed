@@ -15,6 +15,8 @@ from .agent import (
     GeneralAgentScenario,
 )
 from .image import ImageGenerationScenario
+from .media import (VideoGenerationScenario, ImageEnhancementScenario,
+                    MeasuredImageGenerationScenario, MeasuredChatScenario, VisualAssistantScenario)
 from .multimodal import MultimodalScenario
 from .video import VideoUnderstandingScenario
 from .computer_use import ComputerUseScenario
@@ -59,6 +61,11 @@ __all__ = [
     "WebSearchAgentScenario",
     "GeneralAgentScenario",
     "ImageGenerationScenario",
+    "VideoGenerationScenario",
+    "ImageEnhancementScenario",
+    "MeasuredImageGenerationScenario",
+    "MeasuredChatScenario",
+    "VisualAssistantScenario",
     "MultimodalScenario",
     "VideoUnderstandingScenario",
     "ComputerUseScenario",
