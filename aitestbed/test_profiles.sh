@@ -268,10 +268,9 @@ load_requested_profiles() {
 
     local known
     known=$(python - <<'PY'
-import yaml
-from pathlib import Path
-p = yaml.safe_load(Path("configs/profiles.yaml").read_text()) or {}
-print(" ".join((p.get("profiles") or {}).keys()))
+from netemu import load_profile_catalog
+p = load_profile_catalog("configs/profiles.yaml")
+print(" ".join(p["profiles"]))
 PY
     )
     local missing=()
