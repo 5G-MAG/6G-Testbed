@@ -34,6 +34,8 @@ class LogRecord:
     # Traffic metrics
     request_bytes: int = 0
     response_bytes: int = 0
+    request_bytes_source: str = "application_serialization"
+    response_bytes_source: str = "application_serialization"
 
     # Token metrics
     tokens_in: Optional[int] = None
@@ -128,6 +130,8 @@ class TrafficLogger:
 
                 request_bytes INTEGER DEFAULT 0,
                 response_bytes INTEGER DEFAULT 0,
+                request_bytes_source TEXT DEFAULT 'application_serialization',
+                response_bytes_source TEXT DEFAULT 'application_serialization',
 
                 tokens_in INTEGER,
                 tokens_out INTEGER,
@@ -156,6 +160,18 @@ class TrafficLogger:
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
             """)
+
+            # Forward-compatible migration for databases created before byte
+            # provenance was explicit.
+            columns = {
+                row[1] for row in conn.execute("PRAGMA table_info(traffic_logs)")
+            }
+            for name in ("request_bytes_source", "response_bytes_source"):
+                if name not in columns:
+                    conn.execute(
+                        f"ALTER TABLE traffic_logs ADD COLUMN {name} TEXT "
+                        "DEFAULT 'application_serialization'"
+                    )
 
             # Create indexes for common queries
             conn.execute("""
@@ -201,6 +217,7 @@ class TrafficLogger:
                 timestamp, scenario_id, session_id, turn_index, run_index,
                 provider, model,
                 request_bytes, response_bytes,
+                request_bytes_source, response_bytes_source,
                 tokens_in, tokens_out,
                 t_request_start, t_first_token, t_last_token, latency_sec,
                 network_profile,
@@ -212,6 +229,7 @@ class TrafficLogger:
                 :timestamp, :scenario_id, :session_id, :turn_index, :run_index,
                 :provider, :model,
                 :request_bytes, :response_bytes,
+                :request_bytes_source, :response_bytes_source,
                 :tokens_in, :tokens_out,
                 :t_request_start, :t_first_token, :t_last_token, :latency_sec,
                 :network_profile,
@@ -233,6 +251,7 @@ class TrafficLogger:
                     timestamp, scenario_id, session_id, turn_index, run_index,
                     provider, model,
                     request_bytes, response_bytes,
+                    request_bytes_source, response_bytes_source,
                     tokens_in, tokens_out,
                     t_request_start, t_first_token, t_last_token, latency_sec,
                     network_profile,
@@ -244,6 +263,7 @@ class TrafficLogger:
                     :timestamp, :scenario_id, :session_id, :turn_index, :run_index,
                     :provider, :model,
                     :request_bytes, :response_bytes,
+                    :request_bytes_source, :response_bytes_source,
                     :tokens_in, :tokens_out,
                     :t_request_start, :t_first_token, :t_last_token, :latency_sec,
                     :network_profile,

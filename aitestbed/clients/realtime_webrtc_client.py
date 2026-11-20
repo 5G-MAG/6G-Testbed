@@ -110,7 +110,7 @@ class RealtimeWebRTCClient:
     - Audio streaming uses a sendrecv audio transceiver and PCM16 frames.
     """
 
-    REALTIME_API_URL = "https://api.openai.com/v1/realtime"
+    REALTIME_CALLS_URL = "https://api.openai.com/v1/realtime/calls"
     DEFAULT_MODEL = "gpt-realtime-mini"
     DEFAULT_CHANNEL = "oai-events"
 
@@ -154,6 +154,12 @@ class RealtimeWebRTCClient:
         self._output_sample_rate = 24000
         self._sample_width_bytes = 2
         self._channels = 1
+        # Session modalities (set in connect()). Used to gate first-response
+        # timestamping: when 'audio' is not a configured output modality, the
+        # always-on WebRTC audio RTP frames must NOT be allowed to set
+        # t_first_response, otherwise text-only scenarios record a near-zero
+        # TTFT that is really just "time to next 20 ms RTP frame".
+        self._modalities: list[str] = ["text"]
 
     @property
     def provider(self) -> str:
@@ -185,6 +191,7 @@ class RealtimeWebRTCClient:
     ) -> RealtimeSessionMetrics:
         if modalities is None:
             modalities = ["text"]
+        self._modalities = list(modalities)
 
         self._loop = asyncio.get_running_loop()
         t_start = time.time()
@@ -238,19 +245,20 @@ class RealtimeWebRTCClient:
         sdp_offer = self._pc.localDescription.sdp
         sdp_offer_bytes = len(sdp_offer.encode("utf-8"))
         sdp_offer_hash = hashlib.sha256(sdp_offer.encode("utf-8")).hexdigest()
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/sdp",
-            "OpenAI-Beta": "realtime=v1",
-        }
-        url = f"{self.REALTIME_API_URL}?model={self.model}"
+        session_config = self._build_session_config(
+            modalities=modalities,
+            voice=voice,
+            instructions=instructions,
+            turn_detection=turn_detection,
+            input_audio_transcription=input_audio_transcription,
+            max_response_output_tokens=max_response_output_tokens,
+        )
 
         sdp_start = time.time()
         answer_sdp = await asyncio.to_thread(
             self._post_sdp_offer,
-            url,
-            headers,
             sdp_offer,
+            session_config,
         )
         sdp_negotiation_sec = time.time() - sdp_start
         sdp_answer_bytes = len(answer_sdp.encode("utf-8"))
@@ -277,29 +285,6 @@ class RealtimeWebRTCClient:
         self._current_session_metrics.t_first_connected = time.time()
 
         await self._wait_for_event("session.created")
-
-        # Configure session
-        session_config = {
-            "type": "session.update",
-            "session": {
-                "modalities": modalities,
-                "voice": voice,
-                "input_audio_format": input_audio_format,
-                "output_audio_format": output_audio_format,
-                "temperature": temperature,
-            },
-        }
-        if instructions:
-            session_config["session"]["instructions"] = instructions
-        if turn_detection is not None:
-            session_config["session"]["turn_detection"] = turn_detection
-        if input_audio_transcription:
-            session_config["session"]["input_audio_transcription"] = input_audio_transcription
-        if max_response_output_tokens:
-            session_config["session"]["max_response_output_tokens"] = max_response_output_tokens
-
-        await self._send_event(session_config)
-        await self._wait_for_event("session.updated")
 
         logger.info("Realtime WebRTC session connected")
         return self._current_session_metrics
@@ -487,8 +472,54 @@ class RealtimeWebRTCClient:
 
         return self._current_session_metrics
 
-    def _post_sdp_offer(self, url: str, headers: dict, sdp: str) -> str:
-        response = requests.post(url, headers=headers, data=sdp, timeout=30)
+    def _build_session_config(
+        self,
+        modalities: list[str],
+        voice: str,
+        instructions: Optional[str],
+        turn_detection: Optional[dict],
+        input_audio_transcription: Optional[dict],
+        max_response_output_tokens: Optional[int],
+    ) -> dict:
+        """Translate the legacy scenario knobs to a GA Realtime session."""
+        output_modality = "audio" if "audio" in modalities else "text"
+        session: dict = {
+            "type": "realtime",
+            "model": self.model,
+            "output_modalities": [output_modality],
+        }
+        if instructions:
+            session["instructions"] = instructions
+        if max_response_output_tokens:
+            session["max_output_tokens"] = max_response_output_tokens
+
+        if output_modality == "audio" or turn_detection is not None or input_audio_transcription:
+            audio: dict = {}
+            audio_input: dict = {}
+            if turn_detection is not None:
+                audio_input["turn_detection"] = turn_detection
+            if input_audio_transcription:
+                audio_input["transcription"] = input_audio_transcription
+            if audio_input:
+                audio["input"] = audio_input
+            if output_modality == "audio":
+                audio["output"] = {"voice": voice}
+            session["audio"] = audio
+
+        return session
+
+    def _post_sdp_offer(self, sdp: str, session_config: dict) -> str:
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+        files = {
+            "sdp": (None, sdp, "application/sdp"),
+            "session": (None, json.dumps(session_config), "application/json"),
+        }
+        response = requests.post(
+            self.REALTIME_CALLS_URL,
+            headers=headers,
+            files=files,
+            timeout=30,
+        )
         if response.status_code not in (200, 201):
             raise RuntimeError(
                 f"SDP exchange failed ({response.status_code}): {response.text[:200]}"
@@ -534,7 +565,14 @@ class RealtimeWebRTCClient:
                     if not self._audio_capture_active or not self._current_turn_metrics:
                         continue
                     t_recv = time.time()
-                    if self._current_turn_metrics.t_first_response is None:
+                    # Only stamp t_first_response from the audio track when
+                    # audio is actually a configured output modality. In
+                    # text-only sessions the WebRTC peer still delivers
+                    # continuous RTP audio frames; stamping from those would
+                    # record a sub-frame-interval "TTFT" that has nothing to
+                    # do with model token arrival (see realtime_text_webrtc).
+                    if (self._current_turn_metrics.t_first_response is None
+                            and "audio" in self._modalities):
                         self._current_turn_metrics.t_first_response = t_recv
                     self._current_turn_metrics.t_last_response = t_recv
                     self._current_turn_metrics.audio_bytes_received += len(pcm_bytes)
@@ -596,6 +634,9 @@ class RealtimeWebRTCClient:
                 if event_type == "session.created":
                     self._current_session_metrics.session_id = event.get("session", {}).get("id", "")
                 return event
+            if event.get("type") == "error":
+                error = event.get("error", {})
+                raise RuntimeError(error.get("message", str(error)))
 
     async def _recv_event(self, timeout: float = 10) -> tuple[str, int, dict]:
         raw = await asyncio.wait_for(self._event_queue.get(), timeout=timeout)
@@ -630,10 +671,13 @@ class RealtimeWebRTCClient:
                         "response.text.delta",
                         "response.audio.delta",
                         "response.audio_transcript.delta",
+                        "response.output_text.delta",
+                        "response.output_audio.delta",
+                        "response.output_audio_transcript.delta",
                     ]:
                         self._current_turn_metrics.t_first_response = t_recv
 
-                if event_type == "response.text.delta":
+                if event_type in ("response.text.delta", "response.output_text.delta"):
                     delta = event.get("delta", "")
                     self._current_turn_metrics.output_text += delta
                     self._current_turn_metrics.text_bytes_received += len(delta.encode())
@@ -648,7 +692,7 @@ class RealtimeWebRTCClient:
                     self._current_turn_metrics.text_chunks.append(chunk)
                     self._current_turn_metrics.t_last_response = t_recv
 
-                elif event_type == "response.audio.delta":
+                elif event_type in ("response.audio.delta", "response.output_audio.delta"):
                     audio_b64 = event.get("delta", "")
                     audio_bytes = base64.b64decode(audio_b64) if audio_b64 else b""
                     self._current_turn_metrics.audio_bytes_received += len(audio_bytes)
@@ -663,7 +707,10 @@ class RealtimeWebRTCClient:
                     self._current_turn_metrics.audio_chunks.append(chunk)
                     self._current_turn_metrics.t_last_response = t_recv
 
-                elif event_type == "response.audio_transcript.delta":
+                elif event_type in (
+                    "response.audio_transcript.delta",
+                    "response.output_audio_transcript.delta",
+                ):
                     delta = event.get("delta", "")
                     self._current_turn_metrics.output_transcript += delta
 

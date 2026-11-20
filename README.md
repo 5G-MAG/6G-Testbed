@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Measures, analyses and models AI/LLM service traffic under emulated network conditions, to
+  Measures and analyses AI/LLM service traffic under emulated network conditions, to
   support 3GPP SA4 6G Media Study contributions.
 </p>
 
@@ -33,10 +33,9 @@
 ## Introduction
 
 The testbed runs AI service scenarios against LLM providers while shaping the network with Linux
-`tc`/`netem`, captures the resulting traffic, and logs metrics for SA4 contributions. It has three
-parts: `netemu`, the network emulation and capture library; `aitestbed`, the experiment framework
-built on it; and `training`, which learns traffic-pattern models from the captures `aitestbed`
-produces.
+`tc`/`netem`, captures the resulting traffic, and logs metrics for SA4 contributions. It has two
+parts: `netemu`, the network emulation and capture library, and `aitestbed`, the experiment
+framework built on it.
 
 ### Components
 
@@ -44,14 +43,10 @@ produces.
 |:----------|:-----|:-------|
 | [netemu/](./netemu/) | Network emulation, packet capture, and pcap metric extraction. Standalone package, no dependency on the testbed | [netemu/README.md](./netemu/README.md) |
 | [aitestbed/](./aitestbed/) | Experiment orchestration: scenarios, LLM/agent clients, application-layer metrics, reports. Depends on `netemu` | [aitestbed/README.md](./aitestbed/README.md) |
-| [training/](./training/) | Traffic-pattern dataset builder and Markov traffic generators trained on the captures `aitestbed` produces | [training/README.md](./training/README.md) |
 
 The dependencies run one way:
 
 ```
-   training/            reads captures + labels produced by aitestbed
-       │
-       ▼
    aitestbed/           orchestrates experiments, computes application-layer metrics
        │
        ▼
@@ -59,8 +54,7 @@ The dependencies run one way:
 ```
 
 `netemu` does not depend on the testbed and can be used on its own. `aitestbed` imports `netemu`
-for shaping, capture and pcap parsing. `training` reads `aitestbed` output files but imports no
-testbed code.
+for shaping, capture and pcap parsing.
 
 ### What lives where
 
@@ -75,7 +69,6 @@ The measurement stack is split by layer:
 | Application-layer metrics (TTFT, TTLT, tokens, agent loops) | `aitestbed/analysis/metrics.py` | Defined against the testbed's log schema |
 | RAN2 methodology metrics (S4-260859 Q1-Q5) | `aitestbed/analysis/ran2_metrics.py` | Combines pcap metrics with SQLite session records |
 | Reports, charts, Excel export | `aitestbed/` | Contribution-shaped output |
-| Feature extraction, Markov traffic generators | `training/` | Consumes captures; independent lifecycle |
 
 ### netemu
 
@@ -137,29 +130,6 @@ python orchestrator.py --scenario chat_basic --profile 5g_urban --runs 10
 The full SA4 cross-check run (all scenarios and profiles, with PCAP capture and report generation)
 is described in [aitestbed/README.md](./aitestbed/README.md), section "Cross-Checking for SA4 AI
 Traffic Characterization".
-
-### training
-
-Traffic-pattern models learned from the captures the testbed produces:
-
-- Feature extraction from pcaps and SQLite session labels, with flows attributed to a transport
-  surface and segmented at session boundaries
-- Nine traffic-pattern categories, including agent-to-agent signalling and local agent control
-  channels
-- A shared quantisation codec: log-spaced size and inter-arrival bins, with empirical
-  within-bin dequantisation
-- Zero- and first-order Markov generators conditioned on the category, with per-category
-  sampling and a Kolmogorov-Smirnov (KS) evaluation on held-out data
-
-```bash
-cd training
-pip install -r requirements.txt
-python -m dataset --captures-dir ../aitestbed/results/captures \
-    --db-path ../aitestbed/logs/traffic_logs.db --output-dir data --max-packets 100
-python -m train_markov --data-dir data
-```
-
-More detail is in [training/README.md](./training/README.md).
 
 ## Install dependencies
 
@@ -230,7 +200,6 @@ parameters, is in [aitestbed/README.md](./aitestbed/README.md).
 ```bash
 python -m pytest netemu/tests      # emulation, capture, pcap analysis
 python -m pytest aitestbed/tests   # testbed correctness checks
-python -m pytest training/tests    # dataset and model unit tests
 ```
 
 ## Contributing

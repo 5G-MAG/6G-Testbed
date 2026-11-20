@@ -1,6 +1,14 @@
 # METRICS.md
 
-Detailed documentation of all metrics calculated by the 6G AI Traffic Characterization Testbed.
+Detailed documentation of the metrics calculated by the 6G AI Traffic Characterization Testbed.
+
+> **Scope.** This document covers the **application-layer** metrics (computed
+> from the SQLite log) and the **RAN2 methodology** metrics (which join pcap
+> output to session records). The **network-layer** metrics themselves, flow
+> reassembly, handshake RTT, TLS setup, retransmission detection, direction
+> attribution, windowed throughput and burst segmentation, are computed by the
+> sibling `netemu` package and documented in the **PCAP Processing** section
+> of [netemu/README.md](../netemu/README.md).
 
 ## Table of Contents
 
@@ -24,9 +32,26 @@ The testbed calculates metrics at multiple levels:
 
 ### Data Flow
 
+Two paths join at the report stage: the application-layer path through the
+SQLite log, and the network-layer path through the pcaps.
+
 ```
-API Call → LogRecord → SQLite Storage → MetricsCalculator → ScenarioMetrics → 3GPP Report
+                      ┌────────────────────────────────────────────┐
+  API Call ─────────► │ LogRecord → SQLite → MetricsCalculator      │
+                      │            → ScenarioMetrics                │
+                      └───────────────────┬────────────────────────┘
+                                          │
+                                          ├──► 3GPP Report / RESULTS.md
+                                          │    charts, Excel
+                      ┌───────────────────┴────────────────────────┐
+  tcpdump ──► pcap ─► │ netemu.pcap: PcapAnalyzer → PcapMetrics     │
+  (netemu.capture)    │   ↓                                         │
+                      │ analysis/ran2_metrics.py: Q1..Q5            │
+                      └────────────────────────────────────────────┘
 ```
+
+The RAN2 stage is the only place the two layers are combined: it intersects
+per-packet records with the session windows recorded in SQLite.
 
 ---
 
@@ -494,7 +519,7 @@ Gaps between requests:
 | Error Types | 5 | timeout, rate_limited, server_error, tool_failure, other |
 | **RAN2 Q1 — UL-heavy** | 8 | ul/dl bytes (totals + distributions), ul/dl ratio, per-dir pkt count/size, per-dir multi-window throughput |
 | **RAN2 Q2 — Bursts** | 8 | per-dir bursts at 10/100ms, burst size/duration/peak-rate dists, inter-burst idle CDF, burstiness-by-window |
-| **RAN2 Q3 — RTT** | 4 | TCP RTT, TLS handshake, HTTP setup-RTT, inter-chunk-gap vs RTT ratio, E2E-latency vs RTT |
+| **RAN2 Q3 — RTT** | 4 | TCP RTT, TLS handshake, full connection setup (SYN to App-Data), inter-chunk-gap vs RTT ratio, E2E-latency vs RTT |
 | **RAN2 Q4 — Variability** | 6 | volume distributions, reliability-vs-loss, inter-burst-idle CV, flow-duration, connection-reuse, per-tool sub-flow |
 | **RAN2 Q5 — Tokenized** | 4 | inter-token-gap dist per profile, tokens→bytes regression (UL+DL), token-rate vs DL-pkt-rate |
 | **Subtotal RAN2** | **30** | See [RAN2 Methodology Metrics](#ran2-methodology-metrics-s4-260859) |
@@ -524,8 +549,8 @@ The output is a nested dict keyed by RAN2 question. Each leaf distribution uses 
 | Source | Where | Used by |
 |---|---|---|
 | `traffic_logs` table (per-turn DB rows) | `logs/traffic_logs.db` | all five questions |
-| `PacketRecord` list (per-packet pcap records) | `PcapMetrics.packets` (populated in `PcapAnalyzer.analyze()`) | Q1.3, Q1.4, Q2.1, Q2.2, Q2.3, Q3.1, Q3.2, Q4.5–Q4.7, Q5.3 |
-| Per-flow TCP stats (handshake RTT, duration, retransmits) | `PcapMetrics.flows[*]` (`TCPFlow`) | Q3.1, Q3.2, Q4.6, Q4.7 |
+| `PacketRecord` list (per-packet pcap records) | `PcapMetrics.packets` (populated in `netemu.pcap.PcapAnalyzer.analyze()`) | Q1.3, Q1.4, Q2.1, Q2.2, Q2.3, Q3.1, Q3.2, Q4.5–Q4.7, Q5.3 |
+| Per-flow TCP stats (handshake RTT, duration, retransmits) | `PcapMetrics.flows[*]` (`netemu.pcap.TCPFlow`) | Q3.1, Q3.2, Q4.6, Q4.7 |
 | Streaming `inter_chunk_times` (DB column) | per-turn record | Q3.3, Q5.4 |
 | `metadata.record_type == 'tool_call'` rows | per-turn record | Q4.7 |
 | `configs/profiles.yaml:profiles[<name>].loss_pct` | file | Q4.4 |
@@ -539,7 +564,7 @@ The output is a nested dict keyed by RAN2 question. Each leaf distribution uses 
 | Q1.3 | Per-direction packet count + mean packet size | pcap `PacketRecord` | For each pcap: count pkts where `direction == ul/dl`; mean size = bytes/count | `Q1.pcap_per_direction[i].{ul_packets, dl_packets, ul_mean_pkt_size, dl_mean_pkt_size, ul_bytes_total, dl_bytes_total}` |
 | Q1.4 | Per-direction throughput at 1/10/100 ms / 1 s / 10 s windows | pcap `PacketRecord.timestamp + size + direction` | Bucket packets by `int((ts-t0)/window)`; rate = `bucket_bytes · 8 / window` bps; emit `(rel_t, ul_bps, dl_bps)` tuples + peak Mbps per window | `Q1.pcap_per_direction[i].peak_mbps_by_window["1ms"|"10ms"|"100ms"|"1s"|"10s"]` plus full series on `PcapMetrics.throughput_by_window` |
 
-**Code:** `analysis/pcap_analyzer.py::PcapAnalyzer._compute_per_direction_and_multi_window()` (post-processes `metrics.packets` once analyze() completes).
+**Code:** `netemu.pcap::PcapAnalyzer._compute_per_direction_and_multi_window()` (post-processes `metrics.packets` once analyze() completes).
 
 ### Q2 — Data bursts and delay-bound (`Q2`)
 
@@ -551,7 +576,7 @@ The output is a nested dict keyed by RAN2 question. Each leaf distribution uses 
 | Q2.4 | TTFB (already supported) | DB `t_first_token - t_request_start` | `ttft_values` distribution | `Q2.per_scenario_profile_delay[<s/p>].ttft_sec` |
 | Q2.5 | TTLB (already supported) | DB `t_last_token - t_request_start` | `ttlt_values` distribution | `Q2.per_scenario_profile_delay[<s/p>].ttlt_sec` |
 
-**Code:** burst segmentation + idle gaps in `analysis/pcap_analyzer.py::_compute_per_direction_and_multi_window()` (uses `burst_gaps_sec=(0.010, 0.100)` by default). Distribution aggregation in `analysis/ran2_metrics.py::_q2_bursts()`.
+**Code:** burst segmentation + idle gaps in `netemu.pcap::PcapAnalyzer._compute_per_direction_and_multi_window()` (uses `burst_gaps_sec=(0.010, 0.100)` by default). Distribution aggregation in `analysis/ran2_metrics.py::_q2_bursts()`.
 
 **Caveat (per S4-260859 editor's note):** windows below ~10 ms may be affected by OS scheduler jitter; treat `burstiness_by_window["1ms"]` as indicative.
 
@@ -561,11 +586,11 @@ The output is a nested dict keyed by RAN2 question. Each leaf distribution uses 
 |---|---|---|---|---|
 | Q3.1 | TCP handshake RTT (min/median/p95) | pcap `TCPFlow.handshake_rtt` (`ack_time − syn_time`) | Collected during `_process_tcp_packet()`; aggregated into `{min, p50, p95, p99, max, mean}` distribution in ms. | `Q3.tcp_rtt` |
 | Q3.2a | TLS handshake time | per-turn `metadata.tls.handshake_ms` | Aggregated across all primary turns. Honors both `handshake_ms` and `handshake_sec` keys. | `Q3.tls_handshake` |
-| Q3.2b | HTTP connection setup RTT | pcap `TCPFlow.time_to_first_data − TCPFlow.handshake_duration` | Time between the end of TCP handshake and the first application data byte. Clamped at 0. | `Q3.http_setup_rtt` |
+| Q3.2b | Full connection setup latency | pcap `TCPFlow.tls_first_app_data_time − TCPFlow.syn_time` (falls back to `TCPFlow.first_data_time − TCPFlow.syn_time` on non-TLS flows) | End-to-end client-side time from the first SYN until the first TLS ApplicationData (HTTP-ready), spanning TCP handshake + local pre-TLS gap + TLS handshake. Both endpoints are captured at the client NIC. | `Q3.connection_setup_ms` |
 | Q3.3 | Inter-chunk gap vs RTT (streaming) | DB `inter_chunk_times[]` + `Q3.tcp_rtt.p50` | `ratio_p50 = median(inter_chunk_sec) · 1000 / rtt_p50_ms`. Quantifies how much of a stream's inter-chunk gap is attributable to network RTT vs server-side generation. | `Q3.inter_chunk_vs_rtt.{inter_chunk_sec, tcp_rtt_p50_ms, ratio_p50}` |
 | Q3.4 | E2E response latency vs RTT (non-streaming) | DB `latency_sec` + `Q3.tcp_rtt.p50` | Per-turn ratio `(latency·1000)/rtt_p50_ms` aggregated per `(scenario, profile)`. | `Q3.e2e_latency_vs_rtt[<s/p>]` |
 
-**Code:** `analysis/ran2_metrics.py::_q3_rtt()`. TCP handshake times come from `_process_tcp_packet()` in `pcap_analyzer.py`.
+**Code:** `analysis/ran2_metrics.py::_q3_rtt()`. TCP handshake times come from `_process_tcp_packet()` in `netemu.pcap`.
 
 ### Q4 — Intra-application variability (`Q4`)
 
