@@ -212,7 +212,7 @@ class BurstMetrics:
     """Burst structure, keyed by the gap threshold that defines a burst.
 
     ``by_gap[label][direction]`` holds ``count``, ``size_bytes``,
-    ``duration_s``, ``peak_rate_bps`` and ``idle_gap_s`` for that combination.
+    ``duration_s``, ``mean_rate_bps`` and ``idle_gap_s`` for that combination.
     Gap labels come from whatever thresholds :class:`~netemu.pcap.PcapAnalyzer`
     was configured with.
     """
@@ -531,7 +531,11 @@ def compute_packet_metrics(
                 for burst in burst_list or []:
                     slot["size_bytes"].append(float(burst.get("total_bytes", 0)))
                     slot["duration_s"].append(float(burst.get("duration_sec", 0.0)))
-                    slot["peak_rate_bps"].append(float(burst.get("peak_rate_bps", 0.0)))
+                    mean_rate = burst.get("mean_rate_bps")
+                    if mean_rate is None and burst.get("duration_sec", 0) > 0:
+                        mean_rate = burst.get("total_bytes", 0) * 8 / burst["duration_sec"]
+                    if mean_rate is not None:
+                        slot["mean_rate_bps"].append(float(mean_rate))
                 slot["count"].append(float(len(burst_list or [])))
         for label, per_dir in (capture.interburst_idle_by_gap or {}).items():
             for direction, gaps in (per_dir or {}).items():
