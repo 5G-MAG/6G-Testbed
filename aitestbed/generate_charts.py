@@ -3873,9 +3873,9 @@ def generate_ran2_q2_burst_duration_distribution_chart(ran2: dict, output_dir: P
 def generate_ran2_q2_burst_peak_rate_distribution_chart(ran2: dict, output_dir: Path) -> Optional[str]:
     return _q2_burst_distribution_chart(
         ran2, output_dir,
-        metric="peak_rate_mbps",
-        ylabel="Peak intra-burst rate (Mbps, log scale)",
-        title="Q2 — Peak intra-burst rate distribution per scenario × direction",
+        metric="mean_rate_mbps",
+        ylabel="Mean burst rate (Mbps, log scale)",
+        title="Q2 — Mean burst rate distribution per scenario × direction",
         filename="ran2_q2_burst_peak_rate_distribution.png",
     )
 
