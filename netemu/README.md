@@ -58,7 +58,7 @@ external metric taxonomy.
 - One call aggregates a single capture or a whole campaign into distributions
 - Connection metrics: handshake RTT, TLS setup, full connection setup, time to first data, flow duration, exchanges per flow, connection reuse, destination fan-out
 - Direction metrics: uplink and downlink volumes and their ratio, per-direction packet size and inter-packet gap
-- Burst metrics: count, size, duration, peak rate and inter-burst idle, per gap threshold and direction
+- Burst metrics include count, size, duration, mean rate and inter-burst idle time for each gap threshold and direction
 - Throughput metrics: mean and peak, plus peak and burstiness per averaging window
 - Reliability metrics: retransmission counts and rates, per capture and per flow
 - Every distribution carries `n`, mean, min, max, p50, p95, p99, stdev and coefficient of variation
@@ -460,11 +460,12 @@ Each burst is a dict:
 | `duration_sec` | `end - start`; **zero for a single-packet burst** |
 | `total_bytes` | Sum of IP-payload sizes |
 | `packet_count` | Packets in the burst |
-| `peak_rate_bps` | `total_bytes * 8 / duration_sec` |
+| `mean_rate_bps` | `total_bytes * 8 / duration_sec` for positive durations, otherwise `None` |
+| `peak_rate_bps` | Deprecated field that uses the idle-gap threshold as its divisor when duration is zero |
 
-When `duration_sec` is zero the rate would be undefined, so `peak_rate_bps`
-falls back to `total_bytes * 8 / gap_sec`, which reads as "at least this
-fast". Treat single-packet bursts as rate lower bounds.
+Single-packet bursts and bursts whose packets share a timestamp contribute
+to counts, sizes and durations. Rate distributions only include bursts with
+positive measured duration.
 
 `interburst_idle_by_gap` holds the inter-arrival times that triggered each
 cut, so its length is one less than the burst count for that direction. Its
@@ -613,7 +614,7 @@ count is which" above.
 ### Burst
 
 `bursts.by_gap[gap_label][direction]` holds `count`, `size_bytes`, `duration_s`,
-`peak_rate_bps` and `idle_gap_s`, each a serialized `Distribution`. Gap labels
+`mean_rate_bps` and `idle_gap_s`, each a serialized `Distribution`. Gap labels
 are whatever thresholds `PcapAnalyzer` was configured with, `10ms` and `100ms`
 by default. `count` is per capture; the rest pool over individual bursts.
 

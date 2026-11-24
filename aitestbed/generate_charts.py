@@ -3638,7 +3638,7 @@ def generate_ran2_token_vs_pkt_rate_chart(ran2: dict, output_dir: Path) -> Optio
 # Q2 burstiness — additional per-scenario × direction charts.
 # Data source: ran2["Q2"]["per_scenario_profile_bursts"][<scenario>/<profile>]
 #   .by_gap["100ms"].{ul,dl}.{count, arrival_rate_per_sec, duty_cycle,
-#                              size_bytes, duration_sec, peak_rate_mbps}
+#                              size_bytes, duration_sec, mean_rate_mbps}
 # ---------------------------------------------------------------------------
 
 _Q2_BURST_GAP_LABEL = "100ms"
@@ -3769,15 +3769,15 @@ def _q2_burst_distribution_chart(
     ran2: dict, output_dir: Path, *, metric: str, ylabel: str,
     title: str, filename: str, log_y: bool = True, unit_factor: float = 1.0,
 ) -> Optional[str]:
-    """Box-plot template for size/duration/peak-rate distributions (5g_urban only)."""
+    """Box plots of burst size, duration or mean rate for the reference profile."""
     spb = (ran2.get("Q2") or {}).get("per_scenario_profile_bursts") or {}
     if not spb:
         return None
     ref = _q2_burst_select_reference_profile(spb, _Q2_BURST_REFERENCE_PROFILE, _Q2_BURST_GAP_LABEL)
     rows = []
     for sc, sides in ref.items():
-        ul_d = sides["ul"].get(metric) or {}
-        dl_d = sides["dl"].get(metric) or {}
+        ul_d = _q2_chart_distribution(sides["ul"], metric)
+        dl_d = _q2_chart_distribution(sides["dl"], metric)
         if not ul_d.get("n") and not dl_d.get("n"):
             continue
         med = ul_d.get("p50") or dl_d.get("p50") or 0
@@ -3849,6 +3849,16 @@ def _q2_burst_distribution_chart(
     return str(out)
 
 
+def _q2_chart_distribution(side: dict, metric: str) -> dict:
+    if metric == "mean_rate_mbps" and metric not in side:
+        # Older reports used the gap threshold as a divisor for zero-duration bursts.
+        # Their distribution is usable as a mean rate only when every duration was positive.
+        min_duration = (side.get("duration_sec") or {}).get("min")
+        if min_duration is not None and min_duration > 0:
+            return side.get("peak_rate_mbps") or {}
+    return side.get(metric) or {}
+
+
 def generate_ran2_q2_burst_size_distribution_chart(ran2: dict, output_dir: Path) -> Optional[str]:
     return _q2_burst_distribution_chart(
         ran2, output_dir,
@@ -3873,9 +3883,9 @@ def generate_ran2_q2_burst_duration_distribution_chart(ran2: dict, output_dir: P
 def generate_ran2_q2_burst_peak_rate_distribution_chart(ran2: dict, output_dir: Path) -> Optional[str]:
     return _q2_burst_distribution_chart(
         ran2, output_dir,
-        metric="peak_rate_mbps",
-        ylabel="Peak intra-burst rate (Mbps, log scale)",
-        title="Q2 — Peak intra-burst rate distribution per scenario × direction",
+        metric="mean_rate_mbps",
+        ylabel="Mean burst rate (Mbps, log scale)",
+        title="Q2 mean burst rate by scenario and direction",
         filename="ran2_q2_burst_peak_rate_distribution.png",
     )
 
@@ -4193,11 +4203,11 @@ def _generate_per_scenario_ran2_subcharts(scenario_id: str,
             db_ = per_dir.get("dl") or []
             ul_counts.append(len(ub)); dl_counts.append(len(db_))
             def _p95(bursts):
-                rates = sorted(b.get("peak_rate_bps", 0) / 1_000_000 for b in bursts)
+                rates = sorted(b["total_bytes"] * 8 / b["duration_sec"] / 1_000_000
+                               for b in bursts if b["duration_sec"] > 0)
                 if not rates:
-                    return 0.0
-                idx = max(0, int(len(rates) * 0.95) - 1)
-                return rates[idx]
+                    return None
+                return float(np.percentile(rates, 95))
             ul_p95.append(_p95(ub)); dl_p95.append(_p95(db_))
         pos = list(range(len(profiles))); width = 0.38
         ax.bar([p - width/2 for p in pos], ul_counts, width,
@@ -4209,9 +4219,9 @@ def _generate_per_scenario_ran2_subcharts(scenario_id: str,
         ax.set_ylabel("Burst count"); ax.set_title(f"Q2.1 — bursts @ >{gap} gap")
         ax.legend(loc="upper left", fontsize=8); ax.grid(axis="y", alpha=0.3)
         ax2 = ax.twinx()
-        ax2.plot(pos, ul_p95, marker="^", color="#1f77b4", alpha=0.8, label="UL peak p95")
-        ax2.plot(pos, dl_p95, marker="v", color="#ff7f0e", alpha=0.8, label="DL peak p95")
-        ax2.set_ylabel("Intra-burst peak rate p95 (Mbps)")
+        ax2.plot(pos, ul_p95, marker="^", color="#1f77b4", alpha=0.8, label="UL mean-rate p95")
+        ax2.plot(pos, dl_p95, marker="v", color="#ff7f0e", alpha=0.8, label="DL mean-rate p95")
+        ax2.set_ylabel("Mean burst rate p95 (Mbps)")
         ax2.legend(loc="upper right", fontsize=7)
     fig.suptitle(f"RAN2 per-direction bursts: {label}",
                  fontsize=12, fontweight="bold")

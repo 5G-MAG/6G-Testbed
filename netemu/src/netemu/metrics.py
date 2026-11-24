@@ -17,7 +17,7 @@ Five metric families are produced:
   duration, per-flow exchange counts, and destination fan-out.
 * **Direction** - uplink and downlink byte and packet volumes, their ratio, and
   per-direction packet size and inter-packet gap distributions.
-* **Burst** - burst count, size, duration, peak rate, and inter-burst idle time,
+* **Burst** - burst count, size, duration, mean rate, and inter-burst idle time,
   per gap threshold and direction.
 * **Throughput** - mean and peak throughput, plus peak and burstiness per
   averaging window.
