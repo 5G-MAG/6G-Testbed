@@ -3,12 +3,15 @@ import os
 import sys
 import time
 from pathlib import Path
+from unittest.mock import Mock
 
 import dpkt
+import pytest
 
 from clients.realtime_client import RealtimeClient
 from clients.realtime_webrtc_client import RealtimeWebRTCClient
 from configs import DEFAULT_CAPTURE_FILTER, WEBRTC_UDP_PORTS
+from netemu import NetworkEmulator
 from netemu.pcap import PcapAnalyzer
 from analysis.ran2_metrics import _is_primary_turn, _per_tool_bytes
 from analysis.trace_logger import TraceLogger
@@ -151,8 +154,9 @@ def test_trace_redacts_credentials_and_uses_private_permissions(tmp_path):
     ))
     text = path.read_text()
     assert "secret" not in text and "private-key-value" not in text
-    assert path.stat().st_mode & 0o777 == 0o600
-    assert path.parent.stat().st_mode & 0o777 == 0o700
+    if os.name == "posix":
+        assert path.stat().st_mode & 0o777 == 0o600
+        assert path.parent.stat().st_mode & 0o777 == 0o700
 
 
 def test_l7_redacts_headers_and_query_credentials():
@@ -185,12 +189,14 @@ class _SlowScenario:
         Path(self.marker).write_text("late write")
 
 
+@pytest.mark.skipif(os.name != "posix", reason="Requires POSIX process groups")
 def test_timeout_kills_worker_before_late_side_effect(tmp_path):
     marker = tmp_path / "late.txt"
-    result = _TestbedOrchestrator._run_with_timeout(
-        None, _SlowScenario(marker), "no_emulation", 0, 0.05, "slow"
-    )
+    runner = object.__new__(_TestbedOrchestrator)
+    runner.emulator = Mock(spec=NetworkEmulator, interface="test0")
+    result = runner._run_with_timeout(_SlowScenario(marker), "no_emulation", 0, 0.05, "slow")
     assert not result.success
+    runner.emulator.clear_loopback.assert_called_once_with()
     time.sleep(0.5)
     assert not marker.exists()
 

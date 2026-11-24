@@ -6,6 +6,7 @@ verified without root or a live interface.
 """
 
 import json
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -131,6 +132,7 @@ class TestStop:
         assert meta["t_end"] >= meta["t_start"]
         assert meta["size_bytes"] == len(PCAP_HEADER)
 
+    @pytest.mark.skipif(os.name != "posix", reason="Requires POSIX file modes")
     def test_sidecar_is_owner_only(self, capture_dir):
         cap = CaptureController(capture_dir=str(capture_dir))
         self._start(cap)
