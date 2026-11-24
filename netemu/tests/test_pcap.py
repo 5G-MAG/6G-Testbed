@@ -463,3 +463,16 @@ class TestUDPFlows:
         assert d["udp_flows"] == 1
         assert d["udp_bytes"] > 0
         json.dumps(d)
+
+
+def test_tcp_syn_overrides_ephemeral_port_order(tmp_path):
+    path = tmp_path / 'ephemeral.pcap'
+    _write_pcap(path, [
+        (1.0, _frame(CLIENT_IP, SERVER_IP, 30000, 60000, dpkt.tcp.TH_SYN, seq=100)),
+        (1.1, _frame(SERVER_IP, CLIENT_IP, 60000, 30000, dpkt.tcp.TH_SYN | dpkt.tcp.TH_ACK, seq=200, ack=101)),
+        (1.2, _frame(CLIENT_IP, SERVER_IP, 30000, 60000, dpkt.tcp.TH_ACK, seq=101, ack=201, payload=b'upload')),
+    ])
+    result = analyze_pcap(str(path))
+    assert [p.direction for p in result.packets] == ['ul','dl','ul']
+    assert result.flows[0].initiator_port == 30000
+    assert result.bursts_by_gap['10ms']['ul'][0]['mean_rate_bps'] is None

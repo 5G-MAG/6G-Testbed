@@ -518,7 +518,7 @@ Gaps between requests:
 | Burstiness | 6 | peak_to_mean, cv, on_gap (mean, count), off_gap (mean, count) |
 | Error Types | 5 | timeout, rate_limited, server_error, tool_failure, other |
 | **RAN2 Q1 — UL-heavy** | 8 | ul/dl bytes (totals + distributions), ul/dl ratio, per-dir pkt count/size, per-dir multi-window throughput |
-| **RAN2 Q2 — Bursts** | 8 | per-dir bursts at 10/100ms, burst size/duration/peak-rate dists, inter-burst idle CDF, burstiness-by-window |
+| **RAN2 Q2 bursts** | 8 | Per-direction bursts at 10 and 100 ms, distributions of burst size, duration and mean rate, inter-burst idle CDF, and burstiness by window |
 | **RAN2 Q3 — RTT** | 4 | TCP RTT, TLS handshake, full connection setup (SYN to App-Data), inter-chunk-gap vs RTT ratio, E2E-latency vs RTT |
 | **RAN2 Q4 — Variability** | 6 | volume distributions, reliability-vs-loss, inter-burst-idle CV, flow-duration, connection-reuse, per-tool sub-flow |
 | **RAN2 Q5 — Tokenized** | 4 | inter-token-gap dist per profile, tokens→bytes regression (UL+DL), token-rate vs DL-pkt-rate |
@@ -570,8 +570,8 @@ The output is a nested dict keyed by RAN2 question. Each leaf distribution uses 
 
 | # | Metric | Source | Formula / Notes | Field in output |
 |---|---|---|---|---|
-| Q2.1 | Burst detection with **>10 ms / 100 ms** idle-gap per direction | pcap `PacketRecord` sorted per direction | Walk packets; when inter-arrival `iat > gap_sec`, close current burst and start a new one. Emit `{start, end, duration_sec, total_bytes, packet_count, peak_rate_bps}` per burst. | `Q2.per_pcap[i].burst_stats_by_gap["10ms"\|"100ms"][<ul/dl>]` (full bursts list on `PcapMetrics.bursts_by_gap`) |
-| Q2.2 | Burst peak intra-burst rate + inter-burst idle CDF | same | `peak_rate_bps = total_bytes·8 / duration_sec` per burst. Inter-burst idle = `iat` when it crosses the gap threshold. | `Q2.per_pcap[i].burst_stats_by_gap[<gap>][<dir>].peak_rate_mbps` (distribution) and `Q2.per_pcap[i].interburst_idle_by_gap[<gap>][<dir>].cdf_sec` |
+| Q2.1 | Burst detection with a 10 ms or 100 ms idle-gap threshold per direction | pcap `PacketRecord` sorted per direction | Start a new burst when the inter-arrival time exceeds the threshold. Each burst records `start`, `end`, `duration_sec`, `total_bytes`, `packet_count` and `mean_rate_bps`. | `Q2.per_pcap[i].burst_stats_by_gap["10ms"\|"100ms"][<ul/dl>]` (full list on `PcapMetrics.bursts_by_gap`) |
+| Q2.2 | Mean burst rate and inter-burst idle CDF | same | Burst rate in Mbps is `8 * total_bytes / duration_sec / 1_000_000`. Zero-duration bursts count toward size, duration and burst count. Only positive-duration bursts contribute rate samples. The inter-burst idle time is the inter-arrival time that crosses the gap threshold. | `Q2.per_pcap[i].burst_stats_by_gap[<gap>][<dir>].mean_rate_mbps` (distribution) and `Q2.per_pcap[i].interburst_idle_by_gap[<gap>][<dir>].cdf_sec` |
 | Q2.3 | Burstiness index (peak/mean) at **1 ms / 10 ms / 100 ms / 1 s / 10 s** windows | pcap multi-window bucketing | For each window, sum UL+DL bytes per bucket, then `peak / mean` of those sums. | `Q2.per_pcap[i].burstiness_by_window["1ms"..."10s"]` |
 | Q2.4 | TTFB (already supported) | DB `t_first_token - t_request_start` | `ttft_values` distribution | `Q2.per_scenario_profile_delay[<s/p>].ttft_sec` |
 | Q2.5 | TTLB (already supported) | DB `t_last_token - t_request_start` | `ttlt_values` distribution | `Q2.per_scenario_profile_delay[<s/p>].ttlt_sec` |
