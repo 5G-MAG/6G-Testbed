@@ -48,6 +48,12 @@ from .a2a_agent import (
     A2AStreamingScenario,
     A2AMultiAgentScenario,
 )
+from .encoder_placement import EncoderPlacementScenario
+from .encoder_placement_concurrent import EncoderPlacementConcurrentScenario
+from .encoder_placement_qwen36 import EncoderPlacementQwen36Scenario
+from .encoder_placement_concurrent_qwen36 import (
+    EncoderPlacementConcurrentQwen36Scenario,
+)
 
 __all__ = [
     "BaseScenario",
@@ -104,4 +110,12 @@ __all__ = [
     "A2ASingleTaskScenario",
     "A2AStreamingScenario",
     "A2AMultiAgentScenario",
+    # Encoder placement (server-side vs terminal-side visual encoder)
+    "EncoderPlacementScenario",
+    # Encoder placement under concurrency (sidecar 8012)
+    "EncoderPlacementConcurrentScenario",
+    # Encoder placement, Qwen3.6 sibling (serial sidecar 8004)
+    "EncoderPlacementQwen36Scenario",
+    # Encoder placement, Qwen3.6 sibling (concurrent sidecar 8014)
+    "EncoderPlacementConcurrentQwen36Scenario",
 ]

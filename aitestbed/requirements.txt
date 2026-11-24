@@ -1,12 +1,9 @@
 # 6G AI Traffic Testbed Dependencies
 
-# Network Emulation + Capture + PCAP analysis (local sibling package).
-# netemu is a standalone package in the sibling netemu/ directory. It provides
-# tc/netem shaping (netemu.emulator), tcpdump capture (netemu.capture), and
-# pcap metric extraction (netemu.pcap). Install it with the [pcap] extra
-# before installing these dependencies:
-#   cd <repo-root>
-#   pip install -e "netemu[pcap]"
+# Local packages (install separately, in order, from the repository root):
+#   pip install "aiortc>=1.14.0,<1.16.0"   # stock upstream aiortc
+#   pip install -e aicodec --config-settings editable_mode=compat  # AI codec plugin (registers codecs dynamically)
+#   pip install -e "netemu[pcap]"          # tc/netem shaping, tcpdump capture, pcap metric extraction
 #   pip install -r aitestbed/requirements.txt
 
 # LLM Clients
@@ -54,7 +51,9 @@ mitmproxy>=10.0.0
 dpkt>=1.9.8
 
 # Optional: WebRTC transport for realtime scenarios
-# aiortc>=1.5.0 # use modified aiortc for realtime video analysis scenario
+# stock upstream aiortc + aicodec plugin (see aicodec/README.md)
+# 1.15.0+ natively provides alwaysNegotiateDataChannels and ICE local credentials
+aiortc>=1.14.0,<1.16.0
 
 # Optional: Computer use executor
 playwright>=1.41.0
@@ -88,6 +87,7 @@ starlette>=0.40.0
 # asyncio is part of stdlib
 
 # VLM
-torch==2.4.1 
+torch==2.4.1
 torchvision==0.19.1
 transformers==4.44.2
+

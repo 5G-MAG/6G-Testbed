@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What color is the vest the man is wearing?",
+                "time_stamp": "00:00:03",
+                "answer": "A",
+                "options": [
+                    "A. Green.",
+                    "B. Orange.",
+                    "C. Red.",
+                    "D. Yellow."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_454_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What is mounted on the dashboard right now?",
+                "time_stamp": "00:02:10",
+                "answer": "A",
+                "options": [
+                    "A. A phone with GPS application.",
+                    "B. A camera.",
+                    "C. A radio.",
+                    "D. A small fan."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_454_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What color is the dashboard right now?",
+                "time_stamp": "00:04:23",
+                "answer": "B",
+                "options": [
+                    "A. Blue.",
+                    "B. Black.",
+                    "C. Gray.",
+                    "D. Brown."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_454_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What type of vehicle is the vehicle ahead right now?",
+                "time_stamp": "00:06:33",
+                "answer": "C",
+                "options": [
+                    "A. Taxi.",
+                    "B. Delivery van.",
+                    "C. School bus.",
+                    "D. Ambulance."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_454_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What is attached to the dashboard right now?",
+                "time_stamp": "00:08:41",
+                "answer": "C",
+                "options": [
+                    "A. A notebook.",
+                    "B. A GPS device.",
+                    "C. A mobile phone.",
+                    "D. A calculator."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_454_real.mp4"
+    }
+]

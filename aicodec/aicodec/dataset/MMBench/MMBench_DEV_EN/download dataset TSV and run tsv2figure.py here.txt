@@ -1,0 +1,1 @@
+http://opencompass.openxlab.space/utils/VLMEval/MMBench_DEV_EN.tsv
