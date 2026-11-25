@@ -778,6 +778,10 @@ class TestbedOrchestrator:
     Main orchestrator for running traffic characterization experiments.
     """
 
+    # Set by __init__ to the raw --interface value. The class-level default
+    # means "no explicit interface" for a runner built without __init__.
+    raw_network_interface: Optional[str] = None
+
     def __init__(
         self,
         config_path: str = "configs/scenarios.yaml",
