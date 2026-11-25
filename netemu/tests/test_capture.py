@@ -6,6 +6,7 @@ verified without root or a live interface.
 """
 
 import json
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -131,6 +132,7 @@ class TestStop:
         assert meta["t_end"] >= meta["t_start"]
         assert meta["size_bytes"] == len(PCAP_HEADER)
 
+    @pytest.mark.skipif(os.name != "posix", reason="Requires POSIX file modes")
     def test_sidecar_is_owner_only(self, capture_dir):
         cap = CaptureController(capture_dir=str(capture_dir))
         self._start(cap)
@@ -250,3 +252,15 @@ class TestCaptureToContextManager:
                         raise RuntimeError("workload failed")
 
         assert cap.is_running() is False
+
+
+def test_drop_counters_are_retained_not_assumed_zero(capture_dir):
+    cap = CaptureController(capture_dir=str(capture_dir))
+    proc = _fake_proc()
+    proc.stderr.read.return_value = b'7 packets captured\n9 packets received by filter\n2 packets dropped by kernel\n'
+    with patch('netemu.capture.subprocess.Popen', return_value=proc), patch('netemu.capture.time.sleep'):
+        path = cap.start(filename='counters.pcap')
+        path.write_bytes(PCAP_HEADER)
+        cap.stop()
+    meta = json.loads(path.with_suffix('.pcap.metadata.json').read_text())
+    assert meta['capture_stats'] == {'packets_captured':7,'packets_received_by_filter':9,'packets_dropped_by_kernel':2}

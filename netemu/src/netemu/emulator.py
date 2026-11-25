@@ -7,18 +7,11 @@ Provides the NetworkEmulator class for applying network condition emulation
 
 import logging
 import subprocess
-from pathlib import Path
 from typing import Optional, Sequence
 
-import yaml
-
-from .exceptions import (
-    CommandFailedError,
-    ProfileLoadError,
-    ProfileNotFoundError,
-    SudoNotAvailableError,
-)
-from .profile import NetworkProfile
+from .exceptions import ProfileNotFoundError
+from .profile import NetworkProfile, load_profile_catalog
+from .tc import netem_parameters, shaping_commands
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +88,6 @@ class NetworkEmulator:
         self.bidirectional = bidirectional
         self.ifb_device = ifb_device
         self._ifb_initialized = False
-        # Loopback shaping state, see apply_profile_to_loopback().
         self._lo_port: Optional[int] = None
         self._lo_selectors: tuple[tuple[str, Optional[int]], ...] = ()
 
@@ -120,28 +112,13 @@ class NetworkEmulator:
         Raises:
             ProfileLoadError: If file cannot be read or parsed.
         """
-        try:
-            with open(path) as f:
-                data = yaml.safe_load(f)
-        except FileNotFoundError:
-            raise ProfileLoadError(path, "file not found")
-        except yaml.YAMLError as e:
-            raise ProfileLoadError(path, f"invalid YAML: {e}")
-
-        if not data:
-            raise ProfileLoadError(path, "empty file")
-
+        data = load_profile_catalog(path)
+        profiles = {name: NetworkProfile.from_dict(name, config)
+                    for name, config in data["profiles"].items()}
         if "default_interface" in data and self._interface_from_config:
             iface = data["default_interface"]
             self.interface = _detect_default_interface() if iface == "auto" else iface
-
-        profiles_data = data.get("profiles", {})
-        if not profiles_data:
-            raise ProfileLoadError(path, "no profiles defined")
-
-        for name, config in profiles_data.items():
-            self.profiles[name] = NetworkProfile.from_dict(name, config)
-
+        self.profiles = profiles
         logger.info(f"Loaded {len(self.profiles)} network profiles from {path}")
 
     def check_sudo(self) -> bool:
@@ -248,110 +225,55 @@ class NetworkEmulator:
     def apply_profile(
         self, profile_name: str, ingress_profile: Optional[str] = None
     ) -> bool:
+        """Apply uplink on egress and downlink on ingress for a named profile.
+
+        Legacy symmetric profiles are mirrored. An explicit ingress profile
+        selects its downlink fields; "none" disables ingress shaping.
         """
-        Apply a network profile for egress and optionally a different profile for ingress.
-
-        Args:
-            profile_name: Name of the profile to apply to egress traffic.
-            ingress_profile: Name of profile for ingress traffic. Options:
-                - None (default): Use same profile as egress when bidirectional=True.
-                - "none": Disable ingress shaping entirely.
-                - "<profile_name>": Use a different profile for ingress.
-
-        Returns:
-            True if successful, False otherwise.
-
-        Raises:
-            ProfileNotFoundError: If the specified profile doesn't exist.
-        """
-        if profile_name not in self.profiles:
+        profile = self.get_profile(profile_name)
+        if profile is None:
             raise ProfileNotFoundError(profile_name)
-
-        # Determine ingress profile
-        ingress_profile_obj: Optional[NetworkProfile] = None
-        apply_ingress = self.bidirectional
-
-        if ingress_profile == "none":
-            apply_ingress = False
-        elif ingress_profile is not None:
-            if ingress_profile not in self.profiles:
+        ingress = None
+        if ingress_profile not in (None, "none"):
+            ingress = self.get_profile(ingress_profile)
+            if ingress is None:
                 raise ProfileNotFoundError(ingress_profile)
-            ingress_profile_obj = self.profiles[ingress_profile]
-        else:
-            # Default: use same profile for ingress
-            ingress_profile_obj = (
-                self.profiles[profile_name] if apply_ingress else None
-            )
+        elif ingress_profile is None:
+            ingress = profile
+        if not self.bidirectional or ingress_profile == "none":
+            ingress = None
+        return self._apply_profiles(profile.uplink or profile, ingress, profile_name)
 
-        egress_profile = self.profiles[profile_name]
-
-        # Clear existing rules first
+    def _apply_profiles(self, egress: NetworkProfile, ingress: Optional[NetworkProfile],
+                        profile_name: str) -> bool:
+        # Validate both sides before removing any existing shaping.
+        egress.validate()
+        if ingress is not None:
+            ingress.validate()
         self.clear()
-
+        success = False
         try:
-            # Apply egress shaping
-            success = self._apply_profile_to_device(
-                device=self.interface, profile=egress_profile
-            )
-            if not success:
+            if not self._apply_profile_to_device(self.interface, egress):
                 return False
-
-            # Apply ingress shaping if enabled
-            if apply_ingress and ingress_profile_obj is not None:
+            if ingress is not None and not ingress.bypass:
                 if not self._setup_ifb():
-                    logger.error("Failed to set up IFB for ingress shaping")
                     return False
-
-                success = self._apply_profile_to_device(
-                    device=self.ifb_device, profile=ingress_profile_obj
-                )
-                if not success:
-                    logger.error("Failed to apply ingress shaping to IFB")
+                if not self._apply_profile_to_device(self.ifb_device, ingress):
                     return False
-
-                self.current_ingress_profile = ingress_profile_obj.name
-                if ingress_profile_obj.name == egress_profile.name:
-                    logger.info(f"Applied bidirectional profile: {profile_name}")
-                else:
-                    logger.info(
-                        f"Applied asymmetric shaping: egress={profile_name}, "
-                        f"ingress={ingress_profile_obj.name}"
-                    )
-            else:
-                logger.info(f"Applied egress-only profile: {profile_name}")
-
+                self.current_ingress_profile = ingress.name
             self.current_profile = profile_name
+            success = True
+            logger.info("Applied network profile: %s", profile_name)
             return True
-
-        except Exception as e:
-            logger.error(f"Failed to apply network profile: {e}")
+        except Exception as exc:
+            logger.error("Failed to apply network profile: %s", exc)
             return False
+        finally:
+            if not success:
+                self.clear()
 
-    def _apply_profile_to_device(
-        self, device: str, profile: NetworkProfile
-    ) -> bool:
-        """Apply a NetworkProfile to a specific device."""
-        return self._apply_shaping_to_device(
-            device=device,
-            delay_ms=profile.delay_ms,
-            jitter_ms=profile.jitter_ms,
-            delay_distribution=profile.delay_distribution,
-            delay_correlation_pct=profile.delay_correlation_pct,
-            loss_pct=profile.loss_pct,
-            loss_correlation_pct=profile.loss_correlation_pct,
-            loss_model=profile.loss_model,
-            rate_mbit=profile.rate_mbit,
-            rate_ceil_mbit=profile.rate_ceil_mbit,
-            rate_burst_kbit=profile.rate_burst_kbit,
-            rate_cburst_kbit=profile.rate_cburst_kbit,
-            corruption_pct=profile.corruption_pct,
-            corruption_correlation_pct=profile.corruption_correlation_pct,
-            reorder_pct=profile.reorder_pct,
-            reorder_correlation_pct=profile.reorder_correlation_pct,
-            duplicate_pct=profile.duplicate_pct,
-            duplicate_correlation_pct=profile.duplicate_correlation_pct,
-            limit_packets=profile.limit_packets,
-        )
+    def _apply_profile_to_device(self, device: str, profile: NetworkProfile) -> bool:
+        return all(self._run_tc_command(cmd) for cmd in shaping_commands(profile, device))
 
     def apply_settings(
         self,
@@ -376,6 +298,18 @@ class NetworkEmulator:
         profile_name: str = "custom",
         ingress_settings: Optional[dict] = None,
         disable_ingress: bool = False,
+        *,
+        rate_mode: Optional[str] = None,
+        netem_rate_mbit: Optional[float] = None,
+        burst_bytes: Optional[int] = None,
+        cburst_bytes: Optional[int] = None,
+        loss_mean_burst_packets: Optional[float] = None,
+        slot_distribution: Optional[str] = None,
+        slot_delay_ms: Optional[float] = None,
+        slot_jitter_ms: Optional[float] = None,
+        slot_max_packets: Optional[int] = None,
+        slot_max_bytes: Optional[int] = None,
+        bypass: bool = False,
     ) -> bool:
         """
         Apply custom network settings.
@@ -407,287 +341,14 @@ class NetworkEmulator:
         Returns:
             True if successful, False otherwise.
         """
-        # Clear existing rules first
-        self.clear()
-
-        try:
-            # Apply egress shaping to main interface
-            success = self._apply_shaping_to_device(
-                device=self.interface,
-                delay_ms=delay_ms,
-                jitter_ms=jitter_ms,
-                delay_distribution=delay_distribution,
-                delay_correlation_pct=delay_correlation_pct,
-                loss_pct=loss_pct,
-                loss_correlation_pct=loss_correlation_pct,
-                loss_model=loss_model,
-                rate_mbit=rate_mbit,
-                rate_ceil_mbit=rate_ceil_mbit,
-                rate_burst_kbit=rate_burst_kbit,
-                rate_cburst_kbit=rate_cburst_kbit,
-                corruption_pct=corruption_pct,
-                corruption_correlation_pct=corruption_correlation_pct,
-                reorder_pct=reorder_pct,
-                reorder_correlation_pct=reorder_correlation_pct,
-                duplicate_pct=duplicate_pct,
-                duplicate_correlation_pct=duplicate_correlation_pct,
-                limit_packets=limit_packets,
-            )
-
-            if not success:
-                return False
-
-            # Apply ingress shaping via IFB if bidirectional is enabled
-            if self.bidirectional and not disable_ingress:
-                if not self._setup_ifb():
-                    logger.error("Failed to set up IFB for bidirectional shaping")
-                    return False
-
-                # Use separate ingress settings if provided, otherwise mirror egress
-                ing = ingress_settings or {}
-                success = self._apply_shaping_to_device(
-                    device=self.ifb_device,
-                    delay_ms=ing.get("delay_ms", delay_ms),
-                    jitter_ms=ing.get("jitter_ms", jitter_ms),
-                    delay_distribution=ing.get("delay_distribution", delay_distribution),
-                    delay_correlation_pct=ing.get(
-                        "delay_correlation_pct", delay_correlation_pct
-                    ),
-                    loss_pct=ing.get("loss_pct", loss_pct),
-                    loss_correlation_pct=ing.get(
-                        "loss_correlation_pct", loss_correlation_pct
-                    ),
-                    loss_model=ing.get("loss_model", loss_model),
-                    rate_mbit=ing.get("rate_mbit", rate_mbit),
-                    rate_ceil_mbit=ing.get("rate_ceil_mbit", rate_ceil_mbit),
-                    rate_burst_kbit=ing.get("rate_burst_kbit", rate_burst_kbit),
-                    rate_cburst_kbit=ing.get("rate_cburst_kbit", rate_cburst_kbit),
-                    corruption_pct=ing.get("corruption_pct", corruption_pct),
-                    corruption_correlation_pct=ing.get(
-                        "corruption_correlation_pct", corruption_correlation_pct
-                    ),
-                    reorder_pct=ing.get("reorder_pct", reorder_pct),
-                    reorder_correlation_pct=ing.get(
-                        "reorder_correlation_pct", reorder_correlation_pct
-                    ),
-                    duplicate_pct=ing.get("duplicate_pct", duplicate_pct),
-                    duplicate_correlation_pct=ing.get(
-                        "duplicate_correlation_pct", duplicate_correlation_pct
-                    ),
-                    limit_packets=ing.get("limit_packets", limit_packets),
-                )
-
-                if not success:
-                    logger.error("Failed to apply ingress shaping to IFB")
-                    return False
-
-                self.current_ingress_profile = (
-                    f"{profile_name}_ingress" if ingress_settings else profile_name
-                )
-                if ingress_settings:
-                    logger.info(
-                        f"Applied asymmetric shaping: {profile_name} (egress) / custom (ingress)"
-                    )
-                else:
-                    logger.info(f"Applied bidirectional shaping: {profile_name}")
-            else:
-                logger.info(f"Applied egress-only shaping: {profile_name}")
-
-            self.current_profile = profile_name
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to apply network settings: {e}")
-            return False
-
-    def _apply_shaping_to_device(
-        self,
-        device: str,
-        delay_ms: int,
-        jitter_ms: int,
-        delay_distribution: Optional[str],
-        delay_correlation_pct: Optional[float],
-        loss_pct: float,
-        loss_correlation_pct: Optional[float],
-        loss_model: Optional[str],
-        rate_mbit: Optional[int],
-        rate_ceil_mbit: Optional[int],
-        rate_burst_kbit: Optional[int],
-        rate_cburst_kbit: Optional[int],
-        corruption_pct: float,
-        corruption_correlation_pct: Optional[float],
-        reorder_pct: float,
-        reorder_correlation_pct: Optional[float],
-        duplicate_pct: float,
-        duplicate_correlation_pct: Optional[float],
-        limit_packets: Optional[int],
-    ) -> bool:
-        """
-        Apply shaping rules to a specific device.
-
-        Args:
-            device: Network device to apply rules to (interface or IFB).
-            ... (other params same as apply_settings)
-
-        Returns:
-            True if successful, False otherwise.
-        """
-        if rate_mbit is not None:
-            # Use HTB + netem for rate limiting with impairments
-            return self._apply_htb_netem(
-                device,
-                delay_ms,
-                jitter_ms,
-                delay_distribution,
-                delay_correlation_pct,
-                loss_pct,
-                loss_correlation_pct,
-                loss_model,
-                rate_mbit,
-                rate_ceil_mbit,
-                rate_burst_kbit,
-                rate_cburst_kbit,
-                corruption_pct,
-                corruption_correlation_pct,
-                reorder_pct,
-                reorder_correlation_pct,
-                duplicate_pct,
-                duplicate_correlation_pct,
-                limit_packets,
-            )
-        else:
-            # Use netem only (no rate limiting)
-            return self._apply_netem_only(
-                device,
-                delay_ms,
-                jitter_ms,
-                delay_distribution,
-                delay_correlation_pct,
-                loss_pct,
-                loss_correlation_pct,
-                loss_model,
-                corruption_pct,
-                corruption_correlation_pct,
-                reorder_pct,
-                reorder_correlation_pct,
-                duplicate_pct,
-                duplicate_correlation_pct,
-                limit_packets,
-            )
-
-    def _apply_netem_only(
-        self,
-        device: str,
-        delay_ms: int,
-        jitter_ms: int,
-        delay_distribution: Optional[str],
-        delay_correlation_pct: Optional[float],
-        loss_pct: float,
-        loss_correlation_pct: Optional[float],
-        loss_model: Optional[str],
-        corruption_pct: float,
-        corruption_correlation_pct: Optional[float],
-        reorder_pct: float,
-        reorder_correlation_pct: Optional[float],
-        duplicate_pct: float,
-        duplicate_correlation_pct: Optional[float],
-        limit_packets: Optional[int],
-    ) -> bool:
-        """Apply netem rules without rate limiting."""
-        params = self._build_netem_params(
-            delay_ms=delay_ms,
-            jitter_ms=jitter_ms,
-            delay_distribution=delay_distribution,
-            delay_correlation_pct=delay_correlation_pct,
-            loss_pct=loss_pct,
-            loss_correlation_pct=loss_correlation_pct,
-            loss_model=loss_model,
-            corruption_pct=corruption_pct,
-            corruption_correlation_pct=corruption_correlation_pct,
-            reorder_pct=reorder_pct,
-            reorder_correlation_pct=reorder_correlation_pct,
-            duplicate_pct=duplicate_pct,
-            duplicate_correlation_pct=duplicate_correlation_pct,
-            limit_packets=limit_packets,
-        )
-
-        if not params:
-            return True
-
-        cmd = f"sudo tc qdisc add dev {device} root netem {' '.join(params)}"
-        return self._run_tc_command(cmd)
-
-    def _apply_htb_netem(
-        self,
-        device: str,
-        delay_ms: int,
-        jitter_ms: int,
-        delay_distribution: Optional[str],
-        delay_correlation_pct: Optional[float],
-        loss_pct: float,
-        loss_correlation_pct: Optional[float],
-        loss_model: Optional[str],
-        rate_mbit: int,
-        rate_ceil_mbit: Optional[int],
-        rate_burst_kbit: Optional[int],
-        rate_cburst_kbit: Optional[int],
-        corruption_pct: float,
-        corruption_correlation_pct: Optional[float],
-        reorder_pct: float,
-        reorder_correlation_pct: Optional[float],
-        duplicate_pct: float,
-        duplicate_correlation_pct: Optional[float],
-        limit_packets: Optional[int],
-    ) -> bool:
-        """Apply HTB rate limiting with netem impairments."""
-        # Create HTB root qdisc
-        cmd1 = f"sudo tc qdisc add dev {device} root handle 1: htb default 11"
-        if not self._run_tc_command(cmd1):
-            return False
-
-        ceil_mbit = rate_ceil_mbit or rate_mbit
-        burst = f" burst {rate_burst_kbit}kbit" if rate_burst_kbit else ""
-        cburst = f" cburst {rate_cburst_kbit}kbit" if rate_cburst_kbit else ""
-
-        # Create HTB class with rate limit
-        cmd2 = (
-            f"sudo tc class add dev {device} parent 1: "
-            f"classid 1:1 htb rate {rate_mbit}mbit ceil {ceil_mbit}mbit{burst}{cburst}"
-        )
-        if not self._run_tc_command(cmd2):
-            return False
-
-        cmd3 = (
-            f"sudo tc class add dev {device} parent 1:1 "
-            f"classid 1:11 htb rate {rate_mbit}mbit ceil {ceil_mbit}mbit{burst}{cburst}"
-        )
-        if not self._run_tc_command(cmd3):
-            return False
-
-        # Add netem as leaf qdisc
-        params = self._build_netem_params(
-            delay_ms=delay_ms,
-            jitter_ms=jitter_ms,
-            delay_distribution=delay_distribution,
-            delay_correlation_pct=delay_correlation_pct,
-            loss_pct=loss_pct,
-            loss_correlation_pct=loss_correlation_pct,
-            loss_model=loss_model,
-            corruption_pct=corruption_pct,
-            corruption_correlation_pct=corruption_correlation_pct,
-            reorder_pct=reorder_pct,
-            reorder_correlation_pct=reorder_correlation_pct,
-            duplicate_pct=duplicate_pct,
-            duplicate_correlation_pct=duplicate_correlation_pct,
-            limit_packets=limit_packets,
-        )
-
-        if params:
-            cmd4 = f"sudo tc qdisc add dev {device} parent 1:11 handle 10: netem {' '.join(params)}"
-            if not self._run_tc_command(cmd4):
-                return False
-
-        return True
+        settings = {key: value for key, value in locals().items()
+                    if key not in {"self", "profile_name", "ingress_settings", "disable_ingress"}}
+        egress = NetworkProfile.from_dict(profile_name, settings)
+        ingress = None
+        if self.bidirectional and not disable_ingress:
+            name = f"{profile_name}_ingress" if ingress_settings else profile_name
+            ingress = NetworkProfile.from_dict(name, {**settings, **(ingress_settings or {})})
+        return self._apply_profiles(egress, ingress, profile_name)
 
     def _build_netem_params(
         self,
@@ -706,69 +367,9 @@ class NetworkEmulator:
         duplicate_correlation_pct: Optional[float],
         limit_packets: Optional[int],
     ) -> list[str]:
-        """Build netem parameter list from settings."""
-        params: list[str] = []
-
-        if limit_packets:
-            params.append(f"limit {limit_packets}")
-
-        if delay_ms > 0:
-            delay_parts = [f"delay {delay_ms}ms"]
-            if jitter_ms > 0:
-                delay_parts.append(f"{jitter_ms}ms")
-                if delay_correlation_pct is not None:
-                    delay_parts.append(f"{delay_correlation_pct}%")
-                if delay_distribution and delay_distribution.lower() not in ("fixed", "none"):
-                    delay_parts.append(f"distribution {delay_distribution}")
-            params.append(" ".join(delay_parts))
-
-        # "none" and "correlated" are not real tc netem loss models;
-        # "correlated" just means use "loss PCT CORR%" (the default syntax).
-        # Only "gemodel" and "state" are actual advanced loss models.
-        _real_loss_models = {"gemodel", "state"}
-        _skip_loss_models = {"none", "correlated"}
-        if loss_model and loss_model.lower() in _real_loss_models:
-            if loss_pct > 0:
-                # e.g. "loss gemodel 1% 10% 70% 0.1%"
-                loss_parts = [f"loss {loss_model} {loss_pct}%"]
-                if loss_correlation_pct is not None:
-                    loss_parts.append(f"{loss_correlation_pct}%")
-                params.append(" ".join(loss_parts))
-            else:
-                params.append(f"loss {loss_model}")
-        elif loss_model and loss_model.lower() not in _skip_loss_models:
-            # Unknown model — pass through as-is for forward compat
-            if loss_pct > 0:
-                loss_parts = [f"loss {loss_pct}%"]
-                if loss_correlation_pct is not None:
-                    loss_parts.append(f"{loss_correlation_pct}%")
-                loss_parts.append(loss_model)
-                params.append(" ".join(loss_parts))
-            else:
-                params.append(f"loss {loss_model}")
-        elif loss_pct > 0:
-            loss_parts = [f"loss {loss_pct}%"]
-            if loss_correlation_pct is not None:
-                loss_parts.append(f"{loss_correlation_pct}%")
-            params.append(" ".join(loss_parts))
-
-        if corruption_pct > 0:
-            corrupt_parts = [f"corrupt {corruption_pct}%"]
-            if corruption_correlation_pct is not None:
-                corrupt_parts.append(f"{corruption_correlation_pct}%")
-            params.append(" ".join(corrupt_parts))
-
-        if duplicate_pct > 0:
-            duplicate_parts = [f"duplicate {duplicate_pct}%"]
-            if duplicate_correlation_pct is not None:
-                duplicate_parts.append(f"{duplicate_correlation_pct}%")
-            params.append(" ".join(duplicate_parts))
-
-        if reorder_pct > 0:
-            corr = reorder_correlation_pct if reorder_correlation_pct is not None else 25
-            params.append(f"reorder {reorder_pct}% {corr}%")
-
-        return params
+        """Build netem parameter list from legacy flat settings."""
+        settings = {key: value for key, value in locals().items() if key != "self"}
+        return netem_parameters(NetworkProfile.from_dict("custom", settings))
 
     def clear(self) -> bool:
         """
@@ -820,7 +421,6 @@ class NetworkEmulator:
             logger.error(f"tc command error: {e}")
             return False
 
-    # IP protocol numbers for the loopback selectors.
     _LOOPBACK_PROTOCOLS = {"tcp": 6, "udp": 17}
 
     def apply_profile_to_loopback(
@@ -830,118 +430,105 @@ class NetworkEmulator:
         *,
         selectors: Sequence[tuple[str, Optional[int]]] = (),
     ) -> bool:
-        """Apply a netem profile to selected traffic on the loopback interface.
+        """Shape selected TCP/UDP loopback traffic for both IP versions.
 
-        A ``prio`` root qdisc on ``lo`` sends only the selected traffic
-        through a netem leaf and leaves everything else on the host
-        untouched. Traffic is selected by ``(protocol, port)`` pairs:
+        ``dest_port`` selects TCP to/from a server port; ``selectors`` adds
+        (protocol, server_port) pairs. A None port selects the entire protocol,
+        and no selectors selects all traffic. Each call replaces prior rules.
 
-        * ``dest_port`` alone (the original form) selects TCP to or from
-          that port.
-        * ``selectors`` adds any number of ``("tcp" | "udp", port)`` pairs.
-          A port of ``None`` selects every packet of that protocol, which a
-          WebRTC session needs because ICE negotiates its media ports.
-        * With neither, all loopback traffic is shaped.
-
-        IPv4 and IPv6 are both matched. Traffic between two local endpoints
-        crosses ``lo`` once per direction, so a one-way ``delay_ms`` yields
-        a round trip of about twice that, as on a real interface shaped
-        bidirectionally. A ``rate_mbit`` limit uses netem's own rate option
-        and is shared by both directions, since one queue carries them.
-
-        Each call resets the loopback root, so combine selectors in one call
-        rather than calling repeatedly.
-
-        Args:
-            profile_name: Name of the profile to apply.
-            dest_port: TCP port to select.
-            selectors: Additional ``(protocol, port)`` selectors.
-
-        Returns:
-            True if successful.
-
-        Raises:
-            ProfileNotFoundError: If the profile does not exist.
-            ValueError: On a protocol other than ``"tcp"`` or ``"udp"``.
+        Calibration profiles use their complete service model. Server-port
+        selectors separate uplink requests and downlink responses. Protocol-wide
+        and all-traffic selectors cannot identify the client: they use a shared
+        downlink queue, as the original loopback API did. Legacy symmetric
+        profiles retain the original single Netem queue and native rate cap.
         """
-        if profile_name not in self.profiles:
+        profile = self.get_profile(profile_name)
+        if profile is None:
             raise ProfileNotFoundError(profile_name)
-
-        rules: list[tuple[str, Optional[int]]] = []
+        rules = []
         if dest_port is not None:
-            rules.append(("tcp", int(dest_port)))
-        for proto, port in selectors:
-            proto = proto.lower()
-            if proto not in self._LOOPBACK_PROTOCOLS:
-                raise ValueError(
-                    f"Unsupported loopback selector protocol {proto!r}; "
-                    f"expected one of {sorted(self._LOOPBACK_PROTOCOLS)}"
-                )
-            rules.append((proto, None if port is None else int(port)))
-
-        profile = self.profiles[profile_name]
-        netem_params = self._build_netem_params(
-            delay_ms=profile.delay_ms,
-            jitter_ms=profile.jitter_ms,
-            delay_distribution=profile.delay_distribution,
-            delay_correlation_pct=profile.delay_correlation_pct,
-            loss_pct=profile.loss_pct,
-            loss_correlation_pct=profile.loss_correlation_pct,
-            loss_model=profile.loss_model,
-            corruption_pct=profile.corruption_pct,
-            corruption_correlation_pct=profile.corruption_correlation_pct,
-            reorder_pct=profile.reorder_pct,
-            reorder_correlation_pct=profile.reorder_correlation_pct,
-            duplicate_pct=profile.duplicate_pct,
-            duplicate_correlation_pct=profile.duplicate_correlation_pct,
-            limit_packets=profile.limit_packets,
-        )
-        if profile.rate_mbit:
-            # No HTB on lo: netem's built-in rate limiter, one queue for both
-            # directions.
-            netem_params.append(f"rate {profile.rate_mbit}mbit")
-
-        # 0) Defensive clear: any stale root qdisc on lo (e.g. from a prior
-        # run whose scenario thread was killed by the run-timeout and still
-        # holds the qdisc, or from a crashed previous invocation) would cause
-        # the `add` below to fail with "Exclusivity flag on, cannot modify".
-        # A delete is idempotent and cheap, and a profile with no impairments
-        # must leave lo bare rather than inherit whatever was there.
-        self._run_tc_command(
-            "sudo tc qdisc del dev lo root", ignore_errors=True
-        )
-        self._lo_port = None
-        self._lo_selectors = ()
-
-        if not netem_params:
-            return True
-
-        # 1) prio qdisc on lo with 3 bands
-        if not self._run_tc_command(
-            "sudo tc qdisc add dev lo root handle 1: prio bands 3"
-        ):
-            return False
-
-        # 2) netem leaf on band 3
-        netem_str = " ".join(netem_params)
-        if not self._run_tc_command(
-            f"sudo tc qdisc add dev lo parent 1:3 handle 30: netem {netem_str}"
-        ):
-            return False
-
-        # 3) u32 filters steering the selected traffic to band 3 (netem).
-        #    No iptables required, so this works on minimal systems (WSL2).
-        for cmd in self._loopback_filter_commands(rules):
-            if not self._run_tc_command(cmd):
+            rules.append(("tcp", dest_port))
+        rules.extend(selectors)
+        normalized = []
+        for proto, port in rules:
+            if not isinstance(proto, str) or proto.lower() not in self._LOOPBACK_PROTOCOLS:
+                raise ValueError(f"Unsupported loopback selector protocol {proto!r}")
+            if port is not None and (
+                    isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535):
+                raise ValueError("Loopback port must be an integer between 1 and 65535")
+            rule = (proto.lower(), port)
+            if rule not in normalized:
+                normalized.append(rule)
+        rules = normalized
+        uplink = profile.uplink or profile
+        profile.validate()
+        uplink.validate()
+        calibrated = any(value is not None for value in (
+            profile.rate_mode, profile.loss_mean_burst_packets, profile.slot_distribution,
+            profile.burst_bytes, profile.cburst_bytes, profile.uplink,
+        )) or profile.bypass
+        root = ("sudo tc qdisc add dev lo root handle 1: prio bands 3 priomap "
+                + " ".join(["0"] * 16))
+        if calibrated:
+            commands = self._calibrated_loopback_commands(profile, rules, root)
+        else:
+            # Preserve the PR's legacy loopback behavior, including rate-only
+            # profiles and the selector API used by the WebRTC scenario.
+            params = netem_parameters(profile)
+            if profile.rate_mbit is not None:
+                params.append(f"rate {profile.rate_mbit}mbit")
+            commands = ([root,
+                         "sudo tc qdisc add dev lo parent 1:3 handle 30: netem "
+                         + " ".join(params),
+                         *self._loopback_filter_commands(rules)] if params else [])
+        self.clear_loopback()
+        for command in commands:
+            if not self._run_tc_command(command):
+                self.clear_loopback()
                 return False
-
-        self._lo_port = dest_port
-        self._lo_selectors = tuple(rules)
-        logger.info(
-            f"Applied {profile_name} to lo "
-            f"({self._describe_loopback_rules(rules)}): {netem_str}"
-        )
+        if commands:
+            self._lo_port = dest_port
+            self._lo_selectors = tuple(rules)
+            logger.info("Applied %s to lo (%s)", profile_name,
+                        self._describe_loopback_rules(rules))
         return True
+
+    @staticmethod
+    def _calibrated_loopback_commands(
+        profile: NetworkProfile, rules: Sequence[tuple[str, Optional[int]]], root: str,
+    ) -> list[str]:
+        """Use directional service models where a server port identifies them."""
+        uplink = profile.uplink or profile
+        port_rules = [(proto, port) for proto, port in rules if port is not None]
+        broad_rules = [(proto, port) for proto, port in rules if port is None]
+        up = (shaping_commands(uplink, "lo", parent="1:2", htb_handle=20, netem_handle=21)
+              if port_rules else [])
+        down = shaping_commands(profile, "lo", parent="1:3", htb_handle=30, netem_handle=31)
+        if not up and not down:
+            return []
+        if profile.uplink is not None and (broad_rules or not rules):
+            logger.warning("Loopback selectors without a server port use the downlink "
+                           "service model in both directions for profile %s", profile.name)
+        commands = [root, *up, *down]
+        if not rules:
+            commands += NetworkEmulator._loopback_filter_commands(())
+            return commands
+        # Port-specific matches precede protocol-wide fallbacks. Unique filter
+        # priorities also avoid IPv4/IPv6 classifier protocol conflicts.
+        priority = 0
+        for family in ("ip", "ipv6"):
+            for proto, port in port_rules:
+                for field, band in (("dst_port", 2), ("src_port", 3)):
+                    priority += 1
+                    commands.append(
+                        f"sudo tc filter add dev lo parent 1:0 protocol {family} "
+                        f"prio {priority} flower ip_proto {proto} {field} {port} flowid 1:{band}")
+            for proto, _ in broad_rules:
+                priority += 1
+                commands.append(
+                    f"sudo tc filter add dev lo parent 1:0 protocol {family} "
+                    f"prio {priority} flower ip_proto {proto} flowid 1:3")
+        return commands
 
     @classmethod
     def _loopback_filter_commands(
@@ -1056,7 +643,16 @@ class NetworkEmulator:
         Returns:
             NetworkProfile if found, None otherwise.
         """
-        return self.profiles.get(name)
+        if name in self.profiles:
+            return self.profiles[name]
+        base, separator, direction = name.rpartition("/")
+        if separator and base in self.profiles and direction in {"uplink", "downlink"}:
+            profile = self.profiles[base]
+            selected = (profile.uplink or profile) if direction == "uplink" else profile
+            # An explicit directional name represents a flat, symmetric selection.
+            return NetworkProfile.from_dict(name, {"description": selected.description,
+                                                  **selected.settings()})
+        return None
 
     def list_profiles(self) -> list[str]:
         """
@@ -1081,26 +677,8 @@ def apply_profile(profile_config: dict, interface: str = "eth0") -> bool:
         True if successful.
     """
     emulator = NetworkEmulator(interface=interface)
-    return emulator.apply_settings(
-        delay_ms=profile_config.get("delay_ms", 0),
-        jitter_ms=profile_config.get("jitter_ms", 0),
-        loss_pct=profile_config.get("loss_pct", 0.0),
-        rate_mbit=profile_config.get("rate_mbit"),
-        delay_distribution=profile_config.get("delay_distribution"),
-        delay_correlation_pct=profile_config.get("delay_correlation_pct"),
-        loss_correlation_pct=profile_config.get("loss_correlation_pct"),
-        loss_model=profile_config.get("loss_model"),
-        rate_ceil_mbit=profile_config.get("rate_ceil_mbit"),
-        rate_burst_kbit=profile_config.get("rate_burst_kbit"),
-        rate_cburst_kbit=profile_config.get("rate_cburst_kbit"),
-        corruption_pct=profile_config.get("corruption_pct", 0.0),
-        corruption_correlation_pct=profile_config.get("corruption_correlation_pct"),
-        reorder_pct=profile_config.get("reorder_pct", 0.0),
-        reorder_correlation_pct=profile_config.get("reorder_correlation_pct"),
-        duplicate_pct=profile_config.get("duplicate_pct", 0.0),
-        duplicate_correlation_pct=profile_config.get("duplicate_correlation_pct"),
-        limit_packets=profile_config.get("limit_packets"),
-    )
+    emulator.profiles["custom"] = NetworkProfile.from_dict("custom", profile_config)
+    return emulator.apply_profile("custom")
 
 
 def clear_profile(interface: str = "eth0") -> bool:

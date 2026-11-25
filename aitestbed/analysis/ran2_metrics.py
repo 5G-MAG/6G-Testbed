@@ -76,7 +76,7 @@ def _distribution(values: list[float]) -> dict[str, Optional[float]]:
 def _distribution_extended(values: list[float]) -> dict[str, Optional[float]]:
     """Like _distribution() but also includes p10/p25/p75/p90, plus sum.
     Used for metrics that need to be plotted as box-plot / CDF (Q2 burst
-    sizes, durations, peak rates, idle gaps)."""
+    sizes, durations, mean burst rates, idle gaps)."""
     if not values:
         return {"n": 0, "min": None, "p10": None, "p25": None, "p50": None,
                 "p75": None, "p90": None, "p95": None, "p99": None,
@@ -148,8 +148,8 @@ def _load_profile_loss_pct(profiles_yaml: Optional[str]) -> dict[str, float]:
     if not profiles_yaml:
         profiles_yaml = "configs/profiles.yaml"
     try:
-        import yaml
-        data = yaml.safe_load(Path(profiles_yaml).read_text())
+        from netemu import load_profile_catalog
+        data = load_profile_catalog(profiles_yaml)
         out = {}
         for name, cfg in ((data or {}).get("profiles") or {}).items():
             if isinstance(cfg, dict) and "loss_pct" in cfg:
@@ -304,8 +304,8 @@ def _q2_bursts(records: list[dict], pcap_metrics: list, pcap_sp_map: dict[str, t
         lambda: {
             "capture_duration_sum": 0.0,
             "by_gap": defaultdict(lambda: {
-                "ul": {"sizes": [], "durs": [], "peaks_mbps": []},
-                "dl": {"sizes": [], "durs": [], "peaks_mbps": []},
+                "ul": {"sizes": [], "durs": [], "mean_rates_mbps": []},
+                "dl": {"sizes": [], "durs": [], "mean_rates_mbps": []},
             }),
         }
     )
@@ -333,18 +333,19 @@ def _q2_bursts(records: list[dict], pcap_metrics: list, pcap_sp_map: dict[str, t
             for direction, bursts in (per_dir or {}).items():
                 sizes = [b["total_bytes"] for b in bursts]
                 durs = [b["duration_sec"] for b in bursts]
-                peaks = [b["peak_rate_bps"] / 1_000_000 for b in bursts]  # Mbps
+                peaks = [b["total_bytes"] * 8 / b["duration_sec"] / 1_000_000
+                         for b in bursts if b["duration_sec"] > 0]  # Mean burst Mbps
                 entry["burst_stats_by_gap"][label][direction] = {
                     "count": len(bursts),
                     "size_bytes": _distribution(sizes),
                     "duration_sec": _distribution(durs),
-                    "peak_rate_mbps": _distribution(peaks),
+                    "mean_rate_mbps": _distribution(peaks),
                 }
                 if sc != "?" and pr != "?" and direction in ("ul", "dl"):
                     bucket = raw[sp_key]["by_gap"][label][direction]
                     bucket["sizes"].extend(sizes)
                     bucket["durs"].extend(durs)
-                    bucket["peaks_mbps"].extend(peaks)
+                    bucket["mean_rates_mbps"].extend(peaks)
         for label, per_dir in idle_by_gap.items():
             entry["interburst_idle_by_gap"][label] = {}
             for direction, gaps in (per_dir or {}).items():
@@ -367,7 +368,7 @@ def _q2_bursts(records: list[dict], pcap_metrics: list, pcap_sp_map: dict[str, t
                 buf = per_dir[direction]
                 sizes = buf["sizes"]
                 durs = buf["durs"]
-                peaks = buf["peaks_mbps"]
+                peaks = buf["mean_rates_mbps"]
                 count = len(sizes)
                 sum_dur = sum(durs)
                 sp_entry["by_gap"][label][direction] = {
@@ -376,7 +377,7 @@ def _q2_bursts(records: list[dict], pcap_metrics: list, pcap_sp_map: dict[str, t
                     "duty_cycle": (sum_dur / cap_total) if cap_total > 0 else None,
                     "size_bytes": _distribution_extended(sizes),
                     "duration_sec": _distribution_extended(durs),
-                    "peak_rate_mbps": _distribution_extended(peaks),
+                    "mean_rate_mbps": _distribution_extended(peaks),
                 }
         out["per_scenario_profile_bursts"][f"{sc}/{pr}"] = sp_entry
 
