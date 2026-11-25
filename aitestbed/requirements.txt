@@ -1,19 +1,17 @@
 # 6G AI Traffic Testbed Dependencies
 
-# Network Emulation + Capture + PCAP analysis (local sibling package).
-# netemu is a standalone package in the sibling netemu/ directory. It provides
-# tc/netem shaping (netemu.emulator), tcpdump capture (netemu.capture), and
-# pcap metric extraction (netemu.pcap). Install it with the [pcap] extra
-# before installing these dependencies:
-#   cd <repo-root>
-#   pip install -e "netemu[pcap]"
+# Python 3.12 or later is required. mitmproxy 11.1+ needs Python 3.12, and the
+# older releases pin cryptography and pyopenssl versions that aiortc 1.14+
+# (needed by aicodec) does not accept.
+
+# Local packages (install separately, in order, from the repository root):
+#   pip install "aiortc>=1.14.0,<1.16.0"   # stock upstream aiortc
+#   pip install -e aicodec --config-settings editable_mode=compat  # AI codec plugin (registers codecs dynamically)
+#   pip install -e "netemu[pcap]"          # tc/netem shaping, tcpdump capture, pcap metric extraction
 #   pip install -r aitestbed/requirements.txt
 
 # LLM Clients
-# openai 3.x, anthropic 1.x and mcp 2.x switched to httpx2, which requires
-# h11>=0.16. Every mitmproxy release that installs on Python 3.10/3.11 (<12)
-# pins h11<0.15, and pip only finds that out after trying each of those
-# releases, then gives up with "resolution-too-deep". The caps keep the
+# openai 3.x, anthropic 1.x and mcp 2.x switched to httpx2. The caps keep the
 # resolver on the httpx-based lines the clients were written against.
 openai>=1.0.0,<3
 anthropic>=0.40.0,<1
@@ -54,7 +52,9 @@ mitmproxy>=10.0.0
 dpkt>=1.9.8
 
 # Optional: WebRTC transport for realtime scenarios
-# aiortc>=1.5.0 # use modified aiortc for realtime video analysis scenario
+# stock upstream aiortc + aicodec plugin (see aicodec/README.md)
+# 1.15.0+ natively provides alwaysNegotiateDataChannels and ICE local credentials
+aiortc>=1.14.0,<1.16.0
 
 # Optional: Computer use executor
 playwright>=1.41.0
@@ -88,6 +88,7 @@ starlette>=0.40.0
 # asyncio is part of stdlib
 
 # VLM
-torch==2.4.1 
+torch==2.4.1
 torchvision==0.19.1
 transformers==4.44.2
+

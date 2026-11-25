@@ -19,7 +19,7 @@ setup(
     py_modules=["orchestrator"],
     include_package_data=True,
     package_data={"configs": ["*.yaml", "*.json"]},
-    python_requires=">=3.10",
+    python_requires=">=3.12",
     install_requires=[
         "openai>=1.0.0",
         "anthropic>=0.40.0",
@@ -55,7 +55,8 @@ setup(
             "seaborn>=0.12.0",
         ],
         "webrtc": [
-            "aiortc>=1.5.0",
+            "aiortc>=1.14.0,<1.16.0",
+            "aicodec",
         ],
         "computer-use": [
             "playwright>=1.41.0",

@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What brand's advertisement is visible on the back of the bus right now?",
+                "time_stamp": "00:00:04",
+                "answer": "D",
+                "options": [
+                    "A. Toyota.",
+                    "B. Chevrolet.",
+                    "C. Nissan.",
+                    "D. Ford."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_451_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What company's logo is visible on the left side of the building right now?",
+                "time_stamp": "00:01:55",
+                "answer": "D",
+                "options": [
+                    "A. Intel.",
+                    "B. Tesla.",
+                    "C. AT&T.",
+                    "D. Optus."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_451_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What is the current status of the traffic light ahead?",
+                "time_stamp": "00:03:52",
+                "answer": "D",
+                "options": [
+                    "A. Red.",
+                    "B. Yellow.",
+                    "C. Flashing.",
+                    "D. Green."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_451_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What brand is visible on the building right now?",
+                "time_stamp": "00:05:46",
+                "answer": "D",
+                "options": [
+                    "A. Citibank.",
+                    "B. Westpac.",
+                    "C. ANZ.",
+                    "D. Coleslocal."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_451_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "Which brand's logo is visible on the right side of the road right now?",
+                "time_stamp": "00:07:44",
+                "answer": "D",
+                "options": [
+                    "A. McDonald's.",
+                    "B. KFC.",
+                    "C. Subway.",
+                    "D. Starbucks."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_451_real.mp4"
+    }
+]

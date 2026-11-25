@@ -16,7 +16,7 @@ RUN npm install -g \
 # =============================================================================
 # Stage 2: Python application
 # =============================================================================
-FROM python:3.11-slim@sha256:94c50be2dc994b873b55bc123e95e6dbade08095b3dfd790f51c34de3f08cbb7 AS runtime
+FROM python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b AS runtime
 
 # Labels
 LABEL maintainer="6G AI Traffic Testbed"
@@ -104,6 +104,11 @@ RUN pip install --no-cache-dir /tmp/netemu && rm -rf /tmp/netemu
 COPY aitestbed/requirements.lock /tmp/aitestbed-requirements.lock
 RUN pip install --no-cache-dir \
     -r /tmp/aitestbed-requirements.lock
+
+# Copy aicodec (AI codec plugin for aiortc) and install it after the lock, so
+# aiortc is already in place. The orchestrator imports aicodec when it loads.
+COPY aicodec/ /tmp/aicodec
+RUN pip install --no-cache-dir /tmp/aicodec && rm -rf /tmp/aicodec
 
 # Copy the testbed and its measurement/report pipeline.
 COPY aitestbed/ /app/aitestbed/

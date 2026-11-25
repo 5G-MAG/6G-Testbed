@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What color is the car directly in front right now?",
+                "time_stamp": "00:00:04",
+                "answer": "C",
+                "options": [
+                    "A. White.",
+                    "B. Black.",
+                    "C. Yellow.",
+                    "D. Green."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_458_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What brand logo is visible on the rear of the car directly in front right now?",
+                "time_stamp": "00:01:52",
+                "answer": "D",
+                "options": [
+                    "A. Toyota.",
+                    "B. Honda.",
+                    "C. Audi.",
+                    "D. Porsche."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_458_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What colored barriers are visible on the passenger-side sidewalk right now?",
+                "time_stamp": "00:03:39",
+                "answer": "D",
+                "options": [
+                    "A. Red.",
+                    "B. Green.",
+                    "C. Yellow.",
+                    "D. Blue and white."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_458_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What is the color of the vehicle approaching the driver's right side right now?",
+                "time_stamp": "00:05:27",
+                "answer": "A",
+                "options": [
+                    "A. Green",
+                    "B. Red",
+                    "C. Blue",
+                    "D. Yellow"
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_458_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What is the make of the vehicle directly in front right now?",
+                "time_stamp": "00:07:18",
+                "answer": "D",
+                "options": [
+                    "A. Toyota.",
+                    "B. Honda.",
+                    "C. Nissan.",
+                    "D. Mitsubishi."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_458_real.mp4"
+    }
+]

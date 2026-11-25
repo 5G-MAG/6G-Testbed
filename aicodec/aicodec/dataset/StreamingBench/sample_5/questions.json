@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What kind of lighting condition is present right now in the video?",
+                "time_stamp": "00:00:03",
+                "answer": "C",
+                "options": [
+                    "A. Daylight.",
+                    "B. Dusk.",
+                    "C. Nighttime.",
+                    "D. Dawn."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_455_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What type of traffic signal is present right now?",
+                "time_stamp": "00:02:16",
+                "answer": "D",
+                "options": [
+                    "A. A green light.",
+                    "B. A yellow light.",
+                    "C. A flashing light.",
+                    "D. A red light."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_455_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What type of vehicle is visible directly ahead the camera right now?",
+                "time_stamp": "00:04:27",
+                "answer": "C",
+                "options": [
+                    "A. A sedan.",
+                    "B. A motorcycle.",
+                    "C. A truck.",
+                    "D. A bicycle."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_455_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What is the color of the other bus visible right now?",
+                "time_stamp": "00:06:40",
+                "answer": "C",
+                "options": [
+                    "A. Red.",
+                    "B. Green.",
+                    "C. Yellow.",
+                    "D. Blue."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_455_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Object Perception",
+                "question": "What is mounted on the dashboard right now?",
+                "time_stamp": "00:08:56",
+                "answer": "A",
+                "options": [
+                    "A. A phone with GPS application.",
+                    "B. A radio receiver.",
+                    "C. An air freshener.",
+                    "D. A digital clock."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_455_real.mp4"
+    }
+]

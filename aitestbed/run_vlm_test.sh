@@ -4,24 +4,24 @@
 cleanup() {
     echo ""
     echo "=== Interrupted by user, cleaning up... ==="
-    
+
     # clean orchestrator process
     sudo pkill -9 -f orchestrator 2>/dev/null
     if [ $? -eq 0 ]; then
         echo "[Cleanup] orchestrator processes killed"
     fi
-    
+
     # clean tcpdump process
     sudo pkill -9 -f tcpdump 2>/dev/null
     if [ $? -eq 0 ]; then
         echo "[Cleanup] tcpdump processes killed"
     fi
-    
-    # clean lo netem 
+
+    # clean lo netem
     sudo tc qdisc del dev lo root netem 2>/dev/null
     sudo tc qdisc del dev lo ingress 2>/dev/null
     echo "[Cleanup] tc rules cleared"
-    
+
     echo "=== Cleanup completed, exiting ==="
     exit 1
 }
@@ -43,36 +43,36 @@ cleanup_profile_files() {
     local capture_dir="results/captures/vlm/${profile}"
     local report_file="results/reports/experiment_report_${SCENARIO}_${profile}.json"
     local db_file="logs/traffic_logs_vlm_${profile}.db"
-    
+
     echo "[Cleanup] Removing old files for profile: ${profile}"
-    
+
     #  capture-dir
     if [ -d "$capture_dir" ]; then
         rm -rf "$capture_dir"
         echo "  - Deleted: $capture_dir"
     fi
-    
+
     #  report 文件
     if [ -f "$report_file" ]; then
         rm -f "$report_file"
         echo "  - Deleted: $report_file"
     fi
-    
+
     #  db 文件
     if [ -f "$db_file" ]; then
         rm -f "$db_file"
         echo "  - Deleted: $db_file"
     fi
-    
-    for i in $(seq 1 25); do
-        local json_file="examples/assets/dataset/sample_${i}/questions_results_${profile}.json"
+
+    for i in $(seq 1 50); do
+        local json_file="../aicodec/aicodec/dataset/StreamingBench/sample_${i}/questions_results_${profile}.json"
         if [ -f "$json_file" ]; then
             rm -f "$json_file"
             echo " - Deleted: $json_file "
         fi
     done
 
-    #  capture 
+    #  capture
     mkdir -p "$capture_dir"
 }
 # ====================================

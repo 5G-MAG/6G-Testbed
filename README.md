@@ -33,16 +33,18 @@
 ## Introduction
 
 The testbed runs AI service scenarios against LLM providers while shaping the network with Linux
-`tc`/`netem`, captures the resulting traffic, and logs metrics for SA4 contributions. It has two
-parts: `netemu`, the network emulation and capture library, and `aitestbed`, the experiment
-framework built on it.
+`tc`/`netem`, captures the resulting traffic, and logs metrics for SA4 contributions. It has three
+parts: `netemu`, the network emulation and capture library; `aitestbed`, the experiment framework
+built on it; and `aicodec`, the plugin that adds token-based video codecs to `aiortc` for the
+realtime scenarios.
 
 ### Components
 
 | Component | Role | README |
 |:----------|:-----|:-------|
 | [netemu/](./netemu/) | Network emulation, packet capture, and pcap metric extraction. Standalone package, no dependency on the testbed | [netemu/README.md](./netemu/README.md) |
-| [aitestbed/](./aitestbed/) | Experiment orchestration: scenarios, LLM/agent clients, application-layer metrics, reports. Depends on `netemu` | [aitestbed/README.md](./aitestbed/README.md) |
+| [aitestbed/](./aitestbed/) | Experiment orchestration: scenarios, LLM/agent clients, application-layer metrics, reports. Depends on `netemu` and `aicodec` | [aitestbed/README.md](./aitestbed/README.md) |
+| [aicodec/](./aicodec/) | AI codec plugin for `aiortc`: token-based video codecs for VLM streaming, registered into a stock `aiortc` at runtime. Also holds the model and dataset folders the realtime, encoder placement and One-D-Piece scenarios read from | [aicodec/README.md](./aicodec/README.md) |
 
 The dependencies run one way:
 
@@ -54,7 +56,8 @@ The dependencies run one way:
 ```
 
 `netemu` does not depend on the testbed and can be used on its own. `aitestbed` imports `netemu`
-for shaping, capture and pcap parsing.
+for shaping, capture and pcap parsing, and imports `aicodec` for the realtime video, encoder
+placement and One-D-Piece scenarios.
 
 ### What lives where
 
@@ -109,8 +112,10 @@ Orchestrates experiments across AI providers, scenarios and network profiles:
 - Scenarios: chat (including chat with token IDs), agentic AI over MCP, browser automation,
   image generation, multimodal, video understanding, realtime audio and conversation over
   WebSocket and WebRTC, realtime video understanding with a local VLM, the OpenClaw
-  personal-assistant agent, and agent-to-agent (A2A) scenarios. They are defined in
-  `configs/scenarios.yaml`.
+  personal-assistant agent, agent-to-agent (A2A) scenarios, encoder placement (moving the VLM's
+  vision encoder from the server to the terminal, with Qwen3-VL and Qwen3.6 sidecars; see
+  [aitestbed/ENCODER_PLACEMENT.md](./aitestbed/ENCODER_PLACEMENT.md)), and One-D-Piece image-token
+  transmission over lossy UDP. They are defined in `configs/scenarios.yaml`.
 - Providers: OpenAI, Azure OpenAI, Azure AI Inference, Gemini, DeepSeek, Anthropic, self-hosted
   vLLM, OpenAI Realtime (WebSocket and WebRTC), and OpenAI-compatible servers.
 - Metrics: TTFT/TTLT, latency percentiles, UL/DL ratios, token rates, agent loop factors and
@@ -122,6 +127,7 @@ Orchestrates experiments across AI providers, scenarios and network profiles:
 ```bash
 # From the repo root:
 pip install -e "netemu[pcap]"
+pip install -e aicodec --config-settings editable_mode=compat
 pip install -r aitestbed/requirements.txt
 cd aitestbed
 python orchestrator.py --scenario chat_basic --profile 5g_urban --runs 10
@@ -131,13 +137,29 @@ The full SA4 cross-check run (all scenarios and profiles, with PCAP capture and 
 is described in [aitestbed/README.md](./aitestbed/README.md), section "Cross-Checking for SA4 AI
 Traffic Characterization".
 
+### aicodec
+
+Plugin for a stock [`aiortc`](https://github.com/aiortc/aiortc) install. It registers three
+token-based video codecs (`video/tokenId`, `video/tokenIdTransparent`, `video/tokenIdLLM`) and an
+RTX variant at runtime, so no forked `aiortc` is needed. The wire format is model-agnostic and the
+VLM backend is pluggable. Model weights and dataset videos and images for the scenarios that use
+it go under `aicodec/aicodec/models/` and `aicodec/aicodec/dataset/`; they are git-ignored and must
+be downloaded, and [aitestbed/README.md](./aitestbed/README.md) lists what each scenario needs. See
+[aicodec/README.md](./aicodec/README.md).
+
 ## Install dependencies
 
-- Python 3.10 or later
+- Python 3.12 or later for the testbed (`netemu` alone also runs on 3.10 and 3.11)
 - Linux with `iproute2`, for network emulation
 - `tcpdump`, for packet capture
 - Sudo access, or Docker with the `NET_ADMIN` capability
 - Node.js 18 or later for the npm-based MCP servers; 22 or later for the OpenClaw scenario
+- `aicodec` installed (`pip install -e aicodec`): the orchestrator imports it when it loads
+- For the realtime video scenario, an NVIDIA GPU with about 30 GB of VRAM and CUDA Toolkit 12.1 or
+  later (about 2.5 GB for the VLM client, about 27 GB for the VLM server)
+- For the encoder placement scenarios, a single 80 GB-class GPU host, or two hosts (one for the
+  terminal arm, one for the sidecar), and the frozen `epd` conda environment; see
+  [aitestbed/ENCODER_PLACEMENT.md](./aitestbed/ENCODER_PLACEMENT.md)
 
 ## Running
 
@@ -147,8 +169,9 @@ Traffic Characterization".
 python -m venv venv
 source venv/bin/activate
 
-# Install netemu first (separate package, with the pcap extra), then the testbed
+# Install the local packages first (netemu with the pcap extra, then aicodec), then the testbed
 pip install -e "netemu[pcap]"
+pip install -e aicodec --config-settings editable_mode=compat
 pip install -r aitestbed/requirements.txt
 
 # Set API keys

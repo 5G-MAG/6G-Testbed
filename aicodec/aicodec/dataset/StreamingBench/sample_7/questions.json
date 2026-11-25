@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "Right now, what is the main color of the bus in front?",
+                "time_stamp": "00:00:19",
+                "answer": "A",
+                "options": [
+                    "A. Yellow.",
+                    "B. Red.",
+                    "C. Blue.",
+                    "D. Green."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_457_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What is the yellow vehicle on the left side of the street right now?",
+                "time_stamp": "00:01:56",
+                "answer": "A",
+                "options": [
+                    "A. DHL van.",
+                    "B. Police car.",
+                    "C. Fire truck.",
+                    "D. Food truck."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_457_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "Right now, what is the speed limit indicated on the yellow bus?",
+                "time_stamp": "00:03:52",
+                "answer": "A",
+                "options": [
+                    "A. 90 km/h.",
+                    "B. 30 km/h.",
+                    "C. 60 km/h.",
+                    "D. 80 km/h."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_457_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "Right now, what is the background color of the sign indicating changed traffic conditions?",
+                "time_stamp": "00:05:45",
+                "answer": "A",
+                "options": [
+                    "A. Yellow.",
+                    "B. Blue.",
+                    "C. Red.",
+                    "D. White."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_457_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "Right now, what architectural style is predominant in the buildings visible on the left side of the street?",
+                "time_stamp": "00:07:48",
+                "answer": "A",
+                "options": [
+                    "A. Georgian.",
+                    "B. Gothic.",
+                    "C. Modern.",
+                    "D. Art Deco."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_457_real.mp4"
+    }
+]

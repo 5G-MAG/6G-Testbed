@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What is the color of the bus zone sign visible right now?",
+                "time_stamp": "00:00:04",
+                "answer": "A",
+                "options": [
+                    "A. Red and white.",
+                    "B. Blue and white.",
+                    "C. Green and white.",
+                    "D. Black and yellow."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_453_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What is the color of the traffic light right now?",
+                "time_stamp": "00:03:19",
+                "answer": "A",
+                "options": [
+                    "A. Green.",
+                    "B. Yellow.",
+                    "C. Red.",
+                    "D. Blue."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_453_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What can be identified about the current traffic light status for vehicles?",
+                "time_stamp": "00:06:42",
+                "answer": "C",
+                "options": [
+                    "A. Red light.",
+                    "B. Yellow light.",
+                    "C. Green light.",
+                    "D. Flashing light."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_453_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What is the time displayed on the dashboard right now?",
+                "time_stamp": "00:10:06",
+                "answer": "B",
+                "options": [
+                    "A. 7:10:30.",
+                    "B. 7:11:02.",
+                    "C. 7:12:15.",
+                    "D. 7:11:45."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_453_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What is the current speed limit for this road?",
+                "time_stamp": "00:13:24",
+                "answer": "C",
+                "options": [
+                    "A. 50.",
+                    "B. 60.",
+                    "C. 70.",
+                    "D. 80."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_453_real.mp4"
+    }
+]

@@ -1,0 +1,107 @@
+[
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What is the current weather like outside?",
+                "time_stamp": "00:00:03",
+                "answer": "C",
+                "options": [
+                    "A. Rainy and cloudy.",
+                    "B. Snowy with heavy clouds.",
+                    "C. Sunny with clear skies.",
+                    "D. Windy and overcast."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_452_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What color is the SUV that is visible ahead?",
+                "time_stamp": "00:01:41",
+                "answer": "C",
+                "options": [
+                    "A. Orange.",
+                    "B. Blue.",
+                    "C. Black.",
+                    "D. Green."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_452_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What brand name is visible on the large sign on the left side of the road?",
+                "time_stamp": "00:03:18",
+                "answer": "B",
+                "options": [
+                    "A. WESTIE.",
+                    "B. SYNAPSE.",
+                    "C. FASHION.",
+                    "D. COFFEE."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_452_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Text-Rich Understanding",
+                "question": "What brand name is visible on the building to the right?",
+                "time_stamp": "00:04:54",
+                "answer": "A",
+                "options": [
+                    "A. 3HB.",
+                    "B. 3HT.",
+                    "C. 5HB.",
+                    "D. 5HT."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_452_real.mp4"
+    },
+    {
+        "time": "",
+        "captions": "",
+        "questions": [
+            {
+                "task_type": "Attribute Perception",
+                "question": "What is the current color of the nearest car parked on the left side of the road?",
+                "time_stamp": "00:06:30",
+                "answer": "C",
+                "options": [
+                    "A. Black.",
+                    "B. Red.",
+                    "C. White.",
+                    "D. Blue."
+                ],
+                "required_ability": ""
+            }
+        ],
+        "video_categories": "cooking",
+        "video_path": "./videos/sample_452_real.mp4"
+    }
+]

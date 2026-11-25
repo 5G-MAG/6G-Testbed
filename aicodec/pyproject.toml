@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aicodec"
+description = "AI codec plugin for aiortc: token-based semantic communication codecs for VLM streaming"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+version = "1.0.0"
+dependencies = [
+    "aiortc>=1.14.0,<1.16.0",
+    "numpy",
+]
+
+[project.optional-dependencies]
+# heavy inference stack (liquid / chameleon VQGAN + LLM) — GPU environments only
+liquid = [
+    "torch",
+    "transformers",
+    "pillow",
+    "pyyaml",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["aicodec*"]
+
+[tool.setuptools.package-data]
+aicodec = ["models/*/checkpoints/*/README.txt"]

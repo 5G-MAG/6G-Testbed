@@ -185,10 +185,17 @@ class _SlowScenario:
         Path(self.marker).write_text("late write")
 
 
+class _NoLoopbackOrchestrator:
+    """Stand-in for the orchestrator: the timeout path only clears loopback shaping."""
+
+    def _clear_scenario_loopback(self):
+        pass
+
+
 def test_timeout_kills_worker_before_late_side_effect(tmp_path):
     marker = tmp_path / "late.txt"
     result = _TestbedOrchestrator._run_with_timeout(
-        None, _SlowScenario(marker), "no_emulation", 0, 0.05, "slow"
+        _NoLoopbackOrchestrator(), _SlowScenario(marker), "no_emulation", 0, 0.05, "slow"
     )
     assert not result.success
     time.sleep(0.5)
