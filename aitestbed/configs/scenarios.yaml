@@ -378,8 +378,8 @@ scenarios:
     # -> video_path above, shared by all users (original behavior).
     # Runner flag: --video-paths (N paths). Example:
     #   video_paths:
-    #     - "examples/assets/dataset_real/sample_1/video.mp4"
-    #     - "examples/assets/dataset_real/sample_2/video.mp4"
+    #     - "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
+    #     - "../aicodec/aicodec/dataset/StreamingBench/sample_2/video.mp4"
     video_paths: []
     prompts:
       - "Describe this video in detail."
@@ -670,8 +670,8 @@ scenarios:
     # the run. Absent/empty/null falls back to the shared video_path
     # above. Example:
     #   video_paths:
-    #     - "examples/assets/dataset_real/sample_1/video.mp4"
-    #     - "examples/assets/dataset_real/sample_2/video.mp4"
+    #     - "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
+    #     - "../aicodec/aicodec/dataset/StreamingBench/sample_2/video.mp4"
     video_paths: []
     # decord/torchcodec decode-thread cap (edge mode, BOTH thread and
     # process users; the env name SGLANG_DECORD_NUM_THREADS is
@@ -1789,9 +1789,6 @@ scenarios:
     inter_datagram_delay_sec: 0   # raise if the local socket buffer overflows
     image_dir: "aicodec/aicodec/dataset/MMBench/MMBench_DEV_EN"
     # manifest_path: ""        # optional jsonl ordering the image set
-    task_config:
-      task_class: "real"
-      results_dir: "examples/assets/dataset_real/"
 
   # --- all-or-nothing control: any loss destroys the whole image ---
   # Run this alongside the chunked one to isolate how much the per-chunk
@@ -1824,9 +1821,6 @@ scenarios:
     #   ODP_PAYLOAD_DROP_MODE=tail ODP_PAYLOAD_DROP_PCT=30
     payload_drop_mode: "none"   # "none" | "tail" | "random"
     payload_drop_pct: 0         # 0..100
-    task_config:
-      task_class: "real"
-      results_dir: "examples/assets/dataset_real/"
 
 # Default experiment settings
 defaults:
@@ -2105,7 +2099,7 @@ test_matrix:
     runner_enabled_by_default: true
     prereqs:
       - "http://localhost:8002/v1/models"
-      - "examples/assets/dataset_real/sample_1/video.mp4"
+      - "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
 
   # Qwen3-VL concurrent arm (lock-free sidecar 8012, N barrier-aligned
   # users per wave; dataset mode = N playlists: turn_index =
@@ -2121,7 +2115,7 @@ test_matrix:
     runner_enabled_by_default: false
     prereqs:
       - "http://localhost:8012/v1/models"
-      - "examples/assets/dataset_real/sample_1/video.mp4"
+      - "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
 
   # Qwen3.6 sibling (serial sidecar 8004). Same mode-switch semantics
   # as encoder_placement above (env ENC_MODE_QWEN36 wins). Remote
@@ -2134,7 +2128,7 @@ test_matrix:
     runner_enabled_by_default: false
     prereqs:
       - "http://localhost:8004/v1/models"
-      - "examples/assets/dataset_real/sample_1/video.mp4"
+      - "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
 
   # Qwen3.6 sibling, concurrent arm (lock-free sidecar 8014, N
   # barrier-aligned users per wave; dataset mode = N playlists:
@@ -2150,7 +2144,7 @@ test_matrix:
     runner_enabled_by_default: false
     prereqs:
       - "http://localhost:8014/v1/models"
-      - "examples/assets/dataset_real/sample_1/video.mp4"
+      - "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
 
   # One-D-Piece image link over lossy UDP (merged from
   # configs/scenarios_odp_image_udp.yaml). GPU-backed + real UDP sockets, so

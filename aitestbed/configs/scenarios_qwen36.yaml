@@ -151,11 +151,11 @@ scenarios:
     limit: null
     tasks: null
     sample: null
-    # video asset lives under aitestbed/examples/ (NOT repo-root
-    # examples/); base_dir anchors it so the runner works from either
-    # cwd (repo root or aitestbed/). The concurrent yaml relies
-    # on launching from aitestbed/ for the same relative path.
+    # video asset: a StreamingBench sample under aicodec/aicodec/dataset/
+    # (download steps in aitestbed/README.md); base_dir anchors it so the
+    # runner works from either cwd (repo root or aitestbed/). The concurrent
+    # yaml relies on launching from aitestbed/ for the same relative path.
     video_base_dir: "."
-    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    video_path: "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
     prompts:
       - "Describe this video in detail."

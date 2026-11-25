@@ -26,7 +26,7 @@ aicodec/
 ## Install
 
 ```bash
-pip install aiortc>=1.14.0,<1.16.0   # stock dependency (1.15 recommended)
+pip install "aiortc>=1.14.0,<1.16.0"   # stock dependency (1.15 recommended)
 pip install -e "aicodec" --config-settings editable_mode=compat
 ```
 

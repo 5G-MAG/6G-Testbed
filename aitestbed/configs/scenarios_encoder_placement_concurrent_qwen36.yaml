@@ -129,20 +129,20 @@ scenarios:
     # feature tensor — halves the uploaded feature bytes; requires
     # compressor=vidcom2 + edge mode. Runner flag: --bundle-quant.
     # bundle_quant: "fp8"
-    # video asset lives under aitestbed/examples/ (NOT repo-root
-    # examples/); base_dir "." is re-anchored to the aitestbed dir by
-    # the runner so it works from any cwd (same sentinel convention
-    # as scenarios_qwen36.yaml).
+    # video asset: a StreamingBench sample under aicodec/aicodec/dataset/
+    # (download steps in aitestbed/README.md); base_dir "." is re-anchored
+    # to the aitestbed dir by the runner so it works from any cwd (same
+    # sentinel convention as scenarios_qwen36.yaml).
     video_base_dir: "."
-    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    video_path: "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
     # OPTIONAL per-user videos (list): user i uses entry i. STRICT —
     # len(video_paths) must equal concurrent_users; a miscount aborts
     # the run. Distinct files are the point; N copies of one path is
     # the caller's mistake to make explicitly. Absent/empty falls back
     # to the shared video_path above. Runner flag: --video-paths.
     # video_paths:
-    #   - "examples/assets/dataset_real/sample_1/video.mp4"
-    #   - "examples/assets/dataset_real/sample_2/video.mp4"
+    #   - "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
+    #   - "../aicodec/aicodec/dataset/StreamingBench/sample_2/video.mp4"
     # decord/torchcodec decode-thread cap (edge mode, BOTH thread and
     # process users; the env name SGLANG_DECORD_NUM_THREADS is
     # historical — caps BOTH backends). decord sizes its pool by HOST

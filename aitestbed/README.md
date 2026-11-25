@@ -718,7 +718,7 @@ pip install -e "netemu[pcap]"
 
 # Install WebRTC + AI codec plugin (for VLM/RTP scenarios)
 # aiortc is a stock upstream dependency; aicodec registers the token codecs at runtime
-pip install aiortc>=1.14.0,<1.16.0
+pip install "aiortc>=1.14.0,<1.16.0"
 pip install -e aicodec --config-settings editable_mode=compat
 
 # Install testbed dependencies
@@ -766,7 +766,7 @@ For **Realtime Video Analysis**, **Chat with Token ID**, and **Encoder Placement
   | Task class | Dataset | Unzip to |
   |:-----------|:--------|:---------|
   | `proactive_output` | [Proactive Output_1-25.zip](https://huggingface.co/datasets/mjuicem/StreamingBench/blob/main/Proactive%20Output_1-25.zip) | `aitestbed/examples/assets/dataset` |
-  | `real` | [Real-Time Visual Understanding_1-50.zip](https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip) | `aitestbed/examples/assets/dataset_real` |
+  | `real` | [Real-Time Visual Understanding_1-50.zip](https://huggingface.co/datasets/mjuicem/StreamingBench/resolve/main/Real-Time%20Visual%20Understanding_1-50.zip) | `aicodec/aicodec/dataset/StreamingBench` |
 
   `proactive_output` scenario config:
   ```yaml

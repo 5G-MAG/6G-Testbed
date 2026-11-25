@@ -134,7 +134,7 @@ scenarios:
     limit: null
     tasks: null
     sample: null
-    video_path: "examples/assets/dataset_real/sample_1/video.mp4"
+    video_path: "../aicodec/aicodec/dataset/StreamingBench/sample_1/video.mp4"
     # Per-user DISTINCT videos (either mode, threads or processes):
     # user i watches video_paths[i]. STRICT — len(video_paths) MUST
     # equal concurrent_users; a miscount aborts the run. Relative
