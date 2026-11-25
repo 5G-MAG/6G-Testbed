@@ -149,7 +149,7 @@ be downloaded, and [aitestbed/README.md](./aitestbed/README.md) lists what each 
 
 ## Install dependencies
 
-- Python 3.10 or later
+- Python 3.12 or later for the testbed (`netemu` alone also runs on 3.10 and 3.11)
 - Linux with `iproute2`, for network emulation
 - `tcpdump`, for packet capture
 - Sudo access, or Docker with the `NET_ADMIN` capability

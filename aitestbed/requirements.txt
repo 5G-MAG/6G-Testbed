@@ -1,5 +1,9 @@
 # 6G AI Traffic Testbed Dependencies
 
+# Python 3.12 or later is required. mitmproxy 11.1+ needs Python 3.12, and the
+# older releases pin cryptography and pyopenssl versions that aiortc 1.14+
+# (needed by aicodec) does not accept.
+
 # Local packages (install separately, in order, from the repository root):
 #   pip install "aiortc>=1.14.0,<1.16.0"   # stock upstream aiortc
 #   pip install -e aicodec --config-settings editable_mode=compat  # AI codec plugin (registers codecs dynamically)
@@ -7,10 +11,7 @@
 #   pip install -r aitestbed/requirements.txt
 
 # LLM Clients
-# openai 3.x, anthropic 1.x and mcp 2.x switched to httpx2, which requires
-# h11>=0.16. Every mitmproxy release that installs on Python 3.10/3.11 (<12)
-# pins h11<0.15, and pip only finds that out after trying each of those
-# releases, then gives up with "resolution-too-deep". The caps keep the
+# openai 3.x, anthropic 1.x and mcp 2.x switched to httpx2. The caps keep the
 # resolver on the httpx-based lines the clients were written against.
 openai>=1.0.0,<3
 anthropic>=0.40.0,<1

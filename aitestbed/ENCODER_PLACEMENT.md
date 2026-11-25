@@ -271,7 +271,7 @@ Full documentation — sidecar flags, mode switching, compression knobs, CPU bud
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.12+ (the `epd` environment below uses 3.11)
 - Linux with `iproute2` (for network emulation)
 - Sudo access or Docker with `NET_ADMIN` capability
 - NVIDIA GPU with ~30GB VRAM (~2.5GB for VLM client, ~27GB for VLM server)

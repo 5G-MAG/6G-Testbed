@@ -7,7 +7,7 @@ Thanks for your interest in improving the 6G AI Traffic Characterization Testbed
 - Fork the repo and create a feature branch.
 - Copy the environment template and add required API keys:
   - `cp .env.example .env`
-- Use Python 3.10+ or Docker.
+- Use Python 3.12+ or Docker.
 
 ## Development Workflow
 

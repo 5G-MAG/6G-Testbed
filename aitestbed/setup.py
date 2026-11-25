@@ -19,7 +19,7 @@ setup(
     py_modules=["orchestrator"],
     include_package_data=True,
     package_data={"configs": ["*.yaml", "*.json"]},
-    python_requires=">=3.10",
+    python_requires=">=3.12",
     install_requires=[
         "openai>=1.0.0",
         "anthropic>=0.40.0",

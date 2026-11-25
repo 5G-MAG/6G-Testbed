@@ -696,7 +696,7 @@ local to this directory.
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.12+
 - Node.js 18+ (for MCP servers)
 - Linux with `iproute2` (for network emulation)
 - `tcpdump` (for PCAP capture)
